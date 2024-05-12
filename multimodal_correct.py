@@ -18,14 +18,20 @@ adata_RNA = sc.read(path)
 path = './Multimodal_pretraining/data/multi_protein_l2.loom'
 adata_Protein = sc.read(path) #cell_type batch
 
+print("Read data.")
+
 adata_RNA = preprocessing_rna(adata_RNA,min_features = 0,is_hvg=False,batch_key='batch')
 adata_Protein = preprocessing_rna(adata_Protein,min_features = 0,is_hvg=False,batch_key='batch')
+
+print("Preprocessed data.")
 
 save_path = './Multimodal_pretraining/'
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
 adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
+
+print("Saved adata.")
 
 RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
 Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
@@ -36,9 +42,13 @@ RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
 Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
 concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch_pretrain': 5, 'lr': 1e-4,'drop_rate': 0.1})
 
+print("Trained.")
+
 # Test
 saved_weight_path = './Multimodal_pretraining/weight/weight_encoder_epoch3.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
 embedding,batch,RNA_id,attention_weight =  concerto_test_multimodal(weight_path,RNA_tf_path,Protein_tf_path,n_cells_for_sample = None,super_parameters={'batch_size': 32, 'epoch_pretrain': 1, 'lr': 1e-4,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
+
+print("Tested.")
 
 save_path = './'
 adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
