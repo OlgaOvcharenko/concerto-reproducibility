@@ -1,0 +1,5 @@
+data/
+Multimodal_pretraining/data
+Batch_correction/data
+venv-metal
+__pycache__/
