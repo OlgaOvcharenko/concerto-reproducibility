@@ -9,6 +9,7 @@ from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_
 import tensorflow as tf
 
 gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
+print(f"\nAvailable GPUs: {gpus}\n")
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
@@ -37,7 +38,7 @@ concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path,super_paramete
 
 # Test
 saved_weight_path = './Multimodal_pretraining/weight/weight_encoder_epoch3.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
-embedding,batch,RNA_id,attention_weight =  concerto_test_multimodal(weight_path,RNA_tf_path,Protein_tf_path,n_cells_for_sample = None,super_parameters={'batch_size': 128, 'epoch_pretrain': 1, 'lr': 1e-4,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
+embedding,batch,RNA_id,attention_weight =  concerto_test_multimodal(weight_path,RNA_tf_path,Protein_tf_path,n_cells_for_sample = None,super_parameters={'batch_size': 32, 'epoch_pretrain': 1, 'lr': 1e-4,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
 
 save_path = './'
 adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
