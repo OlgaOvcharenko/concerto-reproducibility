@@ -14,6 +14,8 @@ def dot_product(x, kernel):
         kernel (): weights
     Returns:
     """
+
+    print(f"\n\nK backend: {K.backend()}")
     if K.backend() == 'tensorflow':
         return K.squeeze(K.dot(x, K.expand_dims(kernel)), axis=-1)
     else:

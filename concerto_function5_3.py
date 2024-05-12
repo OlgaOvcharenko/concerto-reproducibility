@@ -1446,8 +1446,6 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
 
 
 
-
-
 def concerto_test_1set_attention(model_path:str, ref_tf_path:str, super_parameters=None, n_cells_for_ref=5000):
     set_seeds(0)
     
