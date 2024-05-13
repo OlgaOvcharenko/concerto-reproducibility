@@ -161,7 +161,6 @@ for gpu in gpus:
 
 
 path = './Batch_correction/data/expBatch1_woGroup2.loom'
-dname = args.dname
 
 n_hvgs = 2000
 scale = False
@@ -198,12 +197,7 @@ print(adata)
 # Training of the model
 # ======================
 
-save_path = f'./Batch_correction/data/{dname}/'
-if not os.path.exists(save_path):
-    print(f"Dataset {dname} has not been trained on.\nCreate corresponding directory.\n")
-    os.makedirs(save_path)
-    #os.system(f"mkdir {save_path}")
-os.system(f"rm {save_path}/tfrecord/sim_tf/*")
+save_path = f'./Batch_correction/data/'
 
 if not os.path.exists(save_path):
     os.makedirs(save_path)
@@ -215,29 +209,22 @@ if not os.path.exists(os.path.join(save_path, "embeddings")):
 print("Debugging the tfrecord")
 if not os.path.exists(save_path):
     os.makedirs(save_path)
-sim_tf_path = concerto_make_tfrecord(adata,tf_path = save_path + 'tfrecord/sim_tf/',batch_col_name = batch_key)
+sim_tf_path = concerto_make_tfrecord(adata,tf_path = save_path + 'tfrecord/sim_tf/',batch_col_name = 'Batch')
 print("tfrecord length is ok if the two lengths above are ok.")
 
 print("Training Concerto")
-if args.train:
-    weight_path = save_path + 'weight/'
-    sim_tf_path = save_path + 'tfrecord/sim_tf/'
-    concerto_train_ref(sim_tf_path, weight_path, super_parameters={'batch_size': 64, 'epoch': 400, 'lr': 1e-6})
-    print("Done with training.")
+weight_path = save_path + 'weight/'
+sim_tf_path = save_path + 'tfrecord/sim_tf/'
+concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch': 10, 'lr': 1e-6})
+print("Done with training.")
 
 
 weight_path = save_path + 'weight/'
 sim_tf_path = save_path + 'tfrecord/sim_tf/'
 
 saved_weight_path = save_path + f'weight/weight_encoder_epoch.h5' #You can choose a trained weight or use None to default to the weight of the last epoch.
-embedding,sim_id = concerto_test_ref(weight_path,sim_tf_path, 
-                                     super_parameters = {
-                                         'batch_size': 64, 
-                                         'epoch': 10, 
-                                         'lr': 1e-5,
-                                         'drop_rate': 0.1
-                                        }, 
-                                     saved_weight_path = saved_weight_path)
+saved_weight_path = save_path + 'weight/weight_encoder_epoch4.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
+embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': 64, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
 np.save(f"{save_path}/embeddings/embedding")
 
 print(f'Embedding shape: {embedding.shape}')
