@@ -224,8 +224,7 @@ for epoch in [50, 100, 200, 400]:
     weight_path = save_path + 'weight/'
     sim_tf_path = save_path + 'tfrecord/sim_tf/'
 
-    saved_weight_path = save_path + f'weight/weight_encoder_{epoch}.h5' #You can choose a trained weight or use None to default to the weight of the last epoch.
-    saved_weight_path = save_path + 'weight/weight_encoder_{epoch}.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
+    saved_weight_path = save_path + 'weight/weight_encoder_epoch4.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
     embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': 64, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
     # np.save(f"{save_path}/embeddings/embedding")
 
