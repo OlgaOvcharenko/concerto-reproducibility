@@ -168,27 +168,30 @@ scale = False
 batch_key = 'batchlb'
 label_key = 'CellType'
 
-dataset_dir = pth.join(path, "CLAIRE-data", dname)
-"""if dname == "Simulated":
-    sps_x, genes, cells, df_meta = prepare_SimulatedConcerto(dataset_dir)    
-else:
-    sps_x, genes, cells, df_meta = prepare_PBMC(dataset_dir, "batchlb", "CellType")"""
+# dataset_dir = pth.join(path, "CLAIRE-data", dname)
+# """if dname == "Simulated":
+#     sps_x, genes, cells, df_meta = prepare_SimulatedConcerto(dataset_dir)    
+# else:
+#     sps_x, genes, cells, df_meta = prepare_PBMC(dataset_dir, "batchlb", "CellType")"""
 
-# The function will call the corresponding preparation function for the dataset.
-sps_x, genes, cells, df_meta = prepare_dataset(data_dir=dataset_dir)
+# # The function will call the corresponding preparation function for the dataset.
+# sps_x, genes, cells, df_meta = prepare_dataset(data_dir=dataset_dir)
 
-adata, X, cell_name, gene_name, df_meta = preprocess_dataset(
-    sps_x,
-    cells, 
-    genes, 
-    df_meta, 
-    n_hvgs, 
-    scale, 
-)
+# adata, X, cell_name, gene_name, df_meta = preprocess_dataset(
+#     sps_x,
+#     cells, 
+#     genes, 
+#     df_meta, 
+#     n_hvgs, 
+#     scale, 
+# )
 
 # adata = sc.AnnData(X)
 # adata.var_names = gene_name
 # adata.obs = df_meta.copy()
+
+adata = sc.read(path)
+adata = preprocessing_rna(adata,n_top_features=2000,is_hvg=True,batch_key='Batch')
 print(adata)
 
 # ======================
