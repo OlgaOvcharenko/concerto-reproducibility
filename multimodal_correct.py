@@ -41,7 +41,7 @@ print("Saved adata.")
 weight_path = save_path + 'weight/'
 RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
 Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
-concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch_pretrain': 5, 'lr': 1e-4,'drop_rate': 0.1})
+concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path,super_parameters={'batch_size': 16, 'epoch_pretrain': 5, 'lr': 1e-4,'drop_rate': 0.1})
 
 print("Trained.")
 
