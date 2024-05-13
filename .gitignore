@@ -3,3 +3,11 @@ Multimodal_pretraining/data
 Batch_correction/data
 venv-metal
 __pycache__/
+Multimodal_pretraining/adata_Protein.h5ad
+Multimodal_pretraining/adata_RNA.h5ad
+Multimodal_pretraining/tfrecord/
+logs/
+logs_cpu/
+python_venv/
+Multimodal_pretraining/weight
+
