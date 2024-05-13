@@ -16,7 +16,7 @@ def dot_product(x, kernel):
     Returns:
     """
 
-    print(f"\n\nK backend: {K.backend()}")
+    # print(f"\n\nK backend: {K.backend()}")
     if K.backend() == 'tensorflow':
         # print(tensorflow.shape(x))
         # print(tensorflow.shape(kernel))
