@@ -215,53 +215,55 @@ print("tfrecord length is ok if the two lengths above are ok.")
 print("Training Concerto")
 weight_path = save_path + 'weight/'
 sim_tf_path = save_path + 'tfrecord/sim_tf/'
-concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch': 50, 'lr': 1e-6})
-print("Done with training.")
+
+for epoch in [50, 100, 200, 400]:
+    concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch': epoch, 'lr': 1e-6})
+    print("Done with training.")
 
 
-weight_path = save_path + 'weight/'
-sim_tf_path = save_path + 'tfrecord/sim_tf/'
+    weight_path = save_path + 'weight/'
+    sim_tf_path = save_path + 'tfrecord/sim_tf/'
 
-saved_weight_path = save_path + f'weight/weight_encoder_epoch.h5' #You can choose a trained weight or use None to default to the weight of the last epoch.
-saved_weight_path = save_path + 'weight/weight_encoder_epoch4.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
-embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': 64, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
-# np.save(f"{save_path}/embeddings/embedding")
+    saved_weight_path = save_path + f'weight/weight_encoder_{epoch}.h5' #You can choose a trained weight or use None to default to the weight of the last epoch.
+    saved_weight_path = save_path + 'weight/weight_encoder_{epoch}.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
+    embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': 64, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
+    # np.save(f"{save_path}/embeddings/embedding")
 
-print(f'Embedding shape: {embedding.shape}')
+    print(f'Embedding shape: {embedding.shape}')
 
-#adata = sc.AnnData(X)
-#adata.var_names = gene_name
-#adata.obs = df_meta.copy()
+    #adata = sc.AnnData(X)
+    #adata.var_names = gene_name
+    #adata.obs = df_meta.copy()
 
-# ======================
-# Done with training.
-# ----------------------
-# Continue with plotting
-# ======================
+    # ======================
+    # Done with training.
+    # ----------------------
+    # Continue with plotting
+    # ======================
 
-print("Plotting")
-adata = sc.read(f'{save_path}/adata_sim.h5ad')
-adata_1 = adata[sim_id]
-adata_1.obsm['X_embedding'] = embedding
+    print("Plotting")
+    adata = sc.read(f'{save_path}/adata_sim.h5ad')
+    adata_1 = adata[sim_id]
+    adata_1.obsm['X_embedding'] = embedding
 
-sc.pp.neighbors(adata_1,n_neighbors=15, use_rep='X_embedding')
-sc.tl.umap(adata_1,min_dist =0.001)
+    sc.pp.neighbors(adata_1,n_neighbors=15, use_rep='X_embedding')
+    sc.tl.umap(adata_1,min_dist=0.001)
 
-plt.rcParams.update({
-    'svg.fonttype':'none',
-    "font.size":5.5,
-    'axes.labelsize': 5.5,
-    'axes.titlesize':5,
-    'legend.fontsize': 5,
-    'ytick.labelsize':5,
-    'xtick.labelsize':5,
-})
+    plt.rcParams.update({
+        'svg.fonttype':'none',
+        "font.size":5.5,
+        'axes.labelsize': 5.5,
+        'axes.titlesize':5,
+        'legend.fontsize': 5,
+        'ytick.labelsize':5,
+        'xtick.labelsize':5,
+    })
 
-adata_1.uns['Group_colors'] = ['#ff7f0e','#1f77b4', '#279e68', '#d62728', '#aa40fc', '#8c564b','#e377c2']
-cm = 1/2.54
-fig, axes = plt.subplots(2, 1,figsize=(8*cm,10*cm))
-sc.pl.umap(adata_1, color=['Group'], show=False, ax=axes[0], size=1)
-sc.pl.umap(adata_1, color=['Batch'], show=False, ax=axes[1], size=1)
-fig.tight_layout()
+    adata_1.uns['Group_colors'] = ['#ff7f0e','#1f77b4', '#279e68', '#d62728', '#aa40fc', '#8c564b','#e377c2']
+    cm = 1/2.54
+    fig, axes = plt.subplots(2, 1,figsize=(8*cm,10*cm))
+    sc.pl.umap(adata_1, color=['Group'], show=False, ax=axes[0], size=1)
+    sc.pl.umap(adata_1, color=['Batch'], show=False, ax=axes[1], size=1)
+    fig.tight_layout()
 
-plt.savefig(f'./Batch_correction/plots/test_output_50epochs.png')
+    plt.savefig(f'./Batch_correction/plots/test_output_{epoch}.png')
