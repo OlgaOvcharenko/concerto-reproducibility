@@ -3,6 +3,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Layer
 from tensorflow.keras import constraints
 from tensorflow.keras import initializers, regularizers
+import tensorflow
 
 
 def dot_product(x, kernel):
@@ -17,6 +18,9 @@ def dot_product(x, kernel):
 
     print(f"\n\nK backend: {K.backend()}")
     if K.backend() == 'tensorflow':
+        print(tensorflow.shape(x))
+        print(tensorflow.shape(K.dot(x, K.expand_dims(kernel))))
+        print(tensorflow.shape(K.squeeze(K.dot(x, K.expand_dims(kernel)), axis=-1)))
         return K.squeeze(K.dot(x, K.expand_dims(kernel)), axis=-1)
     else:
         return K.dot(x, kernel)
