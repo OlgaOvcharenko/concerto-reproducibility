@@ -215,7 +215,7 @@ print("tfrecord length is ok if the two lengths above are ok.")
 print("Training Concerto")
 weight_path = save_path + 'weight/'
 sim_tf_path = save_path + 'tfrecord/sim_tf/'
-concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch': 10, 'lr': 1e-6})
+concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch': 50, 'lr': 1e-6})
 print("Done with training.")
 
 
@@ -264,4 +264,4 @@ sc.pl.umap(adata_1, color=['Group'], show=False, ax=axes[0], size=1)
 sc.pl.umap(adata_1, color=['Batch'], show=False, ax=axes[1], size=1)
 fig.tight_layout()
 
-plt.savefig(f'{save_path}/test_output_10epochs.png')
+plt.savefig(f'./Batch_correction/plots/test_output_50epochs.png')
