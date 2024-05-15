@@ -4,10 +4,18 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-epochs=("10 64 128 256 512")
-lrs=("1e-2 1e-5")
-batch_sizes=("64")
-drop_rates=("0.0 0.1 0.4")
+# epochs=("10 64 128 256 512")
+# lrs=("1e-2 1e-5")
+# batch_sizes=("64")
+# drop_rates=("0.0 0.1 0.4")
+# attention_t=("True False")
+# attention_s=("True False")
+# heads=("128")
+
+epochs=("32")
+lrs=("1e-5")
+batch_sizes=("128")
+drop_rates=("0.1")
 attention_t=("True False")
 attention_s=("True False")
 heads=("128")
