@@ -27,7 +27,7 @@ for e in $epochs; do
                 for s in $attention_s; do
                     for t in $attention_t; do
                         for h in $heads; do
-                            sbatch run_batch_correct.ah $e $lr $batch_size $drop_rate $s $t $h
+                            sbatch run_batch_correct.sh $e $lr $batch_size $drop_rate $s $t $h
                         done
                     done
                 done
