@@ -23,6 +23,7 @@ for e in $epochs; do
                         done
                     done
                 done
+            done
         done
     done 
 done

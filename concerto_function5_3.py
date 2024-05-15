@@ -467,12 +467,9 @@ def concerto_make_tfrecord_supervised_1batch(processed_ref_adata, tf_path, save_
 
 # train unsupervised
 def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
-    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    train_log_dir = 'logs_tensorboard/gradient_tape/' + current_time + '/train'
-    test_log_dir = 'logs_tensorboard/gradient_tape/' + current_time + '/test'
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + \
+        f"simulated_{super_parameters["epoch"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}" + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
-    test_summary_writer = tf.summary.create_file_writer(test_log_dir)
-
 
     set_seeds(0)
     if not os.path.exists(weight_path):
