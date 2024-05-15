@@ -42,54 +42,15 @@ def get_args():
                         help='batch size')
     parser.add_argument('--drop_rate', type= float, required=True,
                         help='dropout rate')
+    parser.add_argument('--heads', type= int, required=True,
+                        help='dropout rate')
+    parser.add_argument('--attention_t', type= bool, required=True,
+                        help='dropout rate')
+    parser.add_argument('--attention_s', type= bool, required=True,
+                        help='dropout rate')
 
     args = parser.parse_args()
     return args
-
-def py_read_data(_dir, fname):
-    # read data in sps
-    # saved in (cells, genes)
-    sps_X = sps.load_npz(pth.join(_dir, fname+'.npz'))
-    # read gene names
-    with open(pth.join(_dir, fname+'_genes.pkl'), 'rb') as f:
-        genes = pickle.load(f)
-    # read cell names
-    with open(pth.join(_dir, fname+'_cells.pkl'), 'rb') as f:
-        cells = pickle.load(f)
-    return sps_X, cells, genes
-
-def load_meta_txt(path, delimiter='\t'):
-    st = datetime.datetime.now()
-    data, colname, cname = [], [], []
-    with open(path, 'r') as f:
-        for li, line in enumerate(f):
-            line = line.strip().replace("\"", '').split(delimiter)
-            if li==0:
-                colname = line
-                continue
-            cname.append(line[0])
-            data.append(line[1:])
-    df = pd.DataFrame(data, columns=colname, index=cname)
-    ed = datetime.datetime.now()
-    total_seconds = (ed-st).total_seconds() * 1.0
-    print('The reading cost time {:.4f} secs'.format(total_seconds))
-    return df
-
-def prepare_PBMC(data_root, batch_key, label_key):
-    sps_x1, gene_name1, cell_name1 = py_read_data(data_root, 'b1_exprs')
-    sps_x2, gene_name2, cell_name2 = py_read_data(data_root, 'b2_exprs')
-    sps_x = sps.hstack([sps_x1, sps_x2])
-    cell_name = np.hstack((cell_name1, cell_name2))
-    assert np.all(gene_name1 == gene_name2), 'gene order not match'
-    gene_name = gene_name1
-    df_meta1 = load_meta_txt(pth.join(data_root, 'b1_celltype.txt'))
-    df_meta2 = load_meta_txt(pth.join(data_root, 'b2_celltype.txt'))
-    df_meta1['batchlb'] = 'Batch1'
-    df_meta2['batchlb'] = 'Batch2'
-    df_meta = pd.concat([df_meta1, df_meta2])
-    df_meta[batch_key] = df_meta[batch_key].astype('category')
-    df_meta[label_key] = df_meta[label_key].astype('category')
-    return sps_x, gene_name, cell_name, df_meta
 
 def prepare_SimulatedConcerto(data_root):
     '''
@@ -154,7 +115,11 @@ def main():
     lr = args.lr
     batch_size= args.batch_size
     drop_rate= args.drop_rate
-    print(f"Batch correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {test_drop_rate}, drop_rate {test_drop_rate}.")
+    attention_t = args.attention_t
+    attention_s = args.attention_s
+    heads = args.heads
+    print(f"Batch correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, 
+          attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
     gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
     for gpu in gpus:
@@ -183,14 +148,17 @@ def main():
     weight_path = save_path + 'weight/'
     sim_tf_path = save_path + 'tfrecord/sim_tf/'
     
-    concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': batch_size, 'epoch': epoch, 'lr': lr, 'drop_rate': drop_rate})
+    concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': batch_size, 'epoch': epoch, 'lr': lr, 'drop_rate': drop_rate, 'attention_t': attention_t, 'attention_s': attention_s, 'heads': heads})
     print("Done with training.")
 
     for dr in [drop_rate, 0.0]:
         for nn in ["encoder", "decoder"]:
             saved_weight_path = save_path + f'weight/weight_{nn}_epoch_{epoch}_{lr}_{drop_rate}.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
-            embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': batch_size, 'epoch': 1, 'lr': lr, 'test_drop_rate': dr}, saved_weight_path = saved_weight_path)
-            # np.save(f"{save_path}/embeddings/embedding")
+            embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': batch_size, 'epoch': 1, 'lr': lr, 'drop_rate': dr, 'attention_t': attention_t, 'heads': heads}, saved_weight_path = saved_weight_path)
+            
+            # if not os.path.exists(f"{save_path}/embeddings/"):
+            #     os.makedirs(f"{save_path}/embeddings/")
+            # np.save(f"{save_path}/embeddings/embedding_{nn}_{epoch}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.csv", embedding)
 
             print(f'Embedding shape: {embedding.shape}')
 
@@ -219,4 +187,4 @@ def main():
             sc.pl.umap(adata_1, color=['Batch'], show=False, ax=axes[1], size=1)
             fig.tight_layout()
 
-            plt.savefig(f'./Batch_correction/plots/simulated_{nn}_{epoch}_{lr}_{drop_rate}_{dr}.png')
+            plt.savefig(f'./Batch_correction/plots/simulated_{nn}_{epoch}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')

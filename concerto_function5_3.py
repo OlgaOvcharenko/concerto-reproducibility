@@ -1,3 +1,4 @@
+import datetime
 import tensorflow as tf
 import numpy as np
 import os
@@ -466,11 +467,20 @@ def concerto_make_tfrecord_supervised_1batch(processed_ref_adata, tf_path, save_
 
 # train unsupervised
 def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + current_time + '/train'
+    test_log_dir = 'logs_tensorboard/gradient_tape/' + current_time + '/test'
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+    test_summary_writer = tf.summary.create_file_writer(test_log_dir)
+
+
     set_seeds(0)
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
-        super_parameters = {'batch_size':32,'epoch':3,'lr':1e-5,'drop_rate':0.1}
+        super_parameters = {'batch_size': 32,'epoch': 3,
+                            'lr': 1e-5,'drop_rate': 0.1, 
+                            'attention_t': True, 'attention_s': False, 'heads': 128}
 #     dirname = os.getcwd()
 #     f = np.load(ref_tf_path + './vocab_size.npz')
     f = np.load(os.path.join(ref_tf_path,'vocab_size.npz'))
@@ -478,21 +488,21 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
     encode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size],
                                                         mult_feature_names=['RNA'],
                                                         embedding_dims=128,
-                                                        include_attention=True,
+                                                        include_attention=super_parameters["attention_t"],
                                                         drop_rate=super_parameters["drop_rate"],
-                                                        head_1=128,
-                                                        head_2=128,
-                                                        head_3=128)
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
 
     decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size],
                                                         mult_feature_names=['RNA'],
                                                         embedding_dims=128,
-                                                        include_attention=False,
+                                                        include_attention=super_parameters["attention_s"],
                                                         drop_rate=super_parameters["drop_rate"],
-                                                        head_1=128,
-                                                        head_2=128,
-                                                        head_3=128)
-
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
+    
 #     tf_list_1 = os.listdir(os.path.join(ref_tf_path))
     tf_list_1 = [f for f in os.listdir(os.path.join(ref_tf_path)) if 'tfrecord' in f]
     train_source_list = []
@@ -539,6 +549,10 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
                     print(template.format(epoch + 1,
                                           str(step),
                                           train_loss.result()))
+                
+                with train_summary_writer.as_default():
+                    tf.summary.scalar('loss', train_loss.result(), step=epoch*len(train_db)+step)
+
         encode_network.save_weights(
             weight_path + f'weight_encoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}.h5')
         decode_network.save_weights(
@@ -1858,7 +1872,7 @@ def concerto_test_ref_query(model_path:str, ref_tf_path:str, query_tf_path:str, 
 
 def concerto_test_ref(model_path:str, ref_tf_path:str, super_parameters=None,saved_weight_path=None):
     if super_parameters is None:
-        super_parameters = {'batch_size': 128, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1}
+        super_parameters = {'batch_size': 128, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1, "attention_t": True, "heads": 128}
 
     f = np.load(ref_tf_path + 'vocab_size.npz')
     vocab_size = int(f['vocab size'])
@@ -1866,11 +1880,11 @@ def concerto_test_ref(model_path:str, ref_tf_path:str, super_parameters=None,sav
         multi_max_features=[vocab_size],
         mult_feature_names=['RNA'],
         embedding_dims=128,
-        include_attention=True,
+        include_attention=super_parameters["attention_t"],
         drop_rate=super_parameters['drop_rate'],
-        head_1=128,
-        head_2=128,
-        head_3=128)
+        head_1=super_parameters["heads"],
+        head_2=super_parameters["heads"],
+        head_3=super_parameters["heads"])
 
     tf_list_1 = [f for f in os.listdir(os.path.join(ref_tf_path)) if 'tfrecord' in f]
     train_source_list = []

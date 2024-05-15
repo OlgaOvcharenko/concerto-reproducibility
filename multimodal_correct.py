@@ -31,17 +31,17 @@ if not os.path.exists(save_path):
 adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
 adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
 
-# print("Saved adata.")
+print("Saved adata.")
 
-# # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
-# # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
-# # print("Make tf record.")
+RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
+Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
+print("Make tf record.")
 
 # # Train
 weight_path = save_path + 'weight/'
 RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
 Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
-# concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path,super_parameters={'batch_size': 16, 'epoch_pretrain': 5, 'lr': 1e-4,'drop_rate': 0.1})
+concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path,super_parameters={'batch_size': 16, 'epoch_pretrain': 5, 'lr': 1e-4,'drop_rate': 0.1})
 
 # print("Trained.")
 
