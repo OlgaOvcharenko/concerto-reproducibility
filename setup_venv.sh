@@ -15,3 +15,5 @@ if [[ ! -d "python_env" ]]; then
 
   pip3 install -r requirements.txt
 fi
+
+pip install leidenalg

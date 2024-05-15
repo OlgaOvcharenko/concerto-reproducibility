@@ -470,7 +470,7 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
-        super_parameters = {'batch_size':32,'epoch':3,'lr':1e-5}
+        super_parameters = {'batch_size':32,'epoch':3,'lr':1e-5,'drop_rate':0.1}
 #     dirname = os.getcwd()
 #     f = np.load(ref_tf_path + './vocab_size.npz')
     f = np.load(os.path.join(ref_tf_path,'vocab_size.npz'))
@@ -479,7 +479,7 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
                                                         mult_feature_names=['RNA'],
                                                         embedding_dims=128,
                                                         include_attention=True,
-                                                        drop_rate=0.1,
+                                                        drop_rate=super_parameters["drop_rate"],
                                                         head_1=128,
                                                         head_2=128,
                                                         head_3=128)
@@ -488,7 +488,7 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
                                                         mult_feature_names=['RNA'],
                                                         embedding_dims=128,
                                                         include_attention=False,
-                                                        drop_rate=0.1,
+                                                        drop_rate=super_parameters["drop_rate"],
                                                         head_1=128,
                                                         head_2=128,
                                                         head_3=128)
@@ -540,9 +540,9 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
                                           str(step),
                                           train_loss.result()))
         encode_network.save_weights(
-            weight_path + 'weight_encoder_epoch{}.h5'.format(str(epoch+1)))
+            weight_path + f'weight_encoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}.h5')
         decode_network.save_weights(
-            weight_path + 'weight_decoder_epoch{}.h5'.format(str(epoch+1)))
+            weight_path + f'weight_decoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}.h5')
 
     return weight_path
 

@@ -33,16 +33,15 @@ def set_gpus():
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Evaluation Script for scRNA-seq Contrastive Learning Models')
-    # environ settings
-    """parser.add_argument('--path', default='/cluster/work/boeva/tomap', type=str,
-                        help='Path to where the embeddings can be found')
-    parser.add_argument('--model-paths', nargs='+', default=["CLAIRE-outputs"],
-                        help='Path to the embeddings of the models to be benchmarked')"""
-    parser.add_argument('--dname', default='Simulated', type=str,
-                        help='Name of the dataset used for benchmarking')
-    parser.add_argument('--train', action='store_true',
-                        help='If --train is not set, only perform inference of the embeddings.')
+    parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
+    parser.add_argument('--epoch', type=int, required=True,
+                        help='Number of epochs')
+    parser.add_argument('--lr', type= float, required=True,
+                        help='learning rate')
+    parser.add_argument('--batch_size', type= int, required=True,
+                        help='batch size')
+    parser.add_argument('--drop_rate', type= float, required=True,
+                        help='dropout rate')
 
     args = parser.parse_args()
     return args
@@ -149,120 +148,75 @@ def preprocess_dataset(sps_x, cell_name, gene_name, df_meta, select_hvg=None, sc
     return X, cell_name, adata.var_names, df_meta
 
 
-## ================================== ##
-##    Main Function (can be a todo)   ##
-## ================================== ##
-args = get_args()
+def main():
+    args = get_args()
+    epoch = args.epoch
+    lr = args.lr
+    batch_size= args.batch_size
+    drop_rate= args.drop_rate
+    print(f"Batch correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {test_drop_rate}, drop_rate {test_drop_rate}.")
 
-gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True) 
-    print(f'GPU info: \n{gpu}')
-
-
-path = './Batch_correction/data/expBatch1_woGroup2.loom'
-
-n_hvgs = 2000
-scale = False
-batch_key = 'batchlb'
-label_key = 'CellType'
-
-# dataset_dir = pth.join(path, "CLAIRE-data", dname)
-# """if dname == "Simulated":
-#     sps_x, genes, cells, df_meta = prepare_SimulatedConcerto(dataset_dir)    
-# else:
-#     sps_x, genes, cells, df_meta = prepare_PBMC(dataset_dir, "batchlb", "CellType")"""
-
-# # The function will call the corresponding preparation function for the dataset.
-# sps_x, genes, cells, df_meta = prepare_dataset(data_dir=dataset_dir)
-
-# adata, X, cell_name, gene_name, df_meta = preprocess_dataset(
-#     sps_x,
-#     cells, 
-#     genes, 
-#     df_meta, 
-#     n_hvgs, 
-#     scale, 
-# )
-
-# adata = sc.AnnData(X)
-# adata.var_names = gene_name
-# adata.obs = df_meta.copy()
-
-adata = sc.read(path)
-adata = preprocessing_rna(adata,n_top_features=2000,is_hvg=True,batch_key='Batch')
-print(adata)
-
-# ======================
-# Training of the model
-# ======================
-
-save_path = f'./Batch_correction/data/'
-
-if not os.path.exists(save_path):
-    os.makedirs(save_path)
-adata.write_h5ad(save_path + 'adata_sim.h5ad')
-
-if not os.path.exists(os.path.join(save_path, "embeddings")):
-    os.makedirs(os.path.join(save_path, "embeddings"))
-
-print("Debugging the tfrecord")
-if not os.path.exists(save_path):
-    os.makedirs(save_path)
-sim_tf_path = concerto_make_tfrecord(adata,tf_path = save_path + 'tfrecord/sim_tf/',batch_col_name = 'Batch')
-print("tfrecord length is ok if the two lengths above are ok.")
-
-print("Training Concerto")
-weight_path = save_path + 'weight/'
-sim_tf_path = save_path + 'tfrecord/sim_tf/'
-
-for epoch in [50, 100, 200, 400]:
-    concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': 64, 'epoch': epoch, 'lr': 1e-6})
-    print("Done with training.")
+    gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True) 
+        print(f'GPU info: \n{gpu}')
 
 
+    path = './Batch_correction/data/expBatch1_woGroup2.loom'
+    adata = sc.read(path)
+    adata = preprocessing_rna(adata,n_top_features=2000,is_hvg=True,batch_key='Batch')
+    print(f"Simulated data shape {adata.shape}")
+    print(f"Simulated data: \n {adata}")
+
+    save_path = f'./Batch_correction/data/'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    adata.write_h5ad(save_path + 'adata_sim.h5ad')
+
+    print("Making the tfrecord")
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    sim_tf_path = concerto_make_tfrecord(adata,tf_path = save_path + 'tfrecord/sim_tf/', batch_col_name = 'Batch')
+    print("tfrecord length is ok if the two lengths above are ok")
+
+    print("Training Concerto")
     weight_path = save_path + 'weight/'
     sim_tf_path = save_path + 'tfrecord/sim_tf/'
+    
+    concerto_train_ref(sim_tf_path,weight_path,super_parameters={'batch_size': batch_size, 'epoch': epoch, 'lr': lr, 'drop_rate': drop_rate})
+    print("Done with training.")
 
-    saved_weight_path = save_path + 'weight/weight_encoder_epoch4.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
-    embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': 64, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1},saved_weight_path = saved_weight_path)
-    # np.save(f"{save_path}/embeddings/embedding")
+    for dr in [drop_rate, 0.0]:
+        for nn in ["encoder", "decoder"]:
+            saved_weight_path = save_path + f'weight/weight_{nn}_epoch_{epoch}_{lr}_{drop_rate}.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
+            embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': batch_size, 'epoch': 1, 'lr': lr, 'test_drop_rate': dr}, saved_weight_path = saved_weight_path)
+            # np.save(f"{save_path}/embeddings/embedding")
 
-    print(f'Embedding shape: {embedding.shape}')
+            print(f'Embedding shape: {embedding.shape}')
 
-    #adata = sc.AnnData(X)
-    #adata.var_names = gene_name
-    #adata.obs = df_meta.copy()
+            print("Plotting")
+            adata = sc.read(f'{save_path}/adata_sim.h5ad')
+            adata_1 = adata[sim_id]
+            adata_1.obsm['X_embedding'] = embedding
 
-    # ======================
-    # Done with training.
-    # ----------------------
-    # Continue with plotting
-    # ======================
+            sc.pp.neighbors(adata_1,n_neighbors=15, use_rep='X_embedding')
+            sc.tl.umap(adata_1,min_dist=0.001)
 
-    print("Plotting")
-    adata = sc.read(f'{save_path}/adata_sim.h5ad')
-    adata_1 = adata[sim_id]
-    adata_1.obsm['X_embedding'] = embedding
+            plt.rcParams.update({
+                'svg.fonttype':'none',
+                "font.size":5.5,
+                'axes.labelsize': 5.5,
+                'axes.titlesize':5,
+                'legend.fontsize': 5,
+                'ytick.labelsize':5,
+                'xtick.labelsize':5,
+            })
 
-    sc.pp.neighbors(adata_1,n_neighbors=15, use_rep='X_embedding')
-    sc.tl.umap(adata_1,min_dist=0.001)
+            adata_1.uns['Group_colors'] = ['#ff7f0e','#1f77b4', '#279e68', '#d62728', '#aa40fc', '#8c564b','#e377c2']
+            cm = 1/2.54
+            fig, axes = plt.subplots(2, 1,figsize=(8*cm,10*cm))
+            sc.pl.umap(adata_1, color=['Group'], show=False, ax=axes[0], size=1)
+            sc.pl.umap(adata_1, color=['Batch'], show=False, ax=axes[1], size=1)
+            fig.tight_layout()
 
-    plt.rcParams.update({
-        'svg.fonttype':'none',
-        "font.size":5.5,
-        'axes.labelsize': 5.5,
-        'axes.titlesize':5,
-        'legend.fontsize': 5,
-        'ytick.labelsize':5,
-        'xtick.labelsize':5,
-    })
-
-    adata_1.uns['Group_colors'] = ['#ff7f0e','#1f77b4', '#279e68', '#d62728', '#aa40fc', '#8c564b','#e377c2']
-    cm = 1/2.54
-    fig, axes = plt.subplots(2, 1,figsize=(8*cm,10*cm))
-    sc.pl.umap(adata_1, color=['Group'], show=False, ax=axes[0], size=1)
-    sc.pl.umap(adata_1, color=['Batch'], show=False, ax=axes[1], size=1)
-    fig.tight_layout()
-
-    plt.savefig(f'./Batch_correction/plots/test_output_{epoch}.png')
+            plt.savefig(f'./Batch_correction/plots/simulated_{nn}_{epoch}_{lr}_{drop_rate}_{dr}.png')
