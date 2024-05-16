@@ -4,7 +4,6 @@ import argparse
 
 import warnings
 sys.path.append("../")
-import datetime
 
 from concerto_function5_3 import *
 from sklearn.metrics import f1_score, accuracy_score
@@ -12,13 +11,10 @@ import numpy as np
 import scanpy as sc
 import matplotlib.pyplot as plt
 import os.path as pth
-import pickle # or pickle5
 import pandas as pd
 
 import tensorflow as tf
 import scipy.sparse as sps
-
-from utils.prepare_dataset import prepare_dataset
 
 import matplotlib.style as style
 style.use('ggplot')
@@ -180,3 +176,5 @@ def main():
             fig.tight_layout()
 
             plt.savefig(f'./Batch_correction/plots/simulated_{nn}_{epoch}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
+
+main()
