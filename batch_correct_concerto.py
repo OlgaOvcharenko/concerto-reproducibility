@@ -140,7 +140,7 @@ def main():
 
     for dr in [drop_rate, 0.0]:
         for nn in ["encoder", "decoder"]:
-            saved_weight_path = save_path + f'weight/weight_{nn}_epoch_{epoch}_{lr}_{drop_rate}.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
+            saved_weight_path = save_path + f'weight/weight_{nn}_epoch_{epoch}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
             embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': batch_size, 'epoch': 1, 'lr': lr, 'drop_rate': dr, 'attention_t': attention_t, 'heads': heads}, saved_weight_path = saved_weight_path)
             
             print(f'Embedding shape: {embedding.shape}')
