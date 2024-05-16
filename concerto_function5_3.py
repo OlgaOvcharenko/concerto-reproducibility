@@ -544,6 +544,8 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
     total_update_steps = 300 * super_parameters['epoch']
     lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps, super_parameters['lr']*1e-2, power=1)
     opt_simclr = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+
+    tf_step = 0
     for epoch in range(super_parameters['epoch']):
         np.random.shuffle(train_source_list)
         for file in train_source_list:
@@ -581,7 +583,9 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
                 
                 # Tensorboard
                 with train_summary_writer.as_default():
-                    tf.summary.scalar('loss', train_loss.result(), step=epoch*len(train_db)+step)
+                    # FIXME
+                    tf.summary.scalar('loss', train_loss.result(), step=tf_step)
+                tf_step += 1
 
         encode_network.save_weights(
             weight_path + f'weight_encoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
@@ -1443,6 +1447,8 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
     lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
                                                                 super_parameters['lr'] * 1e-2, power=1)
     opt_simclr = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+    
+    tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
         for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
             print(RNA_file)
@@ -1493,7 +1499,8 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
                     
                 # Tensorboard
                 with train_summary_writer.as_default():
-                    tf.summary.scalar('loss', train_loss.result(), step=epoch*len(train_db_RNA)+step)
+                    tf.summary.scalar('loss', train_loss.result(), step=tf_step)
+                tf_step += 1
 
         encode_network.save_weights(
             weight_path + f'multi_weight_encoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
