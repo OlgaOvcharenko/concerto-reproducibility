@@ -579,13 +579,14 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
                                           str(step),
                                           train_loss.result()))
                 
+                # Tensorboard
                 with train_summary_writer.as_default():
                     tf.summary.scalar('loss', train_loss.result(), step=epoch*len(train_db)+step)
 
         encode_network.save_weights(
-            weight_path + f'weight_encoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}.h5')
+            weight_path + f'weight_encoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
         decode_network.save_weights(
-            weight_path + f'weight_decoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}.h5')
+            weight_path + f'weight_decoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
 
     return weight_path
 
@@ -1392,23 +1393,17 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_simulated_{super_parameters["epoch"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
-    set_seeds(0)
+    set_seeds(0)   
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
-        super_parameters = {'batch_size': 64, 'epoch_pretrain': 3, 'lr': 1e-4,'drop_rate': 0.1}
-        super_parameters = {'batch_size': 32, 
+        super_parameters = {'batch_size': 31, 
                             'epoch_pretrain': 3,
-                            'lr': 1e-5,
+                            'lr': 1e-4,
                             'drop_rate': 0.1, 
                             'attention_t': True, 
                             'attention_s': False, 
-                            'heads': 128}    
-    
-    if not os.path.exists(weight_path):
-        os.makedirs(weight_path)
-    if super_parameters is None:
-        super_parameters = {'batch_size': 64, 'epoch_pretrain': 3, 'lr': 1e-4,'drop_rate': 0.1}
+                            'heads': 128} 
     # dirname = os.getcwd()
     # f = np.load(ref_tf_path + './vocab_size.npz')
     f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
@@ -1418,7 +1413,7 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
     encode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
                                                         mult_feature_names=['RNA','Protein'],
                                                         embedding_dims=128,
-                                                        include_attention=True,
+                                                        include_attention=super_parameters['attention_t'],
                                                         drop_rate=super_parameters['drop_rate'],
                                                         head_1=super_parameters["heads"],
                                                         head_2=super_parameters["heads"],
@@ -1427,7 +1422,7 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
     decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
                                                         mult_feature_names=['RNA','Protein'],
                                                         embedding_dims=128,
-                                                        include_attention=False,
+                                                        include_attention=super_parameters['attention_s'],
                                                         drop_rate=super_parameters['drop_rate'],
                                                         head_1=super_parameters["heads"],
                                                         head_2=super_parameters["heads"],
@@ -1440,7 +1435,6 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
     for i in tf_list_1:
         train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
         train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
-
 
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     train_cls_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_cls_accuracy')
@@ -1496,10 +1490,15 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
                     print(template.format(epoch + 1,
                                           str(step),
                                           train_loss.result()))
+                    
+                # Tensorboard
+                with train_summary_writer.as_default():
+                    tf.summary.scalar('loss', train_loss.result(), step=epoch*len(train_db_RNA)+step)
+
         encode_network.save_weights(
-            os.path.join(weight_path, 'weight_encoder_epoch{}.h5'.format(str(epoch + 1))))
+            weight_path + f'multi_weight_encoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
         decode_network.save_weights(
-            os.path.join(weight_path, 'weight_decoder_epoch{}.h5'.format(str(epoch + 1))))
+            weight_path + f'multi_weight_decoder_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
 
     return print('finished')
 
