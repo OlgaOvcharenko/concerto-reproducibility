@@ -25,13 +25,6 @@ style.use('ggplot')
 sc.settings.set_figure_params(dpi=200, facecolor='white',frameon=False,fontsize=5.5)
 
 
-def set_gpus():
-    os.environ["CUDA_VISIBLE_DEVICES"] = '5' 
-    gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-    for gpu in gpus:
-        tf.config.experimental.set_memory_growth(gpu, True) 
-
-
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
     parser.add_argument('--epoch', type=int, required=True,
@@ -43,11 +36,11 @@ def get_args():
     parser.add_argument('--drop_rate', type= float, required=True,
                         help='dropout rate')
     parser.add_argument('--heads', type= int, required=True,
-                        help='dropout rate')
+                        help='heads for NNs')
     parser.add_argument('--attention_t', type= bool, required=True,
-                        help='dropout rate')
+                        help='to use attention with teacher')
     parser.add_argument('--attention_s', type= bool, required=True,
-                        help='dropout rate')
+                        help='to use attention with student')
 
     args = parser.parse_args()
     return args
@@ -118,8 +111,7 @@ def main():
     attention_t = args.attention_t
     attention_s = args.attention_s
     heads = args.heads
-    print(f"Batch correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, 
-          attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
+    print(f"Batch correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
     gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
     for gpu in gpus:
