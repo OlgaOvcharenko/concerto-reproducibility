@@ -12,13 +12,13 @@ source "python_venv/bin/activate"
 # attention_s=("True False")
 # heads=("128")
 
-epochs=("32")
+epochs=("32 128")
 lrs=("1e-5")
-batch_sizes=("128")
-drop_rates=("0.1")
-attention_t=("True False")
-attention_s=("True False")
-heads=("128")
+batch_sizes=("64")
+drop_rates=("0.1 0.4")
+attention_t=("True")
+attention_s=("True")
+heads=("64 128")
 
 for e in $epochs; do
     for lr in $lrs; do
