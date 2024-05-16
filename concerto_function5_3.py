@@ -64,13 +64,46 @@ def preprocessing_rna(
 
     sc.pp.filter_cells(adata, min_genes=min_features)
 
-    #sc.pp.filter_genes(adata, min_cells=min_cells)
+    # sc.pp.filter_genes(adata, min_cells=min_cells)
 
     sc.pp.normalize_total(adata, target_sum=target_sum)
 
     sc.pp.log1p(adata)
     if is_hvg == True:
         sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=False, subset=True)
+
+    print('Processed dataset shape: {}'.format(adata.shape))
+    return adata
+
+def preprocessing_changed_rna(
+        adata,
+        min_features: int = 600,
+        min_cells: int = 3,
+        target_sum: int = 10000,
+        n_top_features=2000,  # or gene list
+        chunk_size: int = 20000,
+        is_hvg = True,
+        batch_key = 'batch',
+        log=True
+):
+    if min_features is None: min_features = 600
+    if n_top_features is None: n_top_features = 40000
+
+    if not issparse(adata.X):
+        adata.X = scipy.sparse.csr_matrix(adata.X)
+
+    adata = adata[:, [gene for gene in adata.var_names
+                      if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
+
+    sc.pp.filter_cells(adata, min_genes=min_features)
+
+    sc.pp.filter_genes(adata, min_cells=min_cells)
+
+    sc.pp.normalize_total(adata, target_sum=target_sum)
+
+    sc.pp.log1p(adata)
+    if is_hvg == True:
+        sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=True, subset=True)
 
     print('Processed dataset shape: {}'.format(adata.shape))
     return adata
@@ -467,7 +500,7 @@ def concerto_make_tfrecord_supervised_1batch(processed_ref_adata, tf_path, save_
 
 # train unsupervised
 def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
-    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'simulated_{super_parameters["epoch"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'batch_corr_simulated_{super_parameters["epoch"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
     set_seeds(0)
@@ -1356,6 +1389,22 @@ def concerto_train_ref_query(ref_tf_path: str, query_tf_path: str, weight_path: 
 
 
 def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_simulated_{super_parameters["epoch"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+
+    set_seeds(0)
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
+    if super_parameters is None:
+        super_parameters = {'batch_size': 64, 'epoch_pretrain': 3, 'lr': 1e-4,'drop_rate': 0.1}
+        super_parameters = {'batch_size': 32, 
+                            'epoch_pretrain': 3,
+                            'lr': 1e-5,
+                            'drop_rate': 0.1, 
+                            'attention_t': True, 
+                            'attention_s': False, 
+                            'heads': 128}    
+    
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
@@ -1371,18 +1420,18 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
                                                         embedding_dims=128,
                                                         include_attention=True,
                                                         drop_rate=super_parameters['drop_rate'],
-                                                        head_1=128,
-                                                        head_2=128,
-                                                        head_3=128)
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
 
     decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
                                                         mult_feature_names=['RNA','Protein'],
                                                         embedding_dims=128,
                                                         include_attention=False,
                                                         drop_rate=super_parameters['drop_rate'],
-                                                        head_1=128,
-                                                        head_2=128,
-                                                        head_3=128)
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
 
     # tf_list_1 = os.listdir(os.path.join(ref_tf_path))
     tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]

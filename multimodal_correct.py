@@ -8,6 +8,37 @@ import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
 import tensorflow as tf
 
+def get_args():
+    parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
+    parser.add_argument('--epoch', type=int, required=True,
+                        help='Number of epochs')
+    parser.add_argument('--lr', type= float, required=True,
+                        help='learning rate')
+    parser.add_argument('--batch_size', type= int, required=True,
+                        help='batch size')
+    parser.add_argument('--drop_rate', type= float, required=True,
+                        help='dropout rate')
+    parser.add_argument('--heads', type= int, required=True,
+                        help='heads for NNs')
+    parser.add_argument('--attention_t', type= bool, required=True,
+                        help='to use attention with teacher')
+    parser.add_argument('--attention_s', type= bool, required=True,
+                        help='to use attention with student')
+
+    args = parser.parse_args()
+    return args
+
+
+args = get_args()
+epoch = args.epoch
+lr = args.lr
+batch_size= args.batch_size
+drop_rate= args.drop_rate
+attention_t = args.attention_t
+attention_s = args.attention_s
+heads = args.heads
+print(f"Batch correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
+
 gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
 print(f"\nAvailable GPUs: {gpus}\n")
 for gpu in gpus:
@@ -19,11 +50,18 @@ path = './Multimodal_pretraining/data/multi_protein_l2.loom'
 adata_Protein = sc.read(path) #cell_type batch
 
 print("Read data.")
+print(f"Simulated RNA data shape {adata_RNA.shape}")
+print(f"Simulated Protein data shape {adata_Protein.shape}")
 
-adata_RNA = preprocessing_rna(adata_RNA,min_features = 0,is_hvg=False,batch_key='batch')
-adata_Protein = preprocessing_rna(adata_Protein,min_features = 0,is_hvg=False,batch_key='batch')
-
+# FIXME why 20K
+adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0,is_hvg=False,batch_key='batch')
+adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0,is_hvg=False,batch_key='batch')
 print("Preprocessed data.")
+
+print(f"Simulated RNA data shape {adata_RNA.shape}")
+print(f"Simulated Protein data shape {adata_Protein.shape}")
+print(f"Simulated RNA data: \n {adata_RNA}")
+print(f"Simulated Protein data: \n {adata_Protein}")
 
 save_path = './Multimodal_pretraining/'
 if not os.path.exists(save_path):
@@ -33,17 +71,25 @@ adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
 
 print("Saved adata.")
 
-# RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
-# Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
+RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
+Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
 print("Make tf record.")
 
-# # Train
+# Train
 weight_path = save_path + 'weight/'
 RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
 Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
-# concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path,super_parameters={'batch_size': 16, 'epoch_pretrain': 5, 'lr': 1e-4,'drop_rate': 0.1})
+concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path, 
+                          super_parameters={
+                              'batch_size': batch_size, 
+                              'epoch': epoch, 'lr': lr, 
+                              'drop_rate': drop_rate, 
+                              'attention_t': attention_t, 
+                              'attention_s': attention_s, 
+                              'heads': heads
+                            })
 
-# print("Trained.")
+print("Trained.")
 
 # # Test
 saved_weight_path = './Multimodal_pretraining/weight/weight_encoder_epoch3.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.

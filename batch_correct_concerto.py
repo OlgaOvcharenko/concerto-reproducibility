@@ -33,9 +33,9 @@ def get_args():
                         help='dropout rate')
     parser.add_argument('--heads', type= int, required=True,
                         help='heads for NNs')
-    parser.add_argument('--attention_t', type= bool, required=True,
+    parser.add_argument('--attention_t', type= int, required=True,
                         help='to use attention with teacher')
-    parser.add_argument('--attention_s', type= bool, required=True,
+    parser.add_argument('--attention_s', type= int, required=True,
                         help='to use attention with student')
 
     args = parser.parse_args()
@@ -104,8 +104,8 @@ def main():
     lr = args.lr
     batch_size= args.batch_size
     drop_rate= args.drop_rate
-    attention_t = args.attention_t
-    attention_s = args.attention_s
+    attention_t = True if args.attention_t == 1 else False
+    attention_s = True if args.attention_s == 1 else False 
     heads = args.heads
     print(f"Batch correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
@@ -113,7 +113,6 @@ def main():
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True) 
         print(f'GPU info: \n{gpu}')
-
 
     path = './Batch_correction/data/expBatch1_woGroup2.loom'
     adata = sc.read(path)
@@ -144,10 +143,6 @@ def main():
             saved_weight_path = save_path + f'weight/weight_{nn}_epoch_{epoch}_{lr}_{drop_rate}.h5'# You can choose a trained weight or use None to default to the weight of the last epoch.
             embedding, sim_id = concerto_test_ref(weight_path,sim_tf_path,super_parameters = {'batch_size': batch_size, 'epoch': 1, 'lr': lr, 'drop_rate': dr, 'attention_t': attention_t, 'heads': heads}, saved_weight_path = saved_weight_path)
             
-            # if not os.path.exists(f"{save_path}/embeddings/"):
-            #     os.makedirs(f"{save_path}/embeddings/")
-            # np.save(f"{save_path}/embeddings/embedding_{nn}_{epoch}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.csv", embedding)
-
             print(f'Embedding shape: {embedding.shape}')
 
             print("Plotting")
