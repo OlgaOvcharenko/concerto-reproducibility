@@ -54,8 +54,8 @@ print(f"Simulated RNA data shape {adata_RNA.shape}")
 print(f"Simulated Protein data shape {adata_Protein.shape}")
 
 # FIXME why 20K
-adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0,is_hvg=False,batch_key='batch')
-adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0,is_hvg=False,batch_key='batch')
+adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
+adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
 print("Preprocessed data.")
 
 print(f"Simulated RNA data shape {adata_RNA.shape}")
