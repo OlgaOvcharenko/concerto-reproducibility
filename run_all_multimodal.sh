@@ -36,7 +36,7 @@ for e in $epochs; do
                 for s in $attention_s; do
                     for t in $attention_t; do
                         for h in $heads; do
-                            for d in $data
+                            for d in $data; do
                                 sbatch run_multimodal.sh $e $lr $batch_size $drop_rate $s $t $h $d
                             done
                         done
