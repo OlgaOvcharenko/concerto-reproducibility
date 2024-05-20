@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -o logs/log-%j-batch-correct.out
+#SBATCH -o logs/log-%j-multimodal.out
 #SBATCH --nodes=1
 #SBATCH --gpus=rtx_3090:1
 #SBATCH --time=04:00:00
