@@ -10,6 +10,10 @@ import tensorflow as tf
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
+
+    parser.add_argument('--data', type=str, required=True,
+                        help='Dataset (Simulated/Not)')
+
     parser.add_argument('--epoch', type=int, required=True,
                         help='Number of epochs')
     parser.add_argument('--lr', type= float, required=True,
@@ -30,6 +34,7 @@ def get_args():
 
 
 args = get_args()
+data = args.data
 epoch = args.epoch
 lr = args.lr
 batch_size= args.batch_size
@@ -44,43 +49,80 @@ print(f"\nAvailable GPUs: {gpus}\n")
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
-path = './Multimodal_pretraining/data/multi_gene_l2.loom'
-adata_RNA = sc.read(path)
-path = './Multimodal_pretraining/data/multi_protein_l2.loom'
-adata_Protein = sc.read(path) #cell_type batch
+if data == "simulated":
+    path = './Multimodal_pretraining/data/multi_gene_l2.loom'
+    adata_RNA = sc.read(path)
 
-print("Read data.")
-print(f"Simulated RNA data shape {adata_RNA.shape}")
-print(f"Simulated Protein data shape {adata_Protein.shape}")
+    path = './Multimodal_pretraining/data/multi_protein_l2.loom'
+    adata_Protein = sc.read(path) #cell_type batch
 
-# FIXME why 20K
-adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
-adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
-print("Preprocessed data.")
+    print("Read simulated data")
 
-print(f"Simulated RNA data shape {adata_RNA.shape}")
-print(f"Simulated Protein data shape {adata_Protein.shape}")
-print(f"Simulated RNA data: \n {adata_RNA}")
-print(f"Simulated Protein data: \n {adata_Protein}")
+    print("Read data.")
+    print(f"{data} RNA data shape {adata_RNA.shape}")
+    print(f"{data} Protein data shape {adata_Protein.shape}")
 
-save_path = './Multimodal_pretraining/'
-if not os.path.exists(save_path):
-    os.makedirs(save_path)
-adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
-adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
+    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
+    print("Preprocessed data.")
 
-# print("Saved adata.")
+    print(f"{data} RNA data shape {adata_RNA.shape}")
+    print(f"{data} Protein data shape {adata_Protein.shape}")
+    print(f"{data} RNA data: \n {adata_RNA}")
+    print(f"{data} Protein data: \n {adata_Protein}")
 
-# RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
-# Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
-# print("Make tf record.")
+    save_path = './Multimodal_pretraining/'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
+    adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
+
+    print("Saved adata.")
+
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
+    print("Make tf record.")
+
+    RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
+    Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
+
+else:
+    adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+    adata_RNA = adata_adt[:, 0:13431] # adata_gex
+    adata_Protein = adata_adt[:, 13431:] # adata_atac
+
+    print("Read human data")
+
+    # FIXME why 20K
+    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=True, batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein, min_features = 0, is_hvg=True, batch_key='batch')
+    print("Preprocessed data.")
+
+    print(f"{data} RNA data shape {adata_RNA.shape}")
+    print(f"{data} Protein data shape {adata_Protein.shape}")
+    print(f"{data} RNA data: \n {adata_RNA}")
+    print(f"{data} Protein data: \n {adata_Protein}")
+
+    save_path = './Multimodal_pretraining/'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    adata_RNA.write_h5ad(save_path + 'adata_gex.h5ad')
+    adata_Protein.write_h5ad(save_path + 'adata_atac.h5ad')
+
+    print("Saved adata.")
+
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = save_path + 'tfrecord/gex_tf/', batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = save_path + 'tfrecord/atac_tf/', batch_col_name = 'batch')
+    print("Make tf record.")
+
+    RNA_tf_path = save_path + 'tfrecord/gex_tf/'
+    Protein_tf_path = save_path + 'tfrecord/atac_tf/'
 
 # Train
 weight_path = save_path + 'weight/'
-RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
-Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
 concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path, 
                           super_parameters={
+                              'data': data,
                               'batch_size': batch_size, 
                               'epoch_pretrain': epoch, 'lr': lr, 
                               'drop_rate': drop_rate, 
@@ -95,7 +137,7 @@ print("Trained.")
 for dr in [drop_rate, 0.0]:
     for nn in ["encoder", "decoder"]:
         for e in [4, 8, 32, epoch]:
-            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
+            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
             embedding,batch,RNA_id,attention_weight =  concerto_test_multimodal(
                 weight_path, 
                 RNA_tf_path,
@@ -167,4 +209,4 @@ for dr in [drop_rate, 0.0]:
             sc.tl.umap(adata_RNA_1,min_dist=0.1)
             sc.set_figure_params(dpi=150)
             sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
-            plt.savefig(f'./Multimodal_pretraining/plots/simulated_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
+            plt.savefig(f'./Multimodal_pretraining/plots/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')

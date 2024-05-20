@@ -27,6 +27,7 @@ drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("64")
+data=("human")
 
 for e in $epochs; do
     for lr in $lrs; do
@@ -35,7 +36,9 @@ for e in $epochs; do
                 for s in $attention_s; do
                     for t in $attention_t; do
                         for h in $heads; do
-                            sbatch run_multimodal.sh $e $lr $batch_size $drop_rate $s $t $h
+                            for d in $data
+                                sbatch run_multimodal.sh $e $lr $batch_size $drop_rate $s $t $h $d
+                            done
                         done
                     done
                 done
