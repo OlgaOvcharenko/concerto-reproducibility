@@ -1393,7 +1393,7 @@ def concerto_train_ref_query(ref_tf_path: str, query_tf_path: str, weight_path: 
     return weight_path
 
 
-def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
+def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
@@ -1415,7 +1415,7 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
     f = np.load(os.path.join(Protein_tf_path, 'vocab_size.npz'))
     vocab_size_Protein = int(f['vocab size'])
     encode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
-                                                        mult_feature_names=['RNA','Protein'],
+                                                        mult_feature_names=mult_feature_names,
                                                         embedding_dims=128,
                                                         include_attention=super_parameters['attention_t'],
                                                         drop_rate=super_parameters['drop_rate'],
@@ -1424,7 +1424,7 @@ def concerto_train_multimodal(RNA_tf_path: str, Protein_tf_path: str, weight_pat
                                                         head_3=super_parameters["heads"])
 
     decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
-                                                        mult_feature_names=['RNA','Protein'],
+                                                        mult_feature_names=mult_feature_names,
                                                         embedding_dims=128,
                                                         include_attention=super_parameters['attention_s'],
                                                         drop_rate=super_parameters['drop_rate'],
@@ -1999,9 +1999,138 @@ def concerto_test_ref(model_path:str, ref_tf_path:str, super_parameters=None,sav
     return ref_embedding, source_data_id 
 
 
+def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, RNA_tf_path: str, Protein_tf_path: str, n_cells_for_sample=None,super_parameters=None,
+                             saved_weight_path=None):
+    if super_parameters is None:
+        super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5, 'drop_rate': 0.1}
+    
+    batch_size = super_parameters['batch_size']
+    f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
+    vocab_size_RNA = int(f['vocab size'])
+    f = np.load(os.path.join(Protein_tf_path, 'vocab_size.npz'))
+    vocab_size_Protein = int(f['vocab size'])
+    # encode_network = multi_embedding_attention_transfer_explainability(
+    #     multi_max_features=[vocab_size_RNA, vocab_size_Protein],
+    #     mult_feature_names=['RNA', 'Protein'],
+    #     embedding_dims=128,
+    #     include_attention=True,
+    #     drop_rate=super_parameters['drop_rate'],
+    #     head_1=128,
+    #     head_2=128,
+    #     head_3=128)
+    
+    decode_network = multi_embedding_attention_transfer(
+        multi_max_features=[vocab_size_RNA,vocab_size_Protein],
+        mult_feature_names=mult_feature_names,
+        embedding_dims=128,
+        include_attention=super_parameters['attention_s'],
+        drop_rate=super_parameters['drop_rate'],
+        head_1=super_parameters["heads"],
+        head_2=super_parameters["heads"],
+        head_3=super_parameters["heads"])
 
 
-def concerto_test_multimodal(model_path: str, RNA_tf_path: str, Protein_tf_path: str, n_cells_for_sample=None,super_parameters=None,
+    tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
+    train_source_list_RNA = []
+    train_source_list_Protein = []
+    for i in tf_list_1:
+        train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
+        train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
+
+    if saved_weight_path is None:
+        weight_id_list = []
+        weight_list = [f for f in os.listdir(model_path) if f.endswith('h5')]
+        for id in weight_list:
+            id_1 = re.findall('.*epoch(.*).h.*', id)  # f1
+            weight_id_list.append(int(id_1[0]))
+        decode_network.load_weights(model_path + 'weight_decoder_epoch{}.h5'.format(max(weight_id_list)),
+                                    by_name=True)
+
+    else:
+        decode_network.load_weights(saved_weight_path, by_name=True)
+        print('load saved weight')
+
+    source_data_batch = []
+    source_data_feature = []
+    RNA_id_all = []
+    attention_output_RNA_all = []
+    attention_output_Protein_all = []
+    for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
+        train_size = 0
+        train_db_RNA = create_classifier_dataset_multi([RNA_file],
+                                                       batch_size=batch_size,
+                                                       is_training=False,
+                                                       data_augment=False,
+                                                       shuffle_size=10000,
+                                                       )
+        train_db_Protein = create_classifier_dataset_multi([Protein_file],
+                                                           batch_size=batch_size,
+                                                           is_training=False,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           )
+        step = 0
+        for (source_features_RNA, source_values_RNA,
+             source_batch_RNA, source_id_RNA), \
+            (source_features_protein, source_values_protein,
+             source_batch_Protein, source_id_Protein) \
+                in (zip(train_db_RNA, train_db_Protein)):
+            #train_size += len(source_id_RNA)
+            if step == 0:
+                encode_output, attention_output = decode_network([[source_features_RNA, source_features_protein],
+                                                                  [source_values_RNA, source_values_protein]],
+                                                                 training=False)
+                break
+
+        dim = encode_output.shape[1]
+        if n_cells_for_sample is None:            
+            feature_len = 1000000
+        else:            
+            n_cells_for_sample_1 = n_cells_for_sample//8
+            feature_len = n_cells_for_sample_1 // batch_size * batch_size
+        
+        source_data_feature_1 = np.zeros((feature_len, dim))
+        source_data_batch_1 = np.zeros((feature_len))
+        attention_output_RNA = np.zeros((feature_len, vocab_size_RNA, 1))
+        attention_output_Protein = np.zeros((feature_len, vocab_size_Protein, 1))
+        # print('feature_len:', feature_len)
+        RNA_id = []
+        all_samples = 0
+        for (source_features_RNA, source_values_RNA,
+             source_batch_RNA, source_id_RNA), \
+            (source_features_protein, source_values_protein,
+             source_batch_Protein, source_id_Protein) \
+                in (zip(train_db_RNA, train_db_Protein)):
+            if all_samples  >= feature_len:
+                break
+            encode_output, attention_output = decode_network([[source_features_RNA, source_features_protein],
+                                                              [source_values_RNA, source_values_protein]],
+                                                             training=False)
+
+            encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
+            source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
+            source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
+            RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
+            attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
+            attention_output_Protein[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[1]
+            all_samples += len(source_id_RNA)
+            # print('all_samples num:{}'.format(all_samples))
+
+        source_data_feature.extend(source_data_feature_1[:all_samples])
+        source_data_batch.extend(source_data_batch_1[:all_samples])
+        RNA_id_all.extend(RNA_id[:all_samples])
+        attention_output_RNA_all.extend(attention_output_RNA[:all_samples])
+        attention_output_Protein_all.extend(attention_output_Protein[:all_samples])
+
+    source_data_feature = np.array(source_data_feature).astype('float32')
+    source_data_batch = np.array(source_data_batch).astype('int32')
+    attention_weight = {'attention_output_RNA': attention_output_RNA_all,
+                        'attention_output_Protein': attention_output_Protein_all}
+    #np.savez_compressed('./multi_attention.npz', **attention_weight)
+    return source_data_feature, source_data_batch, RNA_id_all, attention_weight
+
+
+def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: str, Protein_tf_path: str, n_cells_for_sample=None,super_parameters=None,
                              saved_weight_path=None):
     if super_parameters is None:
         super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5, 'drop_rate': 0.1}
@@ -2013,7 +2142,7 @@ def concerto_test_multimodal(model_path: str, RNA_tf_path: str, Protein_tf_path:
     vocab_size_Protein = int(f['vocab size'])
     encode_network = multi_embedding_attention_transfer_explainability(
         multi_max_features=[vocab_size_RNA, vocab_size_Protein],
-        mult_feature_names=['RNA', 'Protein'],
+        mult_feature_names=mult_feature_names,
         embedding_dims=128,
         include_attention=True,
         drop_rate=super_parameters['drop_rate'],
@@ -2105,7 +2234,7 @@ def concerto_test_multimodal(model_path: str, RNA_tf_path: str, Protein_tf_path:
             attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
             attention_output_Protein[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[1]
             all_samples += len(source_id_RNA)
-            print('all_samples num:{}'.format(all_samples))
+            # print('all_samples num:{}'.format(all_samples))
 
         source_data_feature.extend(source_data_feature_1[:all_samples])
         source_data_batch.extend(source_data_batch_1[:all_samples])
@@ -2233,7 +2362,7 @@ def concerto_test_multimodal_project(model_path: str, RNA_tf_path: str, Protein_
             source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
             RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
             all_samples += len(source_id_RNA)
-            print('all_samples num:{}'.format(all_samples))
+            # print('all_samples num:{}'.format(all_samples))
 
         source_data_feature.extend(source_data_feature_1)
         source_data_feature_RNA.extend(source_data_feature_RNA_1)        

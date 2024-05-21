@@ -120,7 +120,8 @@ else:
 
 # Train
 weight_path = save_path + 'weight/'
-concerto_train_multimodal(RNA_tf_path,Protein_tf_path,weight_path, 
+concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                          RNA_tf_path,Protein_tf_path,weight_path, 
                           super_parameters={
                               'data': data,
                               'batch_size': batch_size, 
@@ -138,7 +139,10 @@ for dr in [drop_rate, 0.0]:
     for nn in ["encoder", "decoder"]:
         for e in [epoch]: #4, 8, 32, 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
-            embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal(
+            
+            if nn == "decoder":
+                embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
+                ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
                 weight_path, 
                 RNA_tf_path,
                 Protein_tf_path,
@@ -152,6 +156,22 @@ for dr in [drop_rate, 0.0]:
                     'heads': heads
                 }, 
                 saved_weight_path = saved_weight_path)
+            else:
+                embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal(
+                    ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                    weight_path, 
+                    RNA_tf_path,
+                    Protein_tf_path,
+                    n_cells_for_sample=None,
+                    super_parameters={
+                        'batch_size': batch_size, 
+                        'epoch_pretrain': e, 'lr': lr, 
+                        'drop_rate': dr, 
+                        'attention_t': attention_t, 
+                        'attention_s': attention_s, 
+                        'heads': heads
+                    }, 
+                    saved_weight_path = saved_weight_path)
 
             print("Tested.")
             
@@ -159,12 +179,6 @@ for dr in [drop_rate, 0.0]:
                 adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
             else:
                 adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
-
-            print(RNA_id)
-            print("------"*10)
-            print(adata_RNA)
-            print("------"*10)
-            print(adata_RNA[RNA_id])
             
             adata_RNA_1 = adata_RNA[RNA_id]
             adata_RNA_1.obsm['X_embedding'] = embedding
