@@ -134,9 +134,29 @@ if attention_t == True and attention_s == False:
                                 'heads': heads
                                 })
 elif attention_t == True and attention_s == True:
-    pass
+    concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                            RNA_tf_path,Protein_tf_path,weight_path, 
+                            super_parameters={
+                                'data': data,
+                                'batch_size': batch_size, 
+                                'epoch_pretrain': epoch, 'lr': lr, 
+                                'drop_rate': drop_rate, 
+                                'attention_t': attention_t, 
+                                'attention_s': attention_s, 
+                                'heads': heads
+                                })
 elif attention_t == False and attention_s == False:
-    pass
+    concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                            RNA_tf_path,Protein_tf_path,weight_path, 
+                            super_parameters={
+                                'data': data,
+                                'batch_size': batch_size, 
+                                'epoch_pretrain': epoch, 'lr': lr, 
+                                'drop_rate': drop_rate, 
+                                'attention_t': attention_t, 
+                                'attention_s': attention_s, 
+                                'heads': heads
+                                })
 
 print("Trained.")
 
@@ -146,7 +166,7 @@ for dr in [drop_rate, 0.0]:
         for e in [4, 8, 32, epoch]: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
             
-            if nn == "decoder":
+            if (nn == "decoder" and attention_s == False) or (nn == "encoder" and attention_t == False):
                 embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
                 ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
                 weight_path, 

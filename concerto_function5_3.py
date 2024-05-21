@@ -1508,6 +1508,234 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
     return print('finished')
 
 
+def concerto_train_multimodal_tt(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+
+    set_seeds(0)   
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
+    if super_parameters is None:
+        super_parameters = {'batch_size': 31, 
+                            'epoch_pretrain': 3,
+                            'lr': 1e-4,
+                            'drop_rate': 0.1, 
+                            'attention_t': True, 
+                            'attention_s': False, 
+                            'heads': 128} 
+    # dirname = os.getcwd()
+    # f = np.load(ref_tf_path + './vocab_size.npz')
+    f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
+    vocab_size_RNA = int(f['vocab size'])
+    f = np.load(os.path.join(Protein_tf_path, 'vocab_size.npz'))
+    vocab_size_Protein = int(f['vocab size'])
+    encode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
+                                                        mult_feature_names=mult_feature_names,
+                                                        embedding_dims=128,
+                                                        include_attention=super_parameters['attention_t'],
+                                                        drop_rate=super_parameters['drop_rate'],
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
+
+    encode_network2 = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
+                                                        mult_feature_names=mult_feature_names,
+                                                        embedding_dims=128,
+                                                        include_attention=super_parameters['attention_t'],
+                                                        drop_rate=super_parameters['drop_rate'],
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
+
+    # tf_list_1 = os.listdir(os.path.join(ref_tf_path))
+    tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
+    train_source_list_RNA = []
+    train_source_list_Protein = []
+    for i in tf_list_1:
+        train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
+        train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
+
+    train_loss = tf.keras.metrics.Mean(name='train_loss')
+    train_cls_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_cls_accuracy')
+    test_cls_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_cls_accuracy')
+    total_update_steps = 300 * super_parameters['epoch_pretrain']
+    lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
+                                                                super_parameters['lr'] * 1e-2, power=1)
+    opt_simclr = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+    
+    tf_step = 0
+    for epoch in range(super_parameters['epoch_pretrain']):
+        for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
+            train_db_RNA = create_classifier_dataset_multi([RNA_file],
+                                                           batch_size=super_parameters['batch_size'],
+                                                           is_training=False,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           )
+            train_db_Protein = create_classifier_dataset_multi([Protein_file],
+                                                               batch_size=super_parameters['batch_size'],
+                                                               is_training=False,
+                                                               data_augment=False,
+                                                               shuffle_size=10000,
+                                                               )
+            train_loss.reset_states()
+            train_cls_accuracy.reset_states()
+            test_cls_accuracy.reset_states()
+            step = 0
+            for (source_features_RNA, source_values_RNA,
+                 source_batch_RNA, source_id_RNA), \
+                (source_features_protein, source_values_protein,
+                 source_batch_Protein, source_id_Protein) \
+                    in (zip(train_db_RNA, train_db_Protein)):
+                step += 1
+
+                with tf.GradientTape() as tape:
+                    z1 = encode_network([[source_features_RNA, source_features_protein],
+                                         [source_values_RNA, source_values_protein]], training=True)
+                    z2 = encode_network2([[source_features_RNA, source_features_protein],
+                                         [source_values_RNA, source_values_protein]], training=True)
+                    ssl_loss = simclr_loss(z1, z2, temperature=0.1)
+                    loss = ssl_loss
+                    train_loss(loss)
+
+                variables = [encode_network.trainable_variables,
+                             encode_network2.trainable_variables,
+                             ]
+                grads = tape.gradient(loss, variables)
+                for grad, var in zip(grads, variables):
+                    opt_simclr.apply_gradients(zip(grad, var))
+
+                if step > 0 and step % 5 == 0:
+                    template = 'Epoch {}, step {}, simclr loss: {:0.4f}.'
+                    print(template.format(epoch + 1,
+                                          str(step),
+                                          train_loss.result()))
+                    
+                # Tensorboard
+                with train_summary_writer.as_default():
+                    tf.summary.scalar('loss', train_loss.result(), step=tf_step)
+                tf_step += 1
+
+        encode_network.save_weights(
+            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+        encode_network2.save_weights(
+            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+
+    return print('finished')
+
+def concerto_train_multimodal_ss(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+
+    set_seeds(0)   
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
+    if super_parameters is None:
+        super_parameters = {'batch_size': 31, 
+                            'epoch_pretrain': 3,
+                            'lr': 1e-4,
+                            'drop_rate': 0.1, 
+                            'attention_t': True, 
+                            'attention_s': False, 
+                            'heads': 128} 
+    # dirname = os.getcwd()
+    # f = np.load(ref_tf_path + './vocab_size.npz')
+    f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
+    vocab_size_RNA = int(f['vocab size'])
+    f = np.load(os.path.join(Protein_tf_path, 'vocab_size.npz'))
+    vocab_size_Protein = int(f['vocab size'])
+    decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
+                                                        mult_feature_names=mult_feature_names,
+                                                        embedding_dims=128,
+                                                        include_attention=super_parameters['attention_s'],
+                                                        drop_rate=super_parameters['drop_rate'],
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
+
+    decode_network2 = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
+                                                        mult_feature_names=mult_feature_names,
+                                                        embedding_dims=128,
+                                                        include_attention=super_parameters['attention_s'],
+                                                        drop_rate=super_parameters['drop_rate'],
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"])
+
+    # tf_list_1 = os.listdir(os.path.join(ref_tf_path))
+    tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
+    train_source_list_RNA = []
+    train_source_list_Protein = []
+    for i in tf_list_1:
+        train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
+        train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
+
+    train_loss = tf.keras.metrics.Mean(name='train_loss')
+    train_cls_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_cls_accuracy')
+    test_cls_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_cls_accuracy')
+    total_update_steps = 300 * super_parameters['epoch_pretrain']
+    lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
+                                                                super_parameters['lr'] * 1e-2, power=1)
+    opt_simclr = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+    
+    tf_step = 0
+    for epoch in range(super_parameters['epoch_pretrain']):
+        for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
+            train_db_RNA = create_classifier_dataset_multi([RNA_file],
+                                                           batch_size=super_parameters['batch_size'],
+                                                           is_training=False,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           )
+            train_db_Protein = create_classifier_dataset_multi([Protein_file],
+                                                               batch_size=super_parameters['batch_size'],
+                                                               is_training=False,
+                                                               data_augment=False,
+                                                               shuffle_size=10000,
+                                                               )
+            train_loss.reset_states()
+            train_cls_accuracy.reset_states()
+            test_cls_accuracy.reset_states()
+            step = 0
+            for (source_features_RNA, source_values_RNA,
+                 source_batch_RNA, source_id_RNA), \
+                (source_features_protein, source_values_protein,
+                 source_batch_Protein, source_id_Protein) \
+                    in (zip(train_db_RNA, train_db_Protein)):
+                step += 1
+
+                with tf.GradientTape() as tape:
+                    z1 = decode_network([source_values_RNA, source_values_protein], training=True)
+                    z2 = decode_network2([source_values_RNA, source_values_protein], training=True)
+                    ssl_loss = simclr_loss(z1, z2, temperature=0.1)
+                    loss = ssl_loss
+                    train_loss(loss)
+
+                variables = [decode_network.trainable_variables,
+                             decode_network2.trainable_variables,
+                             ]
+                grads = tape.gradient(loss, variables)
+                for grad, var in zip(grads, variables):
+                    opt_simclr.apply_gradients(zip(grad, var))
+
+                if step > 0 and step % 5 == 0:
+                    template = 'Epoch {}, step {}, simclr loss: {:0.4f}.'
+                    print(template.format(epoch + 1,
+                                          str(step),
+                                          train_loss.result()))
+                    
+                # Tensorboard
+                with train_summary_writer.as_default():
+                    tf.summary.scalar('loss', train_loss.result(), step=tf_step)
+                tf_step += 1
+
+        decode_network.save_weights(
+            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+        decode_network2.save_weights(
+            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+
+    return print('finished')
+
 
 def concerto_test_1set_attention(model_path:str, ref_tf_path:str, super_parameters=None, n_cells_for_ref=5000):
     set_seeds(0)

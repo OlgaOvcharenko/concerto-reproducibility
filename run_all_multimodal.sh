@@ -26,7 +26,7 @@ lrs=("1e-5")
 batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
-attention_s=("0")
+attention_s=("1")
 heads=("64")
 data=("human")
 
