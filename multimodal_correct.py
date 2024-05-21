@@ -72,10 +72,10 @@ if data == "simulated":
     print(f"{data} Protein data: \n {adata_Protein}")
 
     save_path = './Multimodal_pretraining/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
-    adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
+    # if not os.path.exists(save_path):
+    #     os.makedirs(save_path)
+    # adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
+    # adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
 
     print("Saved adata.")
 
@@ -104,10 +104,10 @@ else:
     print(f"{data} Protein data: \n {adata_Protein}")
 
     save_path = './Multimodal_pretraining/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    adata_RNA.write_h5ad(save_path + 'adata_gex.h5ad')
-    adata_Protein.write_h5ad(save_path + 'adata_atac.h5ad')
+    # if not os.path.exists(save_path):
+    #     os.makedirs(save_path)
+    # adata_RNA.write_h5ad(save_path + 'adata_gex.h5ad')
+    # adata_Protein.write_h5ad(save_path + 'adata_atac.h5ad')
 
     print("Saved adata.")
 
@@ -120,17 +120,23 @@ else:
 
 # Train
 weight_path = save_path + 'weight/'
-concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                          RNA_tf_path,Protein_tf_path,weight_path, 
-                          super_parameters={
-                              'data': data,
-                              'batch_size': batch_size, 
-                              'epoch_pretrain': epoch, 'lr': lr, 
-                              'drop_rate': drop_rate, 
-                              'attention_t': attention_t, 
-                              'attention_s': attention_s, 
-                              'heads': heads
-                            })
+
+if attention_t == True and attention_s == False:
+    concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                            RNA_tf_path,Protein_tf_path,weight_path, 
+                            super_parameters={
+                                'data': data,
+                                'batch_size': batch_size, 
+                                'epoch_pretrain': epoch, 'lr': lr, 
+                                'drop_rate': drop_rate, 
+                                'attention_t': attention_t, 
+                                'attention_s': attention_s, 
+                                'heads': heads
+                                })
+elif attention_t == True and attention_s == True:
+    pass
+elif attention_t == False and attention_s == False:
+    pass
 
 print("Trained.")
 
