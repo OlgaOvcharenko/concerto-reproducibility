@@ -79,9 +79,9 @@ if data == "simulated":
 
     print("Saved adata.")
 
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
-    print("Make tf record.")
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
+    # print("Make tf record.")
 
     RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
     Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
@@ -111,9 +111,9 @@ else:
 
     print("Saved adata.")
 
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = save_path + 'tfrecord/gex_tf/', batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = save_path + 'tfrecord/atac_tf/', batch_col_name = 'batch')
-    print("Make tf record.")
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = save_path + 'tfrecord/gex_tf/', batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = save_path + 'tfrecord/atac_tf/', batch_col_name = 'batch')
+    # print("Make tf record.")
 
     RNA_tf_path = save_path + 'tfrecord/gex_tf/'
     Protein_tf_path = save_path + 'tfrecord/atac_tf/'
@@ -138,7 +138,7 @@ for dr in [drop_rate, 0.0]:
     for nn in ["encoder", "decoder"]:
         for e in [4, 8, 32, epoch]:
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
-            embedding,batch,RNA_id,attention_weight =  concerto_test_multimodal(
+            embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal(
                 weight_path, 
                 RNA_tf_path,
                 Protein_tf_path,
@@ -156,6 +156,13 @@ for dr in [drop_rate, 0.0]:
             print("Tested.")
 
             adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
+
+            print(RNA_id)
+            print("------"*10)
+            print(adata_RNA)
+            print("------"*10)
+            print(adata_RNA[RNA_id])
+            
             adata_RNA_1 = adata_RNA[RNA_id]
             adata_RNA_1.obsm['X_embedding'] = embedding
 
