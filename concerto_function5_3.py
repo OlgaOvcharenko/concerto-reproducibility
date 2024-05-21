@@ -1451,8 +1451,6 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
         for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
-            print(RNA_file)
-            print(Protein_file)
             train_db_RNA = create_classifier_dataset_multi([RNA_file],
                                                            batch_size=super_parameters['batch_size'],
                                                            is_training=False,
@@ -2077,9 +2075,7 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
                 in (zip(train_db_RNA, train_db_Protein)):
             #train_size += len(source_id_RNA)
             if step == 0:
-                encode_output, attention_output = decode_network([[source_features_RNA, source_features_protein],
-                                                                  [source_values_RNA, source_values_protein]],
-                                                                 training=False)
+                encode_output, attention_output = decode_network([source_values_RNA, source_values_protein], training=False)
                 break
 
         dim = encode_output.shape[1]
