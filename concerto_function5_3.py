@@ -2028,8 +2028,6 @@ def concerto_test_multimodal(model_path: str, RNA_tf_path: str, Protein_tf_path:
         train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
         train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
 
-
-
     if saved_weight_path is None:
         weight_id_list = []
         weight_list = [f for f in os.listdir(model_path) if f.endswith('h5')]
@@ -2049,8 +2047,6 @@ def concerto_test_multimodal(model_path: str, RNA_tf_path: str, Protein_tf_path:
     attention_output_RNA_all = []
     attention_output_Protein_all = []
     for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
-        print(RNA_file)
-        print(Protein_file)
         train_size = 0
         train_db_RNA = create_classifier_dataset_multi([RNA_file],
                                                        batch_size=batch_size,
@@ -2088,7 +2084,7 @@ def concerto_test_multimodal(model_path: str, RNA_tf_path: str, Protein_tf_path:
         source_data_batch_1 = np.zeros((feature_len))
         attention_output_RNA = np.zeros((feature_len, vocab_size_RNA, 1))
         attention_output_Protein = np.zeros((feature_len, vocab_size_Protein, 1))
-        print('feature_len:',feature_len)
+        # print('feature_len:', feature_len)
         RNA_id = []
         all_samples = 0
         for (source_features_RNA, source_values_RNA,

@@ -136,7 +136,7 @@ print("Trained.")
 # # Test
 for dr in [drop_rate, 0.0]:
     for nn in ["encoder", "decoder"]:
-        for e in [4, 8, 32, epoch]:
+        for e in [epoch]: #4, 8, 32, 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
             embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal(
                 weight_path, 
@@ -154,8 +154,11 @@ for dr in [drop_rate, 0.0]:
                 saved_weight_path = saved_weight_path)
 
             print("Tested.")
-
-            adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
+            
+            if data == "simulated":
+                adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
+            else:
+                adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
 
             print(RNA_id)
             print("------"*10)
