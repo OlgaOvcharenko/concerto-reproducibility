@@ -11,3 +11,5 @@ logs_cpu/
 python_venv/
 Multimodal_pretraining/weight
 
+Multimodal_pretraining/adata_atac.h5ad
+Multimodal_pretraining/adata_gex.h5ad
