@@ -2099,31 +2099,26 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
                 in (zip(train_db_RNA, train_db_Protein)):
             if all_samples  >= feature_len:
                 break
-            encode_output, attention_output = decode_network([[source_features_RNA, source_features_protein],
+            decode_output = decode_network([[source_features_RNA, source_features_protein],
                                                               [source_values_RNA, source_values_protein]],
                                                              training=False)
 
-            encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
-            source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
+            decode_output = tf.nn.l2_normalize(decode_output, axis=-1)
+            source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = decode_output
             source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
             RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
-            attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
-            attention_output_Protein[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[1]
             all_samples += len(source_id_RNA)
             # print('all_samples num:{}'.format(all_samples))
 
         source_data_feature.extend(source_data_feature_1[:all_samples])
         source_data_batch.extend(source_data_batch_1[:all_samples])
         RNA_id_all.extend(RNA_id[:all_samples])
-        attention_output_RNA_all.extend(attention_output_RNA[:all_samples])
-        attention_output_Protein_all.extend(attention_output_Protein[:all_samples])
-
+        
     source_data_feature = np.array(source_data_feature).astype('float32')
     source_data_batch = np.array(source_data_batch).astype('int32')
-    attention_weight = {'attention_output_RNA': attention_output_RNA_all,
-                        'attention_output_Protein': attention_output_Protein_all}
+    
     #np.savez_compressed('./multi_attention.npz', **attention_weight)
-    return source_data_feature, source_data_batch, RNA_id_all, attention_weight
+    return source_data_feature, source_data_batch, RNA_id_all, None
 
 
 def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: str, Protein_tf_path: str, n_cells_for_sample=None,super_parameters=None,
