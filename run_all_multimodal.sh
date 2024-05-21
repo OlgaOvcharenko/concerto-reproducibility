@@ -21,13 +21,13 @@ source "python_venv/bin/activate"
 # heads=("64 128")
 # data=("simulated human")
 
-epochs=("1")
+epochs=("64")
 lrs=("1e-5")
 batch_sizes=("64")
-drop_rates=("0.1")
+drop_rates=("0.1 0.4")
 attention_t=("1")
 attention_s=("0")
-heads=("128")
+heads=("64 128")
 data=("human")
 
 for e in $epochs; do
