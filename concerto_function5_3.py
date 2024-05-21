@@ -2075,7 +2075,7 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
                 in (zip(train_db_RNA, train_db_Protein)):
             #train_size += len(source_id_RNA)
             if step == 0:
-                encode_output, attention_output = decode_network([source_values_RNA, source_values_protein], training=False)
+                encode_output = decode_network([source_values_RNA, source_values_protein], training=False)
                 break
 
         dim = encode_output.shape[1]
@@ -2087,8 +2087,6 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
         
         source_data_feature_1 = np.zeros((feature_len, dim))
         source_data_batch_1 = np.zeros((feature_len))
-        attention_output_RNA = np.zeros((feature_len, vocab_size_RNA, 1))
-        attention_output_Protein = np.zeros((feature_len, vocab_size_Protein, 1))
         # print('feature_len:', feature_len)
         RNA_id = []
         all_samples = 0
