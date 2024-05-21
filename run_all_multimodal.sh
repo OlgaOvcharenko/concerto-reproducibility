@@ -28,7 +28,7 @@ drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("128")
-data=("simulated human")
+data=("human")
 
 for e in $epochs; do
     for lr in $lrs; do
