@@ -121,42 +121,42 @@ else:
 # Train
 weight_path = save_path + 'weight/'
 
-if attention_t == True and attention_s == False:
-    concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                            RNA_tf_path,Protein_tf_path,weight_path, 
-                            super_parameters={
-                                'data': data,
-                                'batch_size': batch_size, 
-                                'epoch_pretrain': epoch, 'lr': lr, 
-                                'drop_rate': drop_rate, 
-                                'attention_t': attention_t, 
-                                'attention_s': attention_s, 
-                                'heads': heads
-                                })
-elif attention_t == True and attention_s == True:
-    concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                            RNA_tf_path,Protein_tf_path,weight_path, 
-                            super_parameters={
-                                'data': data,
-                                'batch_size': batch_size, 
-                                'epoch_pretrain': epoch, 'lr': lr, 
-                                'drop_rate': drop_rate, 
-                                'attention_t': attention_t, 
-                                'attention_s': attention_s, 
-                                'heads': heads
-                                })
-elif attention_t == False and attention_s == False:
-    concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                            RNA_tf_path,Protein_tf_path,weight_path, 
-                            super_parameters={
-                                'data': data,
-                                'batch_size': batch_size, 
-                                'epoch_pretrain': epoch, 'lr': lr, 
-                                'drop_rate': drop_rate, 
-                                'attention_t': attention_t, 
-                                'attention_s': attention_s, 
-                                'heads': heads
-                                })
+# if attention_t == True and attention_s == False:
+#     concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+#                             RNA_tf_path,Protein_tf_path,weight_path, 
+#                             super_parameters={
+#                                 'data': data,
+#                                 'batch_size': batch_size, 
+#                                 'epoch_pretrain': epoch, 'lr': lr, 
+#                                 'drop_rate': drop_rate, 
+#                                 'attention_t': attention_t, 
+#                                 'attention_s': attention_s, 
+#                                 'heads': heads
+#                                 })
+# elif attention_t == True and attention_s == True:
+#     concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+#                             RNA_tf_path,Protein_tf_path,weight_path, 
+#                             super_parameters={
+#                                 'data': data,
+#                                 'batch_size': batch_size, 
+#                                 'epoch_pretrain': epoch, 'lr': lr, 
+#                                 'drop_rate': drop_rate, 
+#                                 'attention_t': attention_t, 
+#                                 'attention_s': attention_s, 
+#                                 'heads': heads
+#                                 })
+# elif attention_t == False and attention_s == False:
+#     concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+#                             RNA_tf_path,Protein_tf_path,weight_path, 
+#                             super_parameters={
+#                                 'data': data,
+#                                 'batch_size': batch_size, 
+#                                 'epoch_pretrain': epoch, 'lr': lr, 
+#                                 'drop_rate': drop_rate, 
+#                                 'attention_t': attention_t, 
+#                                 'attention_s': attention_s, 
+#                                 'heads': heads
+#                                 })
 
 print("Trained.")
 
