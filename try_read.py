@@ -5,8 +5,8 @@ adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_n
 adata_adt_cite = adata_adt[:, 0:13431]
 adata_adt_rna = adata_adt[:, 13431:]
 
-# print(adata_adt.shape)
-# print(adata_adt)
+print(adata_adt.shape)
+print(adata_adt)
 
 # print(adata_adt.obs["cell_type"])
 
@@ -20,15 +20,15 @@ adata_adt_rna = adata_adt[:, 13431:]
 
 
 
-print("-----"*10)
+# print("-----"*10)
 
-print(adata_adt_cite)
-print(adata_adt_cite.X)
+# print(adata_adt_cite)
+# print(adata_adt_cite.X)
 
-print("-----"*10)
+# print("-----"*10)
 
-print(adata_adt_rna)
-print(adata_adt_rna.X)
+# print(adata_adt_rna)
+# print(adata_adt_rna.X)
 
 # path = './Multimodal_pretraining/data/multi_gene_l2.loom'
 # adata_RNA = sc.read(path)

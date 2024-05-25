@@ -266,4 +266,4 @@ for dr in [drop_rate, 0.0]:
             sc.tl.umap(adata_RNA_1,min_dist=0.1)
             sc.set_figure_params(dpi=150)
             sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
-            plt.savefig(f'./Multimodal_pretraining/plots/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
+            plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
