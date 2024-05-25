@@ -13,3 +13,7 @@ Multimodal_pretraining/weight
 
 Multimodal_pretraining/adata_atac.h5ad
 Multimodal_pretraining/adata_gex.h5ad
+
+Multimodal_pretraining/.DS_Store
+.DS_Store
+
