@@ -30,7 +30,7 @@ source "python_venv/bin/activate"
 # heads=("64 128")
 # data=("simulated")
 
-epochs=("32")
+epochs=("256")
 lrs=("1e-5")
 batch_sizes=("64")
 drop_rates=("0.1")
