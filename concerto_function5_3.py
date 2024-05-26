@@ -2439,6 +2439,7 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
              source_batch_Protein, source_id_Protein) \
                 in (zip(train_db_RNA, train_db_Protein)):
             if all_samples  >= feature_len:
+                print("Entered if break")
                 break
             encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                               [source_values_RNA, source_values_protein]],

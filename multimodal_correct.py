@@ -223,7 +223,7 @@ for dr in [drop_rate, 0.0]:
                 }, 
                 saved_weight_path = saved_weight_path)
             else:
-                embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal(
+                embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal(
                     ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
                     weight_path, 
                     RNA_tf_path,
@@ -247,8 +247,10 @@ for dr in [drop_rate, 0.0]:
                 adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
             
             # FIXME
-            # adata_RNA_1 = adata_RNA[RNA_id]
-            adata_RNA_1 = adata_RNA
+            print(adata_RNA)
+            adata_RNA_1 = adata_RNA[RNA_id]
+            print(adata_RNA_1)
+            # adata_RNA_1 = adata_RNA
             adata_RNA_1.obsm['X_embedding'] = embedding
 
             # Add for the later benchmarking 
