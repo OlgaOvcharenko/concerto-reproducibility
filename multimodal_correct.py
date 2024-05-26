@@ -246,7 +246,9 @@ for dr in [drop_rate, 0.0]:
             else:
                 adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
             
-            adata_RNA_1 = adata_RNA[RNA_id]
+            # FIXME
+            # adata_RNA_1 = adata_RNA[RNA_id]
+            adata_RNA_1 = adata_RNA
             adata_RNA_1.obsm['X_embedding'] = embedding
 
             # Add for the later benchmarking 
