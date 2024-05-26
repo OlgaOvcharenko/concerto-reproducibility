@@ -16,5 +16,4 @@ if [[ ! -d "python_venv" ]]; then
   pip3 install -r requirements.txt
 fi
 
-pip install leidenalg
-pip install DateTime
+

@@ -21,13 +21,23 @@ source "python_venv/bin/activate"
 # heads=("64 128")
 # data=("simulated human")
 
+#epochs=("500")
+#lrs=("1e-5 1e-3")
+#batch_sizes=("64")
+#drop_rates=("0.0 0.1 0.4")
+#attention_t=("1")
+#attention_s=("0")
+#heads=("64 128")
+#data=("simulated")
+#train=0
+
 epochs=("500")
-lrs=("1e-5 1e-3")
+lrs=("1e-5")
 batch_sizes=("64")
-drop_rates=("0.0 0.1 0.4")
+drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("64 128")
+heads=("128")
 data=("simulated")
 train=0
 
