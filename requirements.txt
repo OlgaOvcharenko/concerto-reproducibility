@@ -98,10 +98,10 @@ tensorflow-estimator==2.5.0
 termcolor==1.1.0
 texttable==1.7.0
 threadpoolctl==3.5.0
-torch==2.3.0
+torch
 tqdm==4.66.4
 triton==2.3.0
-typing-extensions==3.7.4.3
+typing-extensions==3.7.4
 umap-learn==0.5.1
 urllib3==2.2.1
 Werkzeug==3.0.3
