@@ -2393,6 +2393,7 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
     attention_output_RNA_all = []
     attention_output_Protein_all = []
     for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
+        print("Big for loop")
         train_size = 0
         train_db_RNA = create_classifier_dataset_multi([RNA_file],
                                                        batch_size=batch_size,
