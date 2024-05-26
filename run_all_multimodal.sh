@@ -29,6 +29,7 @@ attention_t=("1")
 attention_s=("0")
 heads=("64 128")
 data=("simulated")
+train=0
 
 #epochs=("256")
 #lrs=("1e-5")
@@ -47,7 +48,7 @@ for e in $epochs; do
                     for t in $attention_t; do
                         for h in $heads; do
                             for d in $data; do
-                                sbatch run_multimodal.sh $e $lr $batch_size $drop_rate $s $t $h $d
+                                sbatch run_multimodal.sh $e $lr $batch_size $drop_rate $s $t $h $d $train
                             done
                         done
                     done

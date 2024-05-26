@@ -4,9 +4,11 @@ sys.path.append("../")
 from concerto_function5_3 import *
 import numpy as np
 import scanpy as sc
+import anndata as ad
 import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
 import tensorflow as tf
+from scib_metrics.benchmark import Benchmarker
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -28,6 +30,8 @@ def get_args():
                         help='to use attention with teacher')
     parser.add_argument('--attention_s', type= int, required=True,
                         help='to use attention with student')
+    parser.add_argument('--train', type= int, required=True,
+                        help='to train or just inference')
 
     args = parser.parse_args()
     return args
@@ -42,12 +46,15 @@ drop_rate= args.drop_rate
 attention_t = True if args.attention_t == 1 else False
 attention_s = True if args.attention_s == 1 else False 
 heads = args.heads
+train = args.train 
 print(f"Multimodal correction: epoch {epoch}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
+
 
 gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
 print(f"\nAvailable GPUs: {gpus}\n")
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
+
 
 if data == "simulated":
     path = './Multimodal_pretraining/data/multi_gene_l2.loom'
@@ -62,8 +69,21 @@ if data == "simulated":
     print(f"{data} RNA data shape {adata_RNA.shape}")
     print(f"{data} Protein data shape {adata_Protein.shape}")
 
+    # Create PCA for benchmarking
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated"] = adata_merged.obsm["X_pca"]
+
     adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
     adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
+    
+    # Add PCA after preprocessing for benchmarking
+    adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged_tmp)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged_tmp.obsm["X_pca"]
+
+    del adata_merged_tmp
+    
     print("Preprocessed data.")
 
     print(f"{data} RNA data shape {adata_RNA.shape}")
@@ -87,15 +107,27 @@ if data == "simulated":
     Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
 
 else:
-    adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-    adata_RNA = adata_adt[:, 0:13431] # adata_gex
-    adata_Protein = adata_adt[:, 13431:] # adata_atac
+    adata_merged = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+    adata_RNA = adata_merged[:, 0:13431] # adata_gex
+    adata_Protein = adata_merged[:, 13431:] # adata_atac
 
     print("Read human data")
+
+    # Create PCA for benchmarking
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated"] = adata_merged.obsm["X_pca"]
 
     # FIXME why 20K
     adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=True, batch_key='batch')
     adata_Protein = preprocessing_changed_rna(adata_Protein, min_features = 0, is_hvg=True, batch_key='batch')
+    
+    # Add PCA after preprocessing for benchmarking
+    adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged_tmp)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged_tmp.obsm["X_pca"]
+
+    del adata_merged_tmp
+    
     print("Preprocessed data.")
 
     print(f"{data} RNA data shape {adata_RNA.shape}")
@@ -120,45 +152,45 @@ else:
 
 # Train
 weight_path = save_path + 'weight/'
+if train == 1:
+    if attention_t == True and attention_s == False:
+        concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                                RNA_tf_path,Protein_tf_path,weight_path, 
+                                super_parameters={
+                                    'data': data,
+                                    'batch_size': batch_size, 
+                                    'epoch_pretrain': epoch, 'lr': lr, 
+                                    'drop_rate': drop_rate, 
+                                    'attention_t': attention_t, 
+                                    'attention_s': attention_s, 
+                                    'heads': heads
+                                    })
+    elif attention_t == True and attention_s == True:
+        concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                                RNA_tf_path,Protein_tf_path,weight_path, 
+                                super_parameters={
+                                    'data': data,
+                                    'batch_size': batch_size, 
+                                    'epoch_pretrain': epoch, 'lr': lr, 
+                                    'drop_rate': drop_rate, 
+                                    'attention_t': attention_t, 
+                                    'attention_s': attention_s, 
+                                    'heads': heads
+                                    })
+    elif attention_t == False and attention_s == False:
+        concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                                RNA_tf_path,Protein_tf_path,weight_path, 
+                                super_parameters={
+                                    'data': data,
+                                    'batch_size': batch_size, 
+                                    'epoch_pretrain': epoch, 'lr': lr, 
+                                    'drop_rate': drop_rate, 
+                                    'attention_t': attention_t, 
+                                    'attention_s': attention_s, 
+                                    'heads': heads
+                                    })
 
-if attention_t == True and attention_s == False:
-    concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                            RNA_tf_path,Protein_tf_path,weight_path, 
-                            super_parameters={
-                                'data': data,
-                                'batch_size': batch_size, 
-                                'epoch_pretrain': epoch, 'lr': lr, 
-                                'drop_rate': drop_rate, 
-                                'attention_t': attention_t, 
-                                'attention_s': attention_s, 
-                                'heads': heads
-                                })
-elif attention_t == True and attention_s == True:
-    concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                            RNA_tf_path,Protein_tf_path,weight_path, 
-                            super_parameters={
-                                'data': data,
-                                'batch_size': batch_size, 
-                                'epoch_pretrain': epoch, 'lr': lr, 
-                                'drop_rate': drop_rate, 
-                                'attention_t': attention_t, 
-                                'attention_s': attention_s, 
-                                'heads': heads
-                                })
-elif attention_t == False and attention_s == False:
-    concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                            RNA_tf_path,Protein_tf_path,weight_path, 
-                            super_parameters={
-                                'data': data,
-                                'batch_size': batch_size, 
-                                'epoch_pretrain': epoch, 'lr': lr, 
-                                'drop_rate': drop_rate, 
-                                'attention_t': attention_t, 
-                                'attention_s': attention_s, 
-                                'heads': heads
-                                })
-
-print("Trained.")
+    print("Trained.")
 
 ep_vals = []
 i = 4
@@ -168,6 +200,7 @@ while i < epoch:
 ep_vals.append(epoch)
 
 # # Test
+diverse_tests_names = []
 for dr in [drop_rate, 0.0]:
     for nn in ["encoder", "decoder"]:
         for e in ep_vals: 
@@ -215,6 +248,10 @@ for dr in [drop_rate, 0.0]:
             
             adata_RNA_1 = adata_RNA[RNA_id]
             adata_RNA_1.obsm['X_embedding'] = embedding
+
+            # Add for the later benchmarking 
+            adata_merged.obsm[f"Concerto_{e}_{nn}_{dr}"] = embedding
+            diverse_tests_names.append(f"Concerto_{e}_{nn}_{dr}")
 
             l2tol1 = {
                 'CD8 Naive': 'CD8 T',
@@ -267,3 +304,18 @@ for dr in [drop_rate, 0.0]:
             sc.set_figure_params(dpi=150)
             sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
             plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
+
+
+# Benchmark
+bm = Benchmarker(
+    adata_merged,
+    batch_key="batch",
+    label_key="cell_type",
+    embedding_obsm_keys=["Unintegrated", "Unintegrated_HVG_only"] + diverse_tests_names,
+    n_jobs=1,
+)
+bm.benchmark()
+bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/{data}_metrics/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
+
+df = bm.get_results(min_max_scale=False)
+print(df)
