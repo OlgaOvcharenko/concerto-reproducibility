@@ -2418,6 +2418,19 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                                                                   [source_values_RNA, source_values_protein]],
                                                                  training=False)
                 break
+        
+        train_db_RNA = create_classifier_dataset_multi([RNA_file],
+                                                       batch_size=batch_size,
+                                                       is_training=False,
+                                                       data_augment=False,
+                                                       shuffle_size=10000,
+                                                       )
+        train_db_Protein = create_classifier_dataset_multi([Protein_file],
+                                                           batch_size=batch_size,
+                                                           is_training=False,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           )
 
         dim = encode_output.shape[1]
         if n_cells_for_sample is None:            
