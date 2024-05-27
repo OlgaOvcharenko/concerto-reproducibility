@@ -199,7 +199,9 @@ while i < epoch:
     i = i * 2
 ep_vals.append(epoch)
 
-# # Test
+adata_merged.obs = adata_RNA.obs
+
+# Test
 diverse_tests_names = []
 # for dr in [drop_rate, 0.0]:
 #     for nn in ["encoder", "decoder"]:
