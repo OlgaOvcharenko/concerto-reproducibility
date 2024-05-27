@@ -310,6 +310,7 @@ diverse_tests_names = []
 
 
 # Benchmark
+print(adata_merged)
 bm = Benchmarker(
     adata_merged,
     batch_key="batch",
