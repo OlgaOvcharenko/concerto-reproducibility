@@ -21,14 +21,14 @@ source "python_venv/bin/activate"
 # heads=("64 128")
 # data=("simulated human")
 
-# epochs=("500")
-# lrs=("1e-5 1e-3")
-# batch_sizes=("64")
-# drop_rates=("0.0 0.1 0.4")
-# attention_t=("1")
-# attention_s=("0")
-# heads=("64 128")
-# data=("simulated")
+epochs=("500")
+lrs=("1e-5 1e-3")
+batch_sizes=("64")
+drop_rates=("0.0 0.1 0.4")
+attention_t=("1")
+attention_s=("0")
+heads=("64 128")
+data=("simulated")
 
 # epochs=("500")
 # lrs=("1e-5")
@@ -40,14 +40,14 @@ source "python_venv/bin/activate"
 # data=("simulated")
 train=0
 
-epochs=("256")
-lrs=("1e-5")
-batch_sizes=("64")
-drop_rates=("0.0")
-attention_t=("0")
-attention_s=("0")
-heads=("128")
-data=("simulated")
+# epochs=("256")
+# lrs=("1e-5")
+# batch_sizes=("64")
+# drop_rates=("0.0")
+# attention_t=("0")
+# attention_s=("0")
+# heads=("128")
+# data=("simulated")
 
 for e in $epochs; do
     for lr in $lrs; do
