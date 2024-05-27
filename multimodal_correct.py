@@ -214,7 +214,7 @@ for dr in [drop_rate, 0.0]:
                 Protein_tf_path,
                 n_cells_for_sample=None,
                 super_parameters={
-                    'batch_size': 74, 
+                    'batch_size': 1, 
                     'epoch_pretrain': e, 'lr': lr, 
                     'drop_rate': dr, 
                     'attention_t': attention_t, 
@@ -230,7 +230,7 @@ for dr in [drop_rate, 0.0]:
                     Protein_tf_path,
                     n_cells_for_sample=None,
                     super_parameters={
-                        'batch_size': 74, 
+                        'batch_size': 1, 
                         'epoch_pretrain': e, 'lr': lr, 
                         'drop_rate': dr, 
                         'attention_t': attention_t, 
