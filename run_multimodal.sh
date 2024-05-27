@@ -3,7 +3,7 @@
 #SBATCH -o logs/log-%j-multimodal.out
 #SBATCH --nodes=1
 #SBATCH --gpus=rtx_3090:1
-#SBATCH --time=01:00:00
+#SBATCH --time=04:00:00
 #SBATCH --gres=gpumem:24G
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=10G
