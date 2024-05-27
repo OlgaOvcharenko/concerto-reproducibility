@@ -214,7 +214,7 @@ for dr in [drop_rate, 0.0]:
                 Protein_tf_path,
                 n_cells_for_sample=None,
                 super_parameters={
-                    'batch_size': 1, 
+                    'batch_size': batch_size, 
                     'epoch_pretrain': e, 'lr': lr, 
                     'drop_rate': dr, 
                     'attention_t': attention_t, 
@@ -230,7 +230,7 @@ for dr in [drop_rate, 0.0]:
                     Protein_tf_path,
                     n_cells_for_sample=None,
                     super_parameters={
-                        'batch_size': 1, 
+                        'batch_size': batch_size, 
                         'epoch_pretrain': e, 'lr': lr, 
                         'drop_rate': dr, 
                         'attention_t': attention_t, 
@@ -247,13 +247,12 @@ for dr in [drop_rate, 0.0]:
                 adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
             
             # FIXME
-            print(adata_RNA)
             adata_RNA_1 = adata_RNA[RNA_id]
-            print(adata_RNA_1)
-            # adata_RNA_1 = adata_RNA
             adata_RNA_1.obsm['X_embedding'] = embedding
 
             # Add for the later benchmarking 
+            adata_merged = adata_merged[RNA_id]
+
             adata_merged.obsm[f"Concerto_{e}_{nn}_{dr}"] = embedding
             diverse_tests_names.append(f"Concerto_{e}_{nn}_{dr}")
 
