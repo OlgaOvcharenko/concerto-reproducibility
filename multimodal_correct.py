@@ -70,18 +70,17 @@ if data == "simulated":
     print(f"{data} Protein data shape {adata_Protein.shape}")
 
     # Create PCA for benchmarking
-    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
-    sc.tl.pca(adata_merged)
-    adata_merged.obsm["Unintegrated"] = adata_merged.obsm["X_pca"]
+    adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged_tmp)
 
     adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
     adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
-    adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
-    sc.tl.pca(adata_merged_tmp)
-    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged_tmp.obsm["X_pca"]
-    adata_merged.X = adata_merged_tmp.X
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+    adata_merged.obsm["Unintegrated"] = adata_merged_tmp.obsm["X_pca"]
     del adata_merged_tmp
     
     print("Preprocessed data.")
@@ -107,24 +106,24 @@ if data == "simulated":
     Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
 
 else:
-    adata_merged = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-    adata_RNA = adata_merged[:, 0:13431] # adata_gex
-    adata_Protein = adata_merged[:, 13431:] # adata_atac
+    adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+    adata_RNA = adata_merged_tmp[:, 0:13431] # adata_gex
+    adata_Protein = adata_merged_tmp[:, 13431:] # adata_atac
 
     print("Read human data")
 
     # Create PCA for benchmarking
-    sc.tl.pca(adata_merged)
-    adata_merged.obsm["Unintegrated"] = adata_merged.obsm["X_pca"]
+    sc.tl.pca(adata_merged_tmp)
 
     # FIXME why 20K
     adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=True, batch_key='batch')
     adata_Protein = preprocessing_changed_rna(adata_Protein, min_features = 0, is_hvg=True, batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
-    adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
-    sc.tl.pca(adata_merged_tmp)
-    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged_tmp.obsm["X_pca"]
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+    adata_merged_tmp.obsm["Unintegrated"] = adata_merged_tmp.obsm["X_pca"]
 
     del adata_merged_tmp
     
@@ -252,7 +251,7 @@ for dr in [drop_rate, 0.0]:
             adata_RNA_1 = adata_RNA[RNA_id]
             adata_RNA_1.obsm['X_embedding'] = embedding
 
-            print(f"Shape of the embedding {embedding.shape}")
+            print(f"Shape of the embedding {embedding.shape}.")
 
             # Add for the later benchmarking 
             adata_merged = adata_merged[RNA_id]
