@@ -81,7 +81,7 @@ if data == "simulated":
     adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
     sc.tl.pca(adata_merged_tmp)
     adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged_tmp.obsm["X_pca"]
-
+    adata_merged.X = adata_merged_tmp.X
     del adata_merged_tmp
     
     print("Preprocessed data.")
@@ -203,112 +203,114 @@ adata_merged.obs = adata_RNA.obs
 
 # Test
 diverse_tests_names = []
-# for dr in [drop_rate, 0.0]:
-#     for nn in ["encoder", "decoder"]:
-#         for e in ep_vals: 
-#             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
+for dr in [drop_rate, 0.0]:
+    for nn in ["encoder", "decoder"]:
+        for e in ep_vals: 
+            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
             
-#             if (nn == "decoder" and attention_s == False) or (nn == "encoder" and attention_t == False):
-#                 embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
-#                 ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-#                 weight_path, 
-#                 RNA_tf_path,
-#                 Protein_tf_path,
-#                 n_cells_for_sample=None,
-#                 super_parameters={
-#                     'batch_size': batch_size, 
-#                     'epoch_pretrain': e, 'lr': lr, 
-#                     'drop_rate': dr, 
-#                     'attention_t': attention_t, 
-#                     'attention_s': attention_s, 
-#                     'heads': heads
-#                 }, 
-#                 saved_weight_path = saved_weight_path)
-#             else:
-#                 embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal(
-#                     ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-#                     weight_path, 
-#                     RNA_tf_path,
-#                     Protein_tf_path,
-#                     n_cells_for_sample=None,
-#                     super_parameters={
-#                         'batch_size': batch_size, 
-#                         'epoch_pretrain': e, 'lr': lr, 
-#                         'drop_rate': dr, 
-#                         'attention_t': attention_t, 
-#                         'attention_s': attention_s, 
-#                         'heads': heads
-#                     }, 
-#                     saved_weight_path = saved_weight_path)
+            if (nn == "decoder" and attention_s == False) or (nn == "encoder" and attention_t == False):
+                embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
+                ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                weight_path, 
+                RNA_tf_path,
+                Protein_tf_path,
+                n_cells_for_sample=None,
+                super_parameters={
+                    'batch_size': batch_size, 
+                    'epoch_pretrain': e, 'lr': lr, 
+                    'drop_rate': dr, 
+                    'attention_t': attention_t, 
+                    'attention_s': attention_s, 
+                    'heads': heads
+                }, 
+                saved_weight_path = saved_weight_path)
+            else:
+                embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal(
+                    ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                    weight_path, 
+                    RNA_tf_path,
+                    Protein_tf_path,
+                    n_cells_for_sample=None,
+                    super_parameters={
+                        'batch_size': batch_size, 
+                        'epoch_pretrain': e, 'lr': lr, 
+                        'drop_rate': dr, 
+                        'attention_t': attention_t, 
+                        'attention_s': attention_s, 
+                        'heads': heads
+                    }, 
+                    saved_weight_path = saved_weight_path)
 
-#             print("Tested.")
+            print("Tested.")
             
-#             if data == "simulated":
-#                 adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
-#             else:
-#                 adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
+            if data == "simulated":
+                adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
+            else:
+                adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
             
-#             # FIXME
-#             adata_RNA_1 = adata_RNA[RNA_id]
-#             adata_RNA_1.obsm['X_embedding'] = embedding
+            # FIXME
+            adata_RNA_1 = adata_RNA[RNA_id]
+            adata_RNA_1.obsm['X_embedding'] = embedding
 
-#             # Add for the later benchmarking 
-#             adata_merged = adata_merged[RNA_id]
+            print(f"Shape of the embedding {embedding.shape}")
 
-#             adata_merged.obsm[f"Concerto_{e}_{nn}_{dr}"] = embedding
-#             diverse_tests_names.append(f"Concerto_{e}_{nn}_{dr}")
+            # Add for the later benchmarking 
+            adata_merged = adata_merged[RNA_id]
 
-#             l2tol1 = {
-#                 'CD8 Naive': 'CD8 T',
-#                 'CD8 Proliferating': 'CD8 T',
-#                 'CD8 TCM': 'CD8 T',
-#                 'CD8 TEM': 'CD8 T',
-#                 'CD4 CTL': 'CD4 T',
-#                 'CD4 Naive': 'CD4 T',
-#                 'CD4 Proliferating': 'CD4 T',
-#                 'CD4 TCM': 'CD4 T',
-#                 'CD4 TEM': 'CD4 T',
-#                 'Treg': 'CD4 T',
-#                 'NK': 'NK',
-#                 'NK Proliferating': 'NK',
-#                 'NK_CD56bright': 'NK',
-#                 'dnT': 'other T',
-#                 'gdT': 'other T',
-#                 'ILC': 'other T',
-#                 'MAIT': 'other T',
-#                 'CD14 Mono': 'Monocytes',
-#                 'CD16 Mono': 'Monocytes',
-#                 'cDC1': 'DC',
-#                 'cDC2': 'DC',
-#                 'pDC': 'DC',
-#                 'ASDC':'DC',
-#                 'B intermediate': 'B',
-#                 'B memory': 'B',
-#                 'B naive': 'B',
-#                 'Plasmablast': 'B',
-#                 'Eryth': 'other',
-#                 'HSPC': 'other',
-#                 'Platelet': 'other'
-#             }
-#             adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
-#             print(adata_RNA_1)
+            adata_merged.obsm[f"Concerto_{e}_{nn}_{dr}"] = embedding
+            diverse_tests_names.append(f"Concerto_{e}_{nn}_{dr}")
 
-#             sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding")
-#             labels = adata_RNA_1.obs['cell_type_l1'].tolist()
-#             for res in [0.05,0.1,0.15,0.2,0.25,0.3]:
-#                 sc.tl.leiden(adata_RNA_1, resolution=res)
-#                 target_preds = adata_RNA_1.obs['leiden'].tolist()
-#                 nmi = np.round(normalized_mutual_info_score(labels, target_preds), 5)
-#                 ari = np.round(adjusted_rand_score(labels, target_preds), 5)    
-#                 n_cluster = len(list(set(target_preds)))
-#                 print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
+            l2tol1 = {
+                'CD8 Naive': 'CD8 T',
+                'CD8 Proliferating': 'CD8 T',
+                'CD8 TCM': 'CD8 T',
+                'CD8 TEM': 'CD8 T',
+                'CD4 CTL': 'CD4 T',
+                'CD4 Naive': 'CD4 T',
+                'CD4 Proliferating': 'CD4 T',
+                'CD4 TCM': 'CD4 T',
+                'CD4 TEM': 'CD4 T',
+                'Treg': 'CD4 T',
+                'NK': 'NK',
+                'NK Proliferating': 'NK',
+                'NK_CD56bright': 'NK',
+                'dnT': 'other T',
+                'gdT': 'other T',
+                'ILC': 'other T',
+                'MAIT': 'other T',
+                'CD14 Mono': 'Monocytes',
+                'CD16 Mono': 'Monocytes',
+                'cDC1': 'DC',
+                'cDC2': 'DC',
+                'pDC': 'DC',
+                'ASDC':'DC',
+                'B intermediate': 'B',
+                'B memory': 'B',
+                'B naive': 'B',
+                'Plasmablast': 'B',
+                'Eryth': 'other',
+                'HSPC': 'other',
+                'Platelet': 'other'
+            }
+            adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
+            print(adata_RNA_1)
 
-#             #sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding')
-#             sc.tl.leiden(adata_RNA_1, resolution=0.2)
-#             sc.tl.umap(adata_RNA_1,min_dist=0.1)
-#             sc.set_figure_params(dpi=150)
-#             sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
-#             plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
+            sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding")
+            labels = adata_RNA_1.obs['cell_type_l1'].tolist()
+            for res in [0.05,0.1,0.15,0.2,0.25,0.3]:
+                sc.tl.leiden(adata_RNA_1, resolution=res)
+                target_preds = adata_RNA_1.obs['leiden'].tolist()
+                nmi = np.round(normalized_mutual_info_score(labels, target_preds), 5)
+                ari = np.round(adjusted_rand_score(labels, target_preds), 5)    
+                n_cluster = len(list(set(target_preds)))
+                print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
+
+            #sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding')
+            sc.tl.leiden(adata_RNA_1, resolution=0.2)
+            sc.tl.umap(adata_RNA_1,min_dist=0.1)
+            sc.set_figure_params(dpi=150)
+            sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
+            plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
 
 
 # Benchmark
