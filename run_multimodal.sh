@@ -11,6 +11,7 @@
 mkdir -p logs
 
 module load gcc/8.2.0 python_gpu/3.9.9
+export XLA_FLAGS=--xla_gpu_cuda_data_dir=/usr/lib/cuda
 nvidia-smi
 
 source "python_venv/bin/activate"
