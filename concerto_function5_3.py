@@ -1561,7 +1561,7 @@ def concerto_train_multimodal_tt(mult_feature_names:list, RNA_tf_path: str, Prot
     total_update_steps = 300 * super_parameters['epoch_pretrain']
     lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
                                                                 super_parameters['lr'] * 1e-2, power=1)
-    opt_simclr = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+    opt_simclr = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
     
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
@@ -1676,7 +1676,7 @@ def concerto_train_multimodal_ss(mult_feature_names:list, RNA_tf_path: str, Prot
     total_update_steps = 300 * super_parameters['epoch_pretrain']
     lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
                                                                 super_parameters['lr'] * 1e-2, power=1)
-    opt_simclr = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+    opt_simclr = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
     
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
