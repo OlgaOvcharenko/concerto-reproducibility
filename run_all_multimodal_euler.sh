@@ -57,7 +57,7 @@ for e in $epochs; do
                     for t in $attention_t; do
                         for h in $heads; do
                             for d in $data; do
-                                sbatch run_multimodal.sh $e $lr $batch_size $drop_rate $s $t $h $d $train
+                                sbatch run_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train
                             done
                         done
                     done

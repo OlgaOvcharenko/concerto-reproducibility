@@ -10,8 +10,12 @@
 
 mkdir -p logs
 
+enable_modules
+module load code-server
+#module load gcc/8.2.0 python_gpu/3.9.9
+module load StdEnv/2020 gcc/8.4.0
+module load python/3.9.6
 
-module load gcc/8.2.0 python_gpu/3.9.9
 nvidia-smi
 
 source "python_venv/bin/activate"
