@@ -91,16 +91,16 @@ if data == "simulated":
     print(f"{data} Protein data: \n {adata_Protein}")
 
     save_path = './Multimodal_pretraining/'
-    # if not os.path.exists(save_path):
-    #     os.makedirs(save_path)
-    # adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
-    # adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
+    adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
 
-    # print("Saved adata.")
+    print("Saved adata.")
 
-    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
-    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
-    # print("Make tf record.")
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
+    print("Make tf record.")
 
     RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
     Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
@@ -311,6 +311,8 @@ for dr in [drop_rate, 0.0]:
             sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
             plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}.png')
 
+filename = f'./Multimodal_pretraining/data/{data}/{data}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}.h5ad'
+adata_merged.write(filename)
 
 # Benchmark
 print(adata_merged)
