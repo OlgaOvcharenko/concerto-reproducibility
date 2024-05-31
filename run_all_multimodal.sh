@@ -30,15 +30,15 @@ source "python_venv/bin/activate"
 # heads=("128")
 # data=("simulated")
 
-epochs=("232")
+epochs=("500")
 lrs=("1e-5")
 batch_sizes=("64")
-drop_rates=("0.1")
+drop_rates=("0.1 0.4")
 attention_t=("1")
-attention_s=("0")
+attention_s=("0 1")
 heads=("128")
 data=("simulated")
-train=0
+train=1
 
 # epochs=("256")
 # lrs=("1e-5")
