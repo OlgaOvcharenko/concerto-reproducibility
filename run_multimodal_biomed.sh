@@ -1,14 +1,15 @@
 #!/bin/bash
 
+#SBATCH -p gpu
 #SBATCH -o logs/log-%j-multimodal.out
 #SBATCH --nodes=1
-#SBATCH --gpus=rtx_3090:1
+#SBATCH --gres=gpu:rtx3090:1
 #SBATCH --time=32:00:00
-#SBATCH --gres=gpumem:24G
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=10G
 
 mkdir -p logs
+
 
 module load gcc/8.2.0 python_gpu/3.9.9
 nvidia-smi
