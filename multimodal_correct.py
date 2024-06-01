@@ -93,14 +93,14 @@ if data == "simulated":
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
-    adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
+    # adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
+    # adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
 
-    print("Saved adata.")
+    # print("Saved adata.")
 
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
-    print("Make tf record.")
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
+    # print("Make tf record.")
 
     RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
     Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
@@ -137,14 +137,14 @@ else:
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    adata_RNA.write_h5ad(save_path + 'adata_gex.h5ad')
-    adata_Protein.write_h5ad(save_path + 'adata_atac.h5ad')
+    # adata_RNA.write_h5ad(save_path + 'adata_gex.h5ad')
+    # adata_Protein.write_h5ad(save_path + 'adata_atac.h5ad')
 
-    print("Saved adata.")
+    # print("Saved adata.")
 
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = save_path + 'tfrecord/gex_tf/', batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = save_path + 'tfrecord/atac_tf/', batch_col_name = 'batch')
-    print("Make tf record.")
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = save_path + 'tfrecord/gex_tf/', batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = save_path + 'tfrecord/atac_tf/', batch_col_name = 'batch')
+    # print("Make tf record.")
 
     RNA_tf_path = save_path + 'tfrecord/gex_tf/'
     Protein_tf_path = save_path + 'tfrecord/atac_tf/'
