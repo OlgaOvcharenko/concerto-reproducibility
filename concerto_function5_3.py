@@ -2263,18 +2263,19 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
         train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
         train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
 
-    if saved_weight_path is None:
-        weight_id_list = []
-        weight_list = [f for f in os.listdir(model_path) if f.endswith('h5')]
-        for id in weight_list:
-            id_1 = re.findall('.*epoch(.*).h.*', id)  # f1
-            weight_id_list.append(int(id_1[0]))
-        decode_network.load_weights(model_path + 'weight_decoder_epoch{}.h5'.format(max(weight_id_list)),
-                                    by_name=True)
+    if super_parameters["epoch"] != 0:
+        if saved_weight_path is None:
+            weight_id_list = []
+            weight_list = [f for f in os.listdir(model_path) if f.endswith('h5')]
+            for id in weight_list:
+                id_1 = re.findall('.*epoch(.*).h.*', id)  # f1
+                weight_id_list.append(int(id_1[0]))
+            decode_network.load_weights(model_path + 'weight_decoder_epoch{}.h5'.format(max(weight_id_list)),
+                                        by_name=True)
 
-    else:
-        decode_network.load_weights(saved_weight_path, by_name=True)
-        print('load saved weight')
+        else:
+            decode_network.load_weights(saved_weight_path, by_name=True)
+            print('load saved weight')
 
     source_data_batch = []
     source_data_feature = []

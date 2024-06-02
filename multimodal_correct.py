@@ -228,7 +228,7 @@ if train == 1:
 
     print("Trained.")
 
-ep_vals = []
+ep_vals = [0]
 i = 4
 while i < epoch:
     ep_vals.append(i)
@@ -253,7 +253,7 @@ for dr in [drop_rate, 0.0]:
                 n_cells_for_sample=None,
                 super_parameters={
                     'batch_size': batch_size, 
-                    'epoch_pretrain': e, 'lr': lr, 
+                    'epoch': e, 'lr': lr, 
                     'drop_rate': dr, 
                     'attention_t': attention_t, 
                     'attention_s': attention_s, 
@@ -355,34 +355,34 @@ adata_merged.write(filename)
 print(adata_merged)
 print(f"Saved adata all at {filename}")
 
+# # bm = Benchmarker(
+# #     adata_merged,
+# #     batch_key="batch",
+# #     label_key="cell_type",
+# #     embedding_obsm_keys=["Unintegrated", "Unintegrated_HVG_only"] + diverse_tests_names,
+# #     n_jobs=10,
+# # )
+# # bm.benchmark()
+
+# print("Start metrics")
+
+# biocons = BioConservation(isolated_labels=False)
+# start = time.time()
 # bm = Benchmarker(
 #     adata_merged,
 #     batch_key="batch",
 #     label_key="cell_type",
 #     embedding_obsm_keys=["Unintegrated", "Unintegrated_HVG_only"] + diverse_tests_names,
-#     n_jobs=10,
+#     bio_conservation_metrics=biocons,
+#     n_jobs=-1,
 # )
+
+# # bm.prepare(neighbor_computer=faiss_brute_force_nn)
 # bm.benchmark()
+# end = time.time()
+# print(f"Time: {int((end - start) / 60)} min {int((end - start) % 60)} sec")
 
-print("Start metrics")
+# bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/{data}_metrics/{data}_{lr}_{drop_rate}_{attention_s}_{attention_t}.png')
 
-biocons = BioConservation(isolated_labels=False)
-start = time.time()
-bm = Benchmarker(
-    adata_merged,
-    batch_key="batch",
-    label_key="cell_type",
-    embedding_obsm_keys=["Unintegrated", "Unintegrated_HVG_only"] + diverse_tests_names,
-    bio_conservation_metrics=biocons,
-    n_jobs=-1,
-)
-
-# bm.prepare(neighbor_computer=faiss_brute_force_nn)
-bm.benchmark()
-end = time.time()
-print(f"Time: {int((end - start) / 60)} min {int((end - start) % 60)} sec")
-
-bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/{data}_metrics/{data}_{lr}_{drop_rate}_{attention_s}_{attention_t}.png')
-
-df = bm.get_results(min_max_scale=False)
-print(df)
+# df = bm.get_results(min_max_scale=False)
+# print(df)
