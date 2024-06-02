@@ -33,10 +33,10 @@ source "python_venv/bin/activate"
 epochs=("500")
 lrs=("1e-5")
 batch_sizes=("64")
-drop_rates=("0.1 0.4")
+drop_rates=("0.0 0.1")
 attention_t=("1")
 attention_s=("0 1")
-heads=("128")
+heads=("64 128 256")
 data=("simulated")
 train=1
 
