@@ -2363,9 +2363,9 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
         embedding_dims=128,
         include_attention=True,
         drop_rate=super_parameters['drop_rate'],
-        head_1=128,
-        head_2=128,
-        head_3=128)
+        head_1=super_parameters['heads'],
+        head_2=super_parameters['heads'],
+        head_3=super_parameters['heads'])
 
     tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
     train_source_list_RNA = []

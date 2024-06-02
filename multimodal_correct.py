@@ -321,7 +321,7 @@ bm = Benchmarker(
     batch_key="batch",
     label_key="cell_type",
     embedding_obsm_keys=["Unintegrated", "Unintegrated_HVG_only"] + diverse_tests_names,
-    n_jobs=1,
+    n_jobs=10,
 )
 bm.benchmark()
 bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/{data}_metrics/{data}_{lr}_{drop_rate}_{attention_s}_{attention_t}.png')

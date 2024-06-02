@@ -1,5 +1,6 @@
 import scanpy as sc
 import anndata as ad
+from scib_metrics.benchmark import Benchmarker
 
 # adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
 # adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
@@ -32,8 +33,6 @@ import anndata as ad
 # print(adata_adt_rna.X)
 
 
-
-
 path = './Multimodal_pretraining/data/multi_gene_l2.loom'
 adata_RNA = sc.read(path)
 
@@ -46,8 +45,19 @@ print("Read simulated data")
 adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
 # adata_merged.var_names_make_unique()
 adata_merged.obs = adata_RNA.obs
-# adata_merged.obsm = adata_RNA.obsm
-# sc.tl.pca(adata_merged)
-# adata_merged.obsm["Unintegrated"] = adata_merged.obsm["X_pca"]
+adata_merged.obsm = adata_RNA.obsm
+sc.tl.pca(adata_merged)
+adata_merged.obsm["Unintegrated"] = adata_merged.obsm["X_pca"]
 
-print(adata_merged)
+bm = Benchmarker(
+    adata_merged,
+    batch_key="batch",
+    label_key="cell_type",
+    embedding_obsm_keys=["Unintegrated"],
+    n_jobs=10,
+)
+bm.benchmark()
+bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/test.png')
+
+df = bm.get_results(min_max_scale=False)
+print(df)
