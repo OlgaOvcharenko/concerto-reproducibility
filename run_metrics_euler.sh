@@ -16,9 +16,5 @@ nvidia-smi
 
 source "metrics_python_venv/bin/activate"
 
-for filename in ./Multimodal_pretraining/data/simulated/*.h5ad; do
-    echo $filename
-    python3 metrics.py --data $filename &
-done
-
-wait
+echo $1
+python3 metrics.py --data $1

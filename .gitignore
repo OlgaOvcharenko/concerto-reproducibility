@@ -16,4 +16,6 @@ Multimodal_pretraining/adata_gex.h5ad
 
 Multimodal_pretraining/.DS_Store
 .DS_Store
-metrics_python_venv/v
+metrics_python_venv/
+logs_tensorboard/
+
