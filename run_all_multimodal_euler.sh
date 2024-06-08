@@ -12,7 +12,7 @@ attention_t=("0")
 attention_s=("0")
 heads=("64 128 256")
 data=("simulated")
-train=1
+train=0
 
 for e in $epochs; do
     for lr in $lrs; do
