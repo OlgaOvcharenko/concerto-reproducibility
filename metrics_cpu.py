@@ -51,13 +51,14 @@ print(f"Time: {int((end - start) / 60)} min {int((end - start) % 60)} sec")
 
 df = bm.get_results(min_max_scale=False)
 print(df)
+df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data.split("/")[-1][:-5]}_metrics.csv')
 
 # bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/metrics/')
 # df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data[:-5]}')
 
-dir = f"./Multimodal_pretraining/plots/metrics/{data[:-5]}"
+dir = f"{data[:-5]}"
+# data.split("/")[-1][:-5]
 if not os.path.exists(dir):
-    os.makedirs(dir)
+    os.makedirs(dir, exist_ok=True)
 bm.plot_results_table(save_dir=dir)
-df.to_csv(dir+'/metrics.csv')
 
