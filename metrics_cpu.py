@@ -49,7 +49,9 @@ bm.benchmark()
 end = time.time()
 print(f"Time: {int((end - start) / 60)} min {int((end - start) % 60)} sec")
 
-bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/metrics/')
-
 df = bm.get_results(min_max_scale=False)
 print(df)
+
+bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/metrics/')
+df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data[:-5]}')
+
