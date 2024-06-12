@@ -67,7 +67,7 @@ print(adata_merged)
 print("Start metrics")
 names_obs = list(adata_merged.obsm.keys())
 names_obs.remove("X_pca")
-biocons = BioConservation(isolated_labels=False, nmi_ari_cluster_labels_leiden=True, nmi_ari_cluster_labels_kmeans=False)
+biocons = BioConservation(isolated_labels=True, nmi_ari_cluster_labels_leiden=True, nmi_ari_cluster_labels_kmeans=False)
 
 start = time.time()
 bm = Benchmarker(
@@ -95,4 +95,4 @@ dir = f"{data[:-5]}"
 # data.split("/")[-1][:-5]
 if not os.path.exists(dir):
     os.makedirs(dir, exist_ok=True)
-bm.plot_results_table(save_dir=dir)
+bm.plot_results_table(save_dir='./Multimodal_pretraining/plots/metrics/')
