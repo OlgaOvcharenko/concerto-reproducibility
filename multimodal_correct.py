@@ -110,8 +110,8 @@ if data == "simulated":
     adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
     sc.tl.pca(adata_merged_tmp)
 
-    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
+    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=False,batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=False,batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
@@ -346,9 +346,9 @@ for dr in [drop_rate, 0.0]:
             sc.tl.umap(adata_RNA_1,min_dist=0.1)
             sc.set_figure_params(dpi=150)
             sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
-            plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
+            plt.savefig(f'./Multimodal_pretraining/plots/full_{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
 
-filename = f'./Multimodal_pretraining/data/{data}/{data}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+filename = f'./Multimodal_pretraining/data/full_{data}/{data}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
 adata_merged.write(filename)
 
 # Benchmark
