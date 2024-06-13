@@ -9,43 +9,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
 import tensorflow as tf
 
-from scib_metrics.benchmark import Benchmarker, BioConservation
-import faiss
-# from scib_metrics.nearest_neighbors import NeighborsResults
-
 import time
-
-# def faiss_hnsw_nn(X: np.ndarray, k: int):
-#     """Gpu HNSW nearest neighbor search using faiss.
-
-#     See https://github.com/nmslib/hnswlib/blob/master/ALGO_PARAMS.md
-#     for index param details.
-#     """
-#     X = np.ascontiguousarray(X, dtype=np.float32)
-#     res = faiss.StandardGpuResources()
-#     M = 32
-#     index = faiss.IndexHNSWFlat(X.shape[1], M, faiss.METRIC_L2)
-#     gpu_index = faiss.index_cpu_to_gpu(res, 0, index)
-#     gpu_index.add(X)
-#     distances, indices = gpu_index.search(X, k)
-#     del index
-#     del gpu_index
-#     # distances are squared
-#     return NeighborsResults(indices=indices, distances=np.sqrt(distances))
-
-
-# def faiss_brute_force_nn(X: np.ndarray, k: int):
-#     """Gpu brute force nearest neighbor search using faiss."""
-#     X = np.ascontiguousarray(X, dtype=np.float32)
-#     res = faiss.StandardGpuResources()
-#     index = faiss.IndexFlatL2(X.shape[1])
-#     gpu_index = faiss.index_cpu_to_gpu(res, 0, index)
-#     gpu_index.add(X)
-#     distances, indices = gpu_index.search(X, k)
-#     del index
-#     del gpu_index
-#     # distances are squared
-#     return NeighborsResults(indices=indices, distances=np.sqrt(distances))
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -354,35 +318,3 @@ adata_merged.write(filename)
 # Benchmark
 print(adata_merged)
 print(f"Saved adata all at {filename}")
-
-# # bm = Benchmarker(
-# #     adata_merged,
-# #     batch_key="batch",
-# #     label_key="cell_type",
-# #     embedding_obsm_keys=["Unintegrated", "Unintegrated_HVG_only"] + diverse_tests_names,
-# #     n_jobs=10,
-# # )
-# # bm.benchmark()
-
-# print("Start metrics")
-
-# biocons = BioConservation(isolated_labels=False)
-# start = time.time()
-# bm = Benchmarker(
-#     adata_merged,
-#     batch_key="batch",
-#     label_key="cell_type",
-#     embedding_obsm_keys=["Unintegrated", "Unintegrated_HVG_only"] + diverse_tests_names,
-#     bio_conservation_metrics=biocons,
-#     n_jobs=-1,
-# )
-
-# # bm.prepare(neighbor_computer=faiss_brute_force_nn)
-# bm.benchmark()
-# end = time.time()
-# print(f"Time: {int((end - start) / 60)} min {int((end - start) % 60)} sec")
-
-# bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/{data}_metrics/{data}_{lr}_{drop_rate}_{attention_s}_{attention_t}.png')
-
-# df = bm.get_results(min_max_scale=False)
-# print(df)
