@@ -1502,9 +1502,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                     logits_2 = tf.transpose(logits_1)
 
                     loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
-
-                    # ssl_loss = simclr_loss(z1, z2, temperature=0.1)
-                    # loss = ssl_loss
+                    
                     train_loss(loss)
 
                 # variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
