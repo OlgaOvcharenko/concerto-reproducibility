@@ -1460,7 +1460,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
 
     initializer = tf.keras.initializers.Identity()
     labels = initializer(shape=(super_parameters['batch_size'], super_parameters['batch_size']))
-    temperature = tf.Variable(np.log(1/0.07), trainable=True)
+    temperature = tf.Variable(np.log(1/0.07), trainable=True, dtype='float32')
 
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
