@@ -1489,10 +1489,10 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 with tf.GradientTape() as tape:
                     res_en = encode_network([[source_features_RNA, source_features_protein],
                                          [source_values_RNA, source_values_protein]], training=True)
-                    res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                    # res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
 
                     zt_1, zt_2 = res_en[0], res_en[1]
-                    zs_1, zs_2 = res_dec[0], res_dec[1]
+                    # zs_1, zs_2 = res_dec[0], res_dec[1]
 
                     zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
                     zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
@@ -1507,7 +1507,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                     # loss = ssl_loss
                     train_loss(loss)
 
-                variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
+                # variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
+                variables = [encode_network.trainable_variables, temperature]
                 grads = tape.gradient(loss, variables)
                 for grad, var in zip(grads, variables):
                     optimizer.apply_gradients(zip(grad, var))
