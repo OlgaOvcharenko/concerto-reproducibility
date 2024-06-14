@@ -1491,10 +1491,6 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                          [source_values_RNA, source_values_protein]], training=True)
                     res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
 
-                    print(res_en)
-
-                    print(res_dec)
-
                     zt_1, zt_2 = res_en[0], res_en[1]
                     zs_1, zs_2 = res_dec[0], res_dec[1]
 
@@ -1505,7 +1501,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                     logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
                     logits_2 = tf.transpose(logits_1)
 
-                    loss = loss_1(logits_1, labels) + loss_2(logits_2, labels)
+                    loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
 
                     # ssl_loss = simclr_loss(z1, z2, temperature=0.1)
                     # loss = ssl_loss
