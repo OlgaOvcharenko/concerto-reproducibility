@@ -1508,7 +1508,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                     train_loss(loss)
 
                 # variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
-                variables = [encode_network.trainable_variables, temperature]
+                variables = [encode_network.trainable_variables, [temperature]]
                 grads = tape.gradient(loss, variables)
                 for grad, var in zip(grads, variables):
                     optimizer.apply_gradients(zip(grad, var))
