@@ -163,7 +163,8 @@ if train == 1:
                                     'drop_rate': drop_rate, 
                                     'attention_t': attention_t, 
                                     'attention_s': attention_s, 
-                                    'heads': heads
+                                    'heads': heads,
+                                    'combine_omics': False
                                     })
     elif attention_t == True and attention_s == True:
         concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
@@ -175,7 +176,8 @@ if train == 1:
                                     'drop_rate': drop_rate, 
                                     'attention_t': attention_t, 
                                     'attention_s': attention_s, 
-                                    'heads': heads
+                                    'heads': heads,
+                                    'combine_omics': False
                                     })
     elif attention_t == False and attention_s == False:
         concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
@@ -187,7 +189,8 @@ if train == 1:
                                     'drop_rate': drop_rate, 
                                     'attention_t': attention_t, 
                                     'attention_s': attention_s, 
-                                    'heads': heads
+                                    'heads': heads,
+                                    'combine_omics': False
                                     })
 
     print("Trained.")

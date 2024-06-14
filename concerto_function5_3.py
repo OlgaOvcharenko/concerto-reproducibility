@@ -1408,7 +1408,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                             'attention_t': True, 
                             'attention_s': False, 
                             'heads': 128,
-                            'combine_omics': True} 
+                            'combine_omics': False} 
     # dirname = os.getcwd()
     # f = np.load(ref_tf_path + './vocab_size.npz')
     f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
@@ -1422,7 +1422,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                                         drop_rate=super_parameters['drop_rate'],
                                                         head_1=super_parameters["heads"],
                                                         head_2=super_parameters["heads"],
-                                                        head_3=super_parameters["heads"])
+                                                        head_3=super_parameters["heads"],
+                                                        combine_omics=super_parameters['combine_omics'])
 
     decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
                                                         mult_feature_names=mult_feature_names,
@@ -1431,7 +1432,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                                         drop_rate=super_parameters['drop_rate'],
                                                         head_1=super_parameters["heads"],
                                                         head_2=super_parameters["heads"],
-                                                        head_3=super_parameters["heads"])
+                                                        head_3=super_parameters["heads"],
+                                                        combine_omics=super_parameters['combine_omics'])
 
     # tf_list_1 = os.listdir(os.path.join(ref_tf_path))
     tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
@@ -1492,7 +1494,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                     print(res_en)
 
                     print(res_dec)
-                    
+
                     zt_1, zt_2 = res_en[0], res_en[1]
                     zs_1, zs_2 = res_dec[0], res_dec[1]
 
