@@ -1527,6 +1527,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
         decode_network.save_weights(
             weight_path + f'multi_weight_decoder_{super_parameters["data"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
 
+    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
     return print('finished')
 
 
@@ -2373,7 +2374,7 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
 def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: str, Protein_tf_path: str, n_cells_for_sample=None,super_parameters=None,
                              saved_weight_path=None):
     if super_parameters is None:
-        super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5, 'drop_rate': 0.1}
+        super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5, 'drop_rate': 0.1, 'combine_omics': False}
     
     batch_size = super_parameters['batch_size']
     f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
@@ -2388,7 +2389,8 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
         drop_rate=super_parameters['drop_rate'],
         head_1=super_parameters['heads'],
         head_2=super_parameters['heads'],
-        head_3=super_parameters['heads'])
+        head_3=super_parameters['heads'],
+        combine_omics=super_parameters['combine_omics'])
 
     tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
     train_source_list_RNA = []

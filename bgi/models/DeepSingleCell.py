@@ -214,6 +214,7 @@ def multi_embedding_attention_transfer_explainability(supvised_train: bool = Fal
                                     drop_rate=0.05,
                                     include_attention: bool = False,
                                     use_bias=True,
+                                    combine_omics: bool = True
                                     ):
     assert len(multi_max_features) == len(mult_feature_names)
 
@@ -274,19 +275,30 @@ def multi_embedding_attention_transfer_explainability(supvised_train: bool = Fal
             features.append(x)
         inputs = []
         inputs.append(x_value_inputs)
-    # Concatenate
-    if len(features) > 1:
-    #feature = concatenate(features)
-        feature = Add()([features[0],features[1]])
-    else:
-        feature = features[0]
-    dropout = Dropout(rate=drop_rate)(feature)
-    output = Dense(head_1, name='projection-1', activation='relu')(dropout)
 
-    # inputs = []
-    # inputs.append(x_feature_inputs)
-    # inputs.append(x_value_inputs)
-    return tf.keras.Model(inputs=inputs, outputs=[output,weight_output_all])
+    if combine_omics:
+        # Concatenate
+        if len(features) > 1:
+        #feature = concatenate(features)
+            feature = Add()([features[0],features[1]])
+        else:
+            feature = features[0]
+        dropout = Dropout(rate=drop_rate)(feature)
+        output = Dense(head_1, name='projection-1', activation='relu')(dropout)
+
+        # inputs = []
+        # inputs.append(x_feature_inputs)
+        # inputs.append(x_value_inputs)
+        return tf.keras.Model(inputs=inputs, outputs=[output, weight_output_all])
+    
+    else:
+        dropout0 = Dropout(rate=drop_rate)(features[0])
+        dropout1 = Dropout(rate=drop_rate)(features[1])
+
+        output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
+        output1 = Dense(head_1, name='projection-1', activation='relu')(dropout1)
+
+        return tf.keras.Model(inputs=inputs, outputs=[output0, output1, weight_output_all])
 
 
 

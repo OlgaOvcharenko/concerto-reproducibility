@@ -195,7 +195,7 @@ if train == 1:
 
     print("Trained.")
 
-ep_vals = [0]
+ep_vals = []
 i = 4
 while i < epoch:
     ep_vals.append(i)
@@ -206,8 +206,8 @@ adata_merged.obs = adata_RNA.obs
 
 # Test
 diverse_tests_names = []
-for dr in [drop_rate, 0.0]:
-    for nn in ["encoder", "decoder"]:
+for dr in [drop_rate]:
+    for nn in ["encoder"]:
         for e in ep_vals: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
             
@@ -224,7 +224,8 @@ for dr in [drop_rate, 0.0]:
                     'drop_rate': dr, 
                     'attention_t': attention_t, 
                     'attention_s': attention_s, 
-                    'heads': heads
+                    'heads': heads,
+                    'combine_omics': False
                 }, 
                 saved_weight_path = saved_weight_path)
             else:
@@ -240,7 +241,8 @@ for dr in [drop_rate, 0.0]:
                         'drop_rate': dr, 
                         'attention_t': attention_t, 
                         'attention_s': attention_s, 
-                        'heads': heads
+                        'heads': heads,
+                        'combine_omics': False
                     }, 
                     saved_weight_path = saved_weight_path)
 
