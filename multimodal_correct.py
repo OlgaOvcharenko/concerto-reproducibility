@@ -74,8 +74,8 @@ if data == "simulated":
     adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
     sc.tl.pca(adata_merged_tmp)
 
-    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=False,batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=False,batch_key='batch')
+    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
