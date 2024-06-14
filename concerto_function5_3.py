@@ -1485,9 +1485,16 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 step += 1
 
                 with tf.GradientTape() as tape:
-                    zt_1, zt_2 = encode_network([[source_features_RNA, source_features_protein],
+                    res_en = encode_network([[source_features_RNA, source_features_protein],
                                          [source_values_RNA, source_values_protein]], training=True)
-                    zs_1, zs_2 = decode_network([source_values_RNA, source_values_protein], training=True)
+                    res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+
+                    print(res_en)
+
+                    print(res_dec)
+                    
+                    zt_1, zt_2 = res_en[0], res_en[1]
+                    zs_1, zs_2 = res_dec[0], res_dec[1]
 
                     zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
                     zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
