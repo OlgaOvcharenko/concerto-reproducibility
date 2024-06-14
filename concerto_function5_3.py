@@ -1495,7 +1495,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                     # zs_1, zs_2 = res_dec[0], res_dec[1]
 
                     zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
-                    zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
+                    # zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
 
                     logit_scale = tf.math.exp(temperature)
                     logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
