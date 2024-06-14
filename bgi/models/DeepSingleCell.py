@@ -26,6 +26,7 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
                                     drop_rate=0.05,
                                     include_attention: bool = False,
                                     use_bias=True,
+                                    combine_omics: bool = True
                                     ):
     assert len(multi_max_features) == len(mult_feature_names)
 
@@ -87,19 +88,31 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
         inputs = []
         inputs.append(x_value_inputs)
     # Concatenate
-    if len(features) > 1:
-    #feature = concatenate(features)
-        feature = Add()([features[0],features[1]])
+    print(f"Pefore add modalities input {features}")
+    print(f"Pefore add modalities input 0 {features[0]}")
+    print(f"Pefore add modalities features {len(features)}")
+
+    if combine_omics:
+        if len(features) > 1:
+        #feature = concatenate(features)
+            feature = Add()([features[0],features[1]])
+        else:
+            feature = features[0]
+    
+        dropout = Dropout(rate=drop_rate)(feature)
+        output = Dense(head_1, name='projection-1', activation='relu')(dropout)
+        
+        return tf.keras.Model(inputs=inputs, outputs=output)
+    
     else:
-        feature = features[0]
-    dropout = Dropout(rate=drop_rate)(feature)
-    output = Dense(head_1, name='projection-1', activation='relu')(dropout)
+        dropout0 = Dropout(rate=drop_rate)(features[0])
+        dropout1 = Dropout(rate=drop_rate)(features[1])
 
-    # inputs = []
-    # inputs.append(x_feature_inputs)
-    # inputs.append(x_value_inputs)
-    return tf.keras.Model(inputs=inputs, outputs=output)
+        output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
+        output1 = Dense(head_1, name='projection-1', activation='relu')(dropout1)
 
+        return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
+    
 
 def multi_embedding_attention_transfer_1(supvised_train: bool = False,
                                     scan_train: bool = False,

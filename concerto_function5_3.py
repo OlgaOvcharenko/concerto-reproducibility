@@ -1407,7 +1407,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                             'drop_rate': 0.1, 
                             'attention_t': True, 
                             'attention_s': False, 
-                            'heads': 128} 
+                            'heads': 128,
+                            'combine_omics': True} 
     # dirname = os.getcwd()
     # f = np.load(ref_tf_path + './vocab_size.npz')
     f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
@@ -1447,7 +1448,18 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
     lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
                                                                 super_parameters['lr'] * 1e-2, power=1)
     opt_simclr = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
-    
+
+
+
+    # New try
+    loss_1 = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    loss_2 = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
+
+    initializer = tf.keras.initializers.Identity()
+    labels = initializer(shape=(super_parameters['batch_size'], super_parameters['batch_size']))
+    temperature = tf.Variable(np.log(1/0.07), trainable=True)
+
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
         for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
@@ -1464,30 +1476,36 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                                                shuffle_size=10000,
                                                                )
             train_loss.reset_states()
-            train_cls_accuracy.reset_states()
-            test_cls_accuracy.reset_states()
+            # train_cls_accuracy.reset_states()
+            # test_cls_accuracy.reset_states()
             step = 0
-            for (source_features_RNA, source_values_RNA,
-                 source_batch_RNA, source_id_RNA), \
-                (source_features_protein, source_values_protein,
-                 source_batch_Protein, source_id_Protein) \
+            for (source_features_RNA, source_values_RNA, _, _), \
+                (source_features_protein, source_values_protein, _, _) \
                     in (zip(train_db_RNA, train_db_Protein)):
                 step += 1
 
                 with tf.GradientTape() as tape:
-                    z1 = encode_network([[source_features_RNA, source_features_protein],
+                    zt_1, zt_2 = encode_network([[source_features_RNA, source_features_protein],
                                          [source_values_RNA, source_values_protein]], training=True)
-                    z2 = decode_network([source_values_RNA, source_values_protein], training=True)
-                    ssl_loss = simclr_loss(z1, z2, temperature=0.1)
-                    loss = ssl_loss
+                    zs_1, zs_2 = decode_network([source_values_RNA, source_values_protein], training=True)
+
+                    zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
+                    zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
+
+                    logit_scale = tf.math.exp(temperature)
+                    logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
+                    logits_2 = tf.transpose(logits_1)
+
+                    loss = loss_1(logits_1, labels) + loss_2(logits_2, labels)
+
+                    # ssl_loss = simclr_loss(z1, z2, temperature=0.1)
+                    # loss = ssl_loss
                     train_loss(loss)
 
-                variables = [encode_network.trainable_variables,
-                             decode_network.trainable_variables,
-                             ]
+                variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
                 grads = tape.gradient(loss, variables)
                 for grad, var in zip(grads, variables):
-                    opt_simclr.apply_gradients(zip(grad, var))
+                    optimizer.apply_gradients(zip(grad, var))
 
                 if step > 0 and step % 5 == 0:
                     template = 'Epoch {}, step {}, simclr loss: {:0.4f}.'
