@@ -257,8 +257,8 @@ for dr in [drop_rate, 0.0]:
             # Add for the later benchmarking 
             adata_merged = adata_merged[RNA_id]
 
-            adata_merged.obsm[f"Concerto_{e}_{nn}_{dr}"] = embedding
-            diverse_tests_names.append(f"Concerto_{e}_{nn}_{dr}")
+            adata_merged.obsm[f"{e}_{nn}_{dr}"] = embedding
+            diverse_tests_names.append(f"{e}_{nn}_{dr}")
 
             l2tol1 = {
                 'CD8 Naive': 'CD8 T',
