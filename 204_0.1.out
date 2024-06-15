@@ -1,14 +1,0 @@
-nohup: ignoring input
-/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/anndata/_core/anndata.py:1820: UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`.
-  utils.warn_names_duplicates("var")
-/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scanpy/preprocessing/_pca.py:374: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
-  warn(msg, FutureWarning)
-Read adata
-AnnData object with n_obs × n_vars = 161600 × 2224
-    obs: 'batch', 'cell_type', 'obs_names', 'n_genes'
-    var: 'var_names', 'n_cells', 'highly_variable', 'means', 'dispersions', 'dispersions_norm', 'highly_variable_nbatches', 'highly_variable_intersection'
-    uns: 'pca'
-    obsm: 'Concerto_128_decoder_0.0', 'Concerto_128_decoder_0.1', 'Concerto_128_encoder_0.0', 'Concerto_128_encoder_0.1', 'Concerto_16_decoder_0.0', 'Concerto_16_decoder_0.1', 'Concerto_16_encoder_0.0', 'Concerto_16_encoder_0.1', 'Concerto_203_decoder_0.0', 'Concerto_203_decoder_0.1', 'Concerto_203_encoder_0.0', 'Concerto_203_encoder_0.1', 'Concerto_32_decoder_0.0', 'Concerto_32_decoder_0.1', 'Concerto_32_encoder_0.0', 'Concerto_32_encoder_0.1', 'Concerto_4_decoder_0.0', 'Concerto_4_decoder_0.1', 'Concerto_4_encoder_0.0', 'Concerto_4_encoder_0.1', 'Concerto_64_decoder_0.0', 'Concerto_64_decoder_0.1', 'Concerto_64_encoder_0.0', 'Concerto_64_encoder_0.1', 'Concerto_8_decoder_0.0', 'Concerto_8_decoder_0.1', 'Concerto_8_encoder_0.0', 'Concerto_8_encoder_0.1', 'Unintegrated', 'Unintegrated_HVG_only', 'X_pca'
-    varm: 'PCs'
-Start metrics
-Computing neighbors:   0%|          | 0/30 [00:00<?, ?it/s]Computing neighbors:   3%|▎         | 1/30 [00:40<19:29, 40.34s/it]Computing neighbors:   7%|▋         | 2/30 [01:12<16:33, 35.47s/it]Computing neighbors:  10%|█         | 3/30 [01:53<17:06, 38.01s/it]Computing neighbors:  13%|█▎        | 4/30 [02:34<17:02, 39.31s/it]Computing neighbors:  17%|█▋        | 5/30 [03:23<17:47, 42.71s/it]Computing neighbors:  20%|██        | 6/30 [04:12<17:55, 44.81s/it]Computing neighbors:  23%|██▎       | 7/30 [04:54<16:46, 43.78s/it]Computing neighbors:  27%|██▋       | 8/30 [05:35<15:48, 43.13s/it]Computing neighbors:  30%|███       | 9/30 [06:24<15:41, 44.85s/it]Computing neighbors:  33%|███▎      | 10/30 [07:13<15:20, 46.02s/it]Computing neighbors:  37%|███▋      | 11/30 [07:54<14:05, 44.47s/it]Computing neighbors:  40%|████      | 12/30 [08:35<13:01, 43.44s/it]Computing neighbors:  43%|████▎     | 13/30 [09:23<12:45, 45.02s/it]Computing neighbors:  47%|████▋     | 14/30 [10:12<12:18, 46.13s/it]Computing neighbors:  50%|█████     | 15/30 [10:53<11:08, 44.56s/it]Computing neighbors:  53%|█████▎    | 16/30 [11:35<10:13, 43.84s/it]
