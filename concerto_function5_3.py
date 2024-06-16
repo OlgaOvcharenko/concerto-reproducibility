@@ -1454,8 +1454,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
 
 
     # New try
-    loss_1 = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-    loss_2 = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    loss_1 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    loss_2 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
 
     initializer = tf.keras.initializers.Identity()
