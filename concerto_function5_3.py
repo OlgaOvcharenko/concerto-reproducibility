@@ -1500,8 +1500,6 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                     logit_scale = tf.math.exp(temperature)
                     logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
                     logits_2 = tf.transpose(logits_1)
-                    print(logits_1)
-                    print(logits_2)
                     loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
                     
                     train_loss(loss)
