@@ -1537,7 +1537,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 if super_parameters["model_type"] == 1:
                     variables = [encode_network.trainable_variables, [temperature]]
                 else:
-                    variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
+                    variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]
 
                 grads = tape.gradient(loss, variables)
                 for grad, var in zip(grads, variables):

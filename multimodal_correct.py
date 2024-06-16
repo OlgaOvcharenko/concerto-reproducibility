@@ -308,7 +308,7 @@ if test:
                 adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
                 print(adata_RNA_1)
 
-                sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding")
+                sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
                 labels = adata_RNA_1.obs['cell_type_l1'].tolist()
                 for res in [0.05,0.1,0.15,0.2,0.25,0.3]:
                     sc.tl.leiden(adata_RNA_1, resolution=res)
@@ -322,7 +322,7 @@ if test:
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
                 sc.tl.umap(adata_RNA_1,min_dist=0.1)
                 sc.set_figure_params(dpi=150)
-                sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'],legend_fontsize ='xx-small',size=5,legend_fontweight='light')
+                sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', arrows=True)
                 plt.savefig(f'./Multimodal_pretraining/plots/full_{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
 
     filename = f'./Multimodal_pretraining/data/full_{data}/{data}_{model_type}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
