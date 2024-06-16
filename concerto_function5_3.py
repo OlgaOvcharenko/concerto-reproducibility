@@ -1394,7 +1394,7 @@ def concerto_train_ref_query(ref_tf_path: str, query_tf_path: str, weight_path: 
 
 
 def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
-    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
     set_seeds(0)   
@@ -1408,7 +1408,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                             'attention_t': True, 
                             'attention_s': False, 
                             'heads': 128,
-                            'combine_omics': False} 
+                            'combine_omics': False,
+                            'model_type': 1} 
     # dirname = os.getcwd()
     # f = np.load(ref_tf_path + './vocab_size.npz')
     f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
@@ -1444,18 +1445,20 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
         train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
 
     train_loss = tf.keras.metrics.Mean(name='train_loss')
-    train_cls_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_cls_accuracy')
-    test_cls_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_cls_accuracy')
     total_update_steps = 300 * super_parameters['epoch_pretrain']
     lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
                                                                 super_parameters['lr'] * 1e-2, power=1)
-    opt_simclr = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
-
-
 
     # New try
     loss_1 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     loss_2 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    loss_3 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    loss_4 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    loss_5 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    loss_6 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    loss_7 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    loss_8 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+
     optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
 
     initializer = tf.keras.initializers.Identity()
@@ -1487,25 +1490,55 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 step += 1
 
                 with tf.GradientTape() as tape:
-                    res_en = encode_network([[source_features_RNA, source_features_protein],
+                    if super_parameters["model_type"] == 1:
+                        res_en = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+
+                        zt_1, zt_2 = res_en[0], res_en[1]
+                        zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
+
+                        logit_scale = tf.math.exp(temperature)
+                        logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
+                        logits_2 = tf.transpose(logits_1)
+                        loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
+                    else:
+                        res_en = encode_network([[source_features_RNA, source_features_protein],
                                          [source_values_RNA, source_values_protein]], training=True)
-                    # res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                        res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
 
-                    zt_1, zt_2 = res_en[0], res_en[1]
-                    # zs_1, zs_2 = res_dec[0], res_dec[1]
+                        logit_scale = tf.math.exp(temperature)
 
-                    zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
-                    # zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
+                        # TT
+                        zt_1, zt_2 = res_en[0], res_en[1]
+                        zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
+                        logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
+                        logits_2 = tf.transpose(logits_1)
 
-                    logit_scale = tf.math.exp(temperature)
-                    logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
-                    logits_2 = tf.transpose(logits_1)
-                    loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
+                        # SS
+                        zs_1, zs_2 = res_dec[0], res_dec[1]
+                        zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
+                        logits_3 = logit_scale * zs_1 @ tf.transpose(zs_2)
+                        logits_4 = tf.transpose(logits_3)
+
+                        # TS
+                        logits_5 = logit_scale * zt_1 @ tf.transpose(zs_2)
+                        logits_6 = tf.transpose(logits_5)
+                        
+                        # ST
+                        logits_7 = logit_scale * zt_2 @ tf.transpose(zs_1)
+                        logits_8 = tf.transpose(logits_7)
+
+                        
+                        loss = loss_1(labels, logits_1) + loss_2(labels, logits_2) + loss_3(labels, logits_3)  + loss_4(labels, logits_4) + \
+                            loss_5(labels, logits_5) + loss_6(labels, logits_6) + loss_7(labels, logits_7)  + loss_8(labels, logits_8)
                     
                     train_loss(loss)
 
-                # variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
-                variables = [encode_network.trainable_variables, [temperature]]
+                if super_parameters["model_type"] == 1:
+                    variables = [encode_network.trainable_variables, [temperature]]
+                else:
+                    variables = [encode_network.trainable_variables, decode_network.trainable_variables, temperature]
+
                 grads = tape.gradient(loss, variables)
                 for grad, var in zip(grads, variables):
                     optimizer.apply_gradients(zip(grad, var))
@@ -1522,11 +1555,11 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 tf_step += 1
 
         encode_network.save_weights(
-            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_model_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
         decode_network.save_weights(
-            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_model_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
 
-    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_model_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
     return print('finished')
 
 
