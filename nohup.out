@@ -1,14 +1,0 @@
-/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/anndata/_core/anndata.py:1820: UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`.
-  utils.warn_names_duplicates("var")
-/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scanpy/preprocessing/_pca.py:374: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
-  warn(msg, FutureWarning)
-Read adata
-AnnData object with n_obs × n_vars = 161600 × 2224
-    obs: 'batch', 'cell_type', 'obs_names', 'n_genes'
-    var: 'var_names', 'n_cells', 'highly_variable', 'means', 'dispersions', 'dispersions_norm', 'highly_variable_nbatches', 'highly_variable_intersection'
-    uns: 'pca'
-    obsm: 'Concerto_128_decoder_0.0', 'Concerto_128_decoder_0.1', 'Concerto_128_encoder_0.0', 'Concerto_128_encoder_0.1', 'Concerto_16_decoder_0.0', 'Concerto_16_decoder_0.1', 'Concerto_16_encoder_0.0', 'Concerto_16_encoder_0.1', 'Concerto_203_decoder_0.0', 'Concerto_203_decoder_0.1', 'Concerto_203_encoder_0.0', 'Concerto_203_encoder_0.1', 'Concerto_32_decoder_0.0', 'Concerto_32_decoder_0.1', 'Concerto_32_encoder_0.0', 'Concerto_32_encoder_0.1', 'Concerto_4_decoder_0.0', 'Concerto_4_decoder_0.1', 'Concerto_4_encoder_0.0', 'Concerto_4_encoder_0.1', 'Concerto_64_decoder_0.0', 'Concerto_64_decoder_0.1', 'Concerto_64_encoder_0.0', 'Concerto_64_encoder_0.1', 'Concerto_8_decoder_0.0', 'Concerto_8_decoder_0.1', 'Concerto_8_encoder_0.0', 'Concerto_8_encoder_0.1', 'Unintegrated', 'Unintegrated_HVG_only', 'X_pca'
-    varm: 'PCs'
-Start metrics
-Computing neighbors:   0%|          | 0/30 [00:00<?, ?it/s]usage: metrics_cpu.py [-h] --data DATA
-metrics_cpu.py: error: unrecognized arguments: 203_FT_256_0.1.out

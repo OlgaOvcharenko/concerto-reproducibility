@@ -54,7 +54,7 @@ heads = args.heads
 train = args.train 
 model_type = args.model_type
 test = args.test
-print(f"Multimodal correction: epoch {epoch}, modeltype {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
+print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
 
 gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
