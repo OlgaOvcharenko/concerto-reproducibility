@@ -1392,6 +1392,28 @@ def concerto_train_ref_query(ref_tf_path: str, query_tf_path: str, weight_path: 
 
     return weight_path
 
+def contrastive_loss(logits) :
+    return tf.math.reduce_mean(
+        tf.keras.metrics.sparse_categorical_crossentropy(
+            y_true=tf.range(logits.shape[0]), y_pred=logits, from_logits=True
+        )
+    )
+
+
+def clip_loss(text_embeds, image_embeds, logit_scale) :
+    # normalized features
+    image_embeds = image_embeds / tf.norm(tensor=image_embeds, ord="euclidean", axis=-1, keepdims=True)
+    text_embeds = text_embeds / tf.norm(tensor=text_embeds, ord="euclidean", axis=-1, keepdims=True)
+
+    # cosine similarity as logits
+    logit_scale = tf.math.exp(logit_scale)
+    logits_per_text = tf.matmul(text_embeds, image_embeds, transpose_b=True) * logit_scale
+    similarity = logits_per_text
+
+    caption_loss = contrastive_loss(similarity)
+    image_loss = contrastive_loss(tf.transpose(similarity))
+    return (caption_loss + image_loss) / 2.0
+
 
 def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
@@ -1401,7 +1423,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
-        super_parameters = {'batch_size': 31, 
+        super_parameters = {'batch_size': 32, 
                             'epoch_pretrain': 3,
                             'lr': 1e-4,
                             'drop_rate': 0.1, 
@@ -1495,12 +1517,15 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                             [source_values_RNA, source_values_protein]], training=True)
 
                         zt_1, zt_2 = res_en[0], res_en[1]
-                        zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
+                        # zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
 
-                        logit_scale = tf.math.exp(temperature)
-                        logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
-                        logits_2 = tf.transpose(logits_1)
-                        loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
+                        # logit_scale = tf.math.exp(temperature)
+                        # logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
+                        # logits_2 = tf.transpose(logits_1)
+                        # loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
+
+                        loss = clip_loss(zt_1, zt_2, temperature)
+
                     else:
                         res_en = encode_network([[source_features_RNA, source_features_protein],
                                          [source_values_RNA, source_values_protein]], training=True)

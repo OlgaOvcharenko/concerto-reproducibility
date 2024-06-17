@@ -4,10 +4,10 @@
 #SBATCH --nodes=1
 #SBATCH --time=10:00:00
 #SBATCH --gpus=1
-#SBATCH --gres=gpumem:11G
-#SBATCH --cpus-per-task=3
+#SBATCH --gres=gpumem:23G
+#SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=10G
-#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-type=START,END,FAIL
 
 mkdir -p logs
 
