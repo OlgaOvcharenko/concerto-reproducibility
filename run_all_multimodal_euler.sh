@@ -14,7 +14,7 @@ heads=("256")
 data=("simulated")
 train=1
 test=0
-model_type=("1")
+model_type=1
 
 for e in $epochs; do
     for lr in $lrs; do
@@ -24,9 +24,7 @@ for e in $epochs; do
                     for t in $attention_t; do
                         for h in $heads; do
                             for d in $data; do
-                                for mt in $model_type; do
-                                    sbatch run_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt
-                                done
+                                sbatch run_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $model_type
                             done
                         done
                     done
