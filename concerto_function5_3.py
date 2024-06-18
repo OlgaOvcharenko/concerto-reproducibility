@@ -1492,15 +1492,17 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
         for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
             train_db_RNA = create_classifier_dataset_multi([RNA_file],
                                                            batch_size=super_parameters['batch_size'],
-                                                           is_training=False,
+                                                           is_training=True,
                                                            data_augment=False,
                                                            shuffle_size=10000,
+                                                           seed=epoch
                                                            )
             train_db_Protein = create_classifier_dataset_multi([Protein_file],
                                                                batch_size=super_parameters['batch_size'],
-                                                               is_training=False,
+                                                               is_training=True,
                                                                data_augment=False,
                                                                shuffle_size=10000,
+                                                               seed=epoch
                                                                )
             train_loss.reset_states()
             # train_cls_accuracy.reset_states()

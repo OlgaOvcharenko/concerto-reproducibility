@@ -140,7 +140,8 @@ def create_classifier_dataset_multi(record_files: list,
                               batch_size: int,
                               is_training=True,
                               data_augment=False,
-                              shuffle_size=100):
+                              shuffle_size=100,
+                              seed=42):
     """Creates input dataset from (tf)records files for train/eval."""
     name_to_features = {
         'feature': tf.io.VarLenFeature(tf.int64),
@@ -164,7 +165,7 @@ def create_classifier_dataset_multi(record_files: list,
                                        drop_remainder=True)
     if is_training:
         # dataset = dataset.shuffle(shuffle_size)
-        dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True)
+        dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
 
     dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
     return dataset

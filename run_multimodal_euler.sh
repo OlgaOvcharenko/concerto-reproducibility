@@ -15,5 +15,5 @@ module load gcc/8.2.0 python_gpu/3.9.9
 nvidia-smi
 
 source "python_venv/bin/activate"
-echo $11
+echo ${11}
 python3 multimodal_correct.py --epoch $1 --lr $2 --batch_size $3 --drop_rate $4 --attention_s $5 --attention_t $6 --heads $7 --data $8 --train $9 --test ${10} --model_type ${11}
