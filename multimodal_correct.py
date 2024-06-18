@@ -204,10 +204,10 @@ if train == 1:
     print("Trained.")
 
 ep_vals = []
-# i = 4
-# while i < epoch:
-#     ep_vals.append(i)
-#     i = i * 2
+i = 4
+while i < epoch:
+    ep_vals.append(i)
+    i = i * 2
 ep_vals.append(epoch)
 
 adata_merged.obs = adata_RNA.obs
