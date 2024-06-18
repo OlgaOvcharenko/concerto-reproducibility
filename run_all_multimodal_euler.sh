@@ -5,16 +5,16 @@ mkdir -p logs
 source "python_venv/bin/activate"
 
 epochs=("50")
-lrs=("1e-8 1e-5 1e-3 1e-1")
-batch_sizes=("64 128 256")
+lrs=("1e-3")
+batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("256")
 data=("simulated")
-train=1
-test=0
-model_type=("1")
+train=0
+test=1
+model_type=("2")
 
 for e in $epochs; do
     for lr in $lrs; do

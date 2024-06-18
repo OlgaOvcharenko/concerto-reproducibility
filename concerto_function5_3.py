@@ -2526,9 +2526,38 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
             if all_samples  >= feature_len:
                 print("Entered if break")
                 break
-            encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
+
+            if super_parameters["combine_omics"]:
+                encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
+                                                                [source_values_RNA, source_values_protein]],
+                                                                training=False)
+                
+                encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
+                source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
+                source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
+                RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
+                attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
+                attention_output_Protein[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[1]
+                all_samples += len(source_id_RNA)
+                # print('all_samples num:{}'.format(all_samples))
+
+            else:
+                encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                               [source_values_RNA, source_values_protein]],
                                                              training=False)
+                
+                encode_output1 = tf.nn.l2_normalize(encode_output1, axis=-1)
+                encode_output2 = tf.nn.l2_normalize(encode_output2, axis=-1)
+                encode_output = tf.concat([encode_output1, encode_output2], axis=1)
+
+                print(encode_output)
+
+                source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
+                source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
+                RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
+                attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
+                attention_output_Protein[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[1]
+                all_samples += len(source_id_RNA)
 
             encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
             source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output

@@ -250,7 +250,8 @@ if test:
                             'attention_t': attention_t, 
                             'attention_s': attention_s, 
                             'heads': heads,
-                            'combine_omics': False
+                            'combine_omics': False,
+                            'model_type': model_type
                         }, 
                         saved_weight_path = saved_weight_path)
 
@@ -323,9 +324,9 @@ if test:
                 sc.tl.umap(adata_RNA_1,min_dist=0.1)
                 sc.set_figure_params(dpi=150)
                 sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', arrows=True)
-                plt.savefig(f'./Multimodal_pretraining/plots/full_{data}/{data}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
+                plt.savefig(f'./Multimodal_pretraining/plots/full_{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
 
-    filename = f'./Multimodal_pretraining/data/full_{data}/{data}_{model_type}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    filename = f'./Multimodal_pretraining/data/full_{data}/{data}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
     adata_merged.write(filename)
 
     # Benchmark
