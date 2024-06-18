@@ -218,8 +218,8 @@ if test:
     for dr in [drop_rate]:
         for nn in ["encoder"]:
             for e in ep_vals: 
-                # saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
-                saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_model_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
+                saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
+                # saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_model_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
                 
                 if (nn == "decoder" and attention_s == False) or (nn == "encoder" and attention_t == False):
                     embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
