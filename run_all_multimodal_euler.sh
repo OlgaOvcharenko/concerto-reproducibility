@@ -24,7 +24,7 @@ for e in $epochs; do
                     for t in $attention_t; do
                         for h in $heads; do
                             for d in $data; do
-                                for $mt in $model_type; do
+                                for mt in $model_type; do
                                     sbatch run_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt
                                 done
                             done
