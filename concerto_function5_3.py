@@ -2574,8 +2574,6 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                 encode_output2 = tf.nn.l2_normalize(encode_output2, axis=-1)
                 encode_output = tf.concat([encode_output1, encode_output2], axis=1)
 
-                print(encode_output)
-
                 source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
                 source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
                 RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
