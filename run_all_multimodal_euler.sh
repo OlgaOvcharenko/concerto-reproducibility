@@ -14,7 +14,7 @@ heads=("256")
 data=("simulated")
 train=0
 test=1
-model_type=("2")
+model_type=("501")
 
 for e in $epochs; do
     for lr in $lrs; do

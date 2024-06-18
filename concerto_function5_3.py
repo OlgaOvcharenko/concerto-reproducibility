@@ -1472,15 +1472,6 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                                                 super_parameters['lr'] * 1e-2, power=1)
 
     # New try
-    loss_1 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    loss_2 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    loss_3 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    loss_4 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    loss_5 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    loss_6 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    loss_7 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    loss_8 = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-
     optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
 
     initializer = tf.keras.initializers.Identity()
@@ -1529,35 +1520,55 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                         loss = clip_loss(zt_1, zt_2, temperature)
 
                     else:
+                        # res_en = encode_network([[source_features_RNA, source_features_protein],
+                        #                  [source_values_RNA, source_values_protein]], training=True)
+                        # res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+
+                        # logit_scale = tf.math.exp(temperature)
+
+                        # # TT
+                        # zt_1, zt_2 = res_en[0], res_en[1]
+                        # zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
+                        # logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
+                        # logits_2 = tf.transpose(logits_1)
+
+                        # # SS
+                        # zs_1, zs_2 = res_dec[0], res_dec[1]
+                        # zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
+                        # logits_3 = logit_scale * zs_1 @ tf.transpose(zs_2)
+                        # logits_4 = tf.transpose(logits_3)
+
+                        # # TS
+                        # logits_5 = logit_scale * zt_1 @ tf.transpose(zs_2)
+                        # logits_6 = tf.transpose(logits_5)
+                        
+                        # # ST
+                        # logits_7 = logit_scale * zt_2 @ tf.transpose(zs_1)
+                        # logits_8 = tf.transpose(logits_7)
+
+                        
+                        # loss = loss_1(labels, logits_1) + loss_2(labels, logits_2) + loss_3(labels, logits_3)  + loss_4(labels, logits_4) + \
+                        #     loss_5(labels, logits_5) + loss_6(labels, logits_6) + loss_7(labels, logits_7)  + loss_8(labels, logits_8)
+
                         res_en = encode_network([[source_features_RNA, source_features_protein],
                                          [source_values_RNA, source_values_protein]], training=True)
                         res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
-
-                        logit_scale = tf.math.exp(temperature)
+                        zt_1, zt_2 = res_en[0], res_en[1]
+                        zs_1, zs_2 = res_dec[0], res_dec[1]
 
                         # TT
-                        zt_1, zt_2 = res_en[0], res_en[1]
-                        zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
-                        logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
-                        logits_2 = tf.transpose(logits_1)
+                        loss_TT = clip_loss(zt_1, zt_2, temperature)
 
                         # SS
-                        zs_1, zs_2 = res_dec[0], res_dec[1]
-                        zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
-                        logits_3 = logit_scale * zs_1 @ tf.transpose(zs_2)
-                        logits_4 = tf.transpose(logits_3)
+                        loss_SS = clip_loss(zs_1, zs_2, temperature)
 
                         # TS
-                        logits_5 = logit_scale * zt_1 @ tf.transpose(zs_2)
-                        logits_6 = tf.transpose(logits_5)
+                        loss_TS = clip_loss(zt_1, zs_2, temperature)
                         
                         # ST
-                        logits_7 = logit_scale * zt_2 @ tf.transpose(zs_1)
-                        logits_8 = tf.transpose(logits_7)
-
+                        loss_ST = clip_loss(zt_2, zs_1, temperature)
                         
-                        loss = loss_1(labels, logits_1) + loss_2(labels, logits_2) + loss_3(labels, logits_3)  + loss_4(labels, logits_4) + \
-                            loss_5(labels, logits_5) + loss_6(labels, logits_6) + loss_7(labels, logits_7)  + loss_8(labels, logits_8)
+                        loss = loss_TT + loss_TS + loss_ST + loss_SS
                     
                     train_loss(loss)
 
