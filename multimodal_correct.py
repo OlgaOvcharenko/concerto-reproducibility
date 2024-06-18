@@ -8,6 +8,7 @@ import anndata as ad
 import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
 import tensorflow as tf
+import scvelo as scv
 
 import time
 
@@ -320,12 +321,14 @@ if test:
                     n_cluster = len(list(set(target_preds)))
                     print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
 
-                #sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding')
+                # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
                 sc.tl.umap(adata_RNA_1,min_dist=0.1)
                 sc.set_figure_params(dpi=150)
-                sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', arrows=True)
+                sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'], legend_fontsize ='xx-small', size=5, legend_fontweight='light')
                 plt.savefig(f'./Multimodal_pretraining/plots/full_{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
+                
+                scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/velocity_full_{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
 
     filename = f'./Multimodal_pretraining/data/full_{data}/{data}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
     adata_merged.write(filename)
