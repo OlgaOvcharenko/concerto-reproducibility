@@ -213,6 +213,7 @@ ep_vals.append(epoch)
 adata_merged.obs = adata_RNA.obs
 
 # Test
+itr_test = 0
 if test:
     diverse_tests_names = []
     for dr in [drop_rate]:
@@ -271,7 +272,11 @@ if test:
                 print(f"Shape of the embedding {embedding.shape}.")
 
                 # Add for the later benchmarking 
-                adata_merged = adata_merged[RNA_id]
+                print(RNA_id)
+                print(adata_merged)
+                if itr_test == 0:
+                    adata_merged = adata_merged[RNA_id]
+                    itr_test += 1
 
                 adata_merged.obsm[f"{e}_{nn}_{dr}"] = embedding
                 diverse_tests_names.append(f"{e}_{nn}_{dr}")
