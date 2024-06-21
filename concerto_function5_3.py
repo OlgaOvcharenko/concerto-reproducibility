@@ -1519,7 +1519,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
 
                         loss = clip_loss(zt_1, zt_2, temperature)
 
-                    else:
+                    elif super_parameters["model_type"] == 2:
                         # res_en = encode_network([[source_features_RNA, source_features_protein],
                         #                  [source_values_RNA, source_values_protein]], training=True)
                         # res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
@@ -1569,6 +1569,33 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                         loss_ST = clip_loss(zt_2, zs_1, temperature)
                         
                         loss = loss_TT + loss_TS + loss_ST + loss_SS
+                    
+                    elif super_parameters["model_type"] == 3:
+                        res_en = encode_network([[source_features_RNA, source_features_protein],
+                                         [source_values_RNA, source_values_protein]], training=True)
+                        res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                        zt_1, zt_2 = res_en[0], res_en[1]
+                        zs_1, zs_2 = res_dec[0], res_dec[1]
+
+                        # TT
+                        loss_TT = clip_loss(zt_1, zt_2, temperature)
+
+                        # SS
+                        loss_SS = clip_loss(zs_1, zs_2, temperature)
+
+                        # TS
+                        loss_TS = clip_loss(zt_1, zs_2, temperature)
+                        
+                        # ST
+                        loss_ST = clip_loss(zt_2, zs_1, temperature)
+
+                        # T1S1
+                        loss_T1S1 = clip_loss(zt_1, zs_1, temperature)
+
+                        # T2S2
+                        loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
+                        
+                        loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
                     
                     train_loss(loss)
 

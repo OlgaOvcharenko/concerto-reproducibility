@@ -12,9 +12,9 @@ attention_t=("1")
 attention_s=("0")
 heads=("256")
 data=("simulated")
-train=0
+train=1
 test=1
-model_type=("1 2")
+model_type=("3")
 
 for e in $epochs; do
     for lr in $lrs; do
