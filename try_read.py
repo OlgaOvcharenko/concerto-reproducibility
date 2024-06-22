@@ -41,7 +41,6 @@ adata_Protein = sc.read(path) #cell_type batch
 
 # Create PCA for benchmarking
 adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
-print(adata_merged_tmp)
 # # adata_merged.var_names_make_unique()
 # adata_merged.obs = adata_RNA.obs
 # adata_merged.obsm = adata_RNA.obsm

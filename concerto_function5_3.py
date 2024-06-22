@@ -2553,7 +2553,6 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                                                                 [source_values_RNA, source_values_protein]],
                                                                 training=False)
                     encode_output = tf.concat([encode_output1, encode_output2], axis=1)
-                    print(encode_output)
                     break
 
         dim = encode_output.shape[1]
