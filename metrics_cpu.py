@@ -31,6 +31,7 @@ data = args.data
 
 print("Read adata")
 adata_merged = sc.read_h5ad(data)
+adata_merged = sc.pp.subsample(adata_merged, fraction=0.4)
 print(adata_merged)
 
 
