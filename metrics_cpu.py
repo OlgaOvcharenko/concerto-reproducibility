@@ -13,8 +13,8 @@ from scib_metrics.benchmark import Benchmarker, BioConservation
 import time
 
 os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"]="false"
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]=".XX"
-os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"]="platform"
+# os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]=".XX"
+# os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"]="platform"
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
