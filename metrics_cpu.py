@@ -35,6 +35,8 @@ adata_merged = adata_merged[0:(adata_merged.shape[0]/2)-1,:]
 # print(adata_merged)
 # adata_merged = sc.pp.subsample(adata_merged, fraction=0.4)
 print(adata_merged)
+print(adata_merged.X)
+print(adata_merged[list(adata_merged.obsm.keys())[0]])
 
 
 print("Start metrics")
