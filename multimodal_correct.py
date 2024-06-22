@@ -215,6 +215,9 @@ ep_vals.append(epoch)
 
 adata_merged.obs = adata_RNA.obs
 
+print("Merged adata")
+print(adata_merged)
+
 # Test
 itr_test = 0
 if test:
@@ -273,12 +276,14 @@ if test:
                 adata_RNA_1.obsm['X_embedding'] = embedding
 
                 print(f"Shape of the embedding {embedding.shape}.")
-
-                # Add for the later benchmarking 
-                # print(RNA_id)
-                # print(adata_merged)
+                
                 if itr_test == 0:
                     adata_merged = adata_merged[RNA_id]
+
+                    print("Merged adata")
+                    print(adata_merged)
+                    print(len(RNA_id))
+
                     itr_test += 1
 
                 adata_merged.obsm[f"{e}_{nn}_{dr}"] = embedding
@@ -339,6 +344,9 @@ if test:
                 # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
 
     filename = f'./Multimodal_pretraining/data/{data}/{data}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    
+    print("Merged adata")
+    print(adata_merged)
     adata_merged.write(filename)
 
     # Benchmark
