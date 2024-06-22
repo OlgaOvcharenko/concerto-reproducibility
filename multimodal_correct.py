@@ -277,14 +277,15 @@ if test:
 
                 print(f"Shape of the embedding {embedding.shape}.")
                 
-                if itr_test == 0:
-                    adata_merged = adata_merged[RNA_id]
+                adata_merged = adata_merged[RNA_id]
+                # if itr_test == 0:
+                #     adata_merged = adata_merged[RNA_id]
 
-                    print("Merged adata")
-                    print(adata_merged)
-                    print(len(RNA_id))
+                #     print("Merged adata")
+                #     print(adata_merged)
+                #     print(len(RNA_id))
 
-                    itr_test += 1
+                #     itr_test += 1
 
                 adata_merged.obsm[f"{e}_{nn}_{dr}"] = embedding
                 diverse_tests_names.append(f"{e}_{nn}_{dr}")

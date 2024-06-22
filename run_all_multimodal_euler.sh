@@ -16,9 +16,9 @@ source "python_venv/bin/activate"
 # test=1
 # model_type=("1 2 3")
 
-epochs=("4")
+epochs=("100")
 lrs=("1e-3")
-batch_sizes=("64")
+batch_sizes=("64 128 256")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
@@ -26,7 +26,7 @@ heads=("256")
 data=("simulated")
 train=0
 test=1
-model_type=("1")
+model_type=("1 2 3")
 
 for e in $epochs; do
     for lr in $lrs; do
