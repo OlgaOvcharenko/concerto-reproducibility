@@ -13,8 +13,8 @@ from scib_metrics.benchmark import Benchmarker, BioConservation
 import time
 
 os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"]="false"
-# os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]=".XX"
-# os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"]="platform"
+os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]=".XX"
+os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"]="platform"
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -31,8 +31,8 @@ data = args.data
 
 print("Read adata")
 adata_merged = sc.read_h5ad(data)
-print(adata_merged)
-adata_merged = sc.pp.subsample(adata_merged, fraction=0.4)
+# print(adata_merged)
+# adata_merged = sc.pp.subsample(adata_merged, fraction=0.4)
 print(adata_merged)
 
 
