@@ -33,14 +33,15 @@ import anndata as ad
 # print(adata_adt_rna.X)
 
 
-# path = './Multimodal_pretraining/data/multi_gene_l2.loom'
-# adata_RNA = sc.read(path)
+path = './Multimodal_pretraining/data/multi_gene_l2.loom'
+adata_RNA = sc.read(path)
 
 path = './Multimodal_pretraining/data/multi_protein_l2.loom'
 adata_Protein = sc.read(path) #cell_type batch
 
-# # Create PCA for benchmarking
-# adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+# Create PCA for benchmarking
+adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
+print(adata_merged_tmp)
 # # adata_merged.var_names_make_unique()
 # adata_merged.obs = adata_RNA.obs
 # adata_merged.obsm = adata_RNA.obsm
@@ -48,10 +49,10 @@ sc.tl.pca(adata_Protein)
 adata_Protein.obsm["Unintegrated"] = adata_Protein.obsm["X_pca"]
 
 
-print("Read simulated data")
-print(adata_Protein)
-print("Read obsm")
-print(list(adata_Protein.obsm.keys()))
+# print("Read simulated data")
+# print(adata_Protein)
+# print("Read obsm")
+# print(list(adata_Protein.obsm.keys()))
 
 # bm = Benchmarker(
 #     adata_merged,

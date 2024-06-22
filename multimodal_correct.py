@@ -157,6 +157,9 @@ else:
     RNA_tf_path = save_path + 'tfrecord/gex_tf/'
     Protein_tf_path = save_path + 'tfrecord/atac_tf/'
 
+print("Merged adata")
+print(adata_merged)
+
 # Train
 weight_path = save_path + 'weight/'
 if train == 1:
