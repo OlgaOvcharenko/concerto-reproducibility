@@ -16,17 +16,18 @@ source "python_venv/bin/activate"
 # test=1
 # model_type=("2 3")
 
-epochs=("132")
+epochs=("50")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("64 128")
+heads=("128")
 data=("simulated")
-train=0
-test=1
+train=1
+test=0
 model_type=("1")
+combine_omics=1
 
 for e in $epochs; do
     for lr in $lrs; do
@@ -37,7 +38,7 @@ for e in $epochs; do
                         for h in $heads; do
                             for d in $data; do
                                 for mt in $model_type; do
-                                    sbatch run_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt
+                                    sbatch run_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt $combine_omics
                                 done
                             done
                         done
