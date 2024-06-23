@@ -20,9 +20,9 @@ class CausalSelfAttention(tf.keras.layers.Layer):
     self.layernorm = tf.keras.layers.LayerNormalization()
 
   def call(self, x):
-    attn = self.mha(query=x, value=x,
-                    use_causal_mask=True)
+    attn = self.mha(query=x, value=x, use_causal_mask=False)
     x = self.add([x, attn])
+    print(x)
     return self.layernorm(x)
 
 
@@ -117,7 +117,8 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
                 features[0] = tf.expand_dims(features[0], axis=1)
                 features[1] = tf.expand_dims(features[1], axis=1)
 
-                feature = cross_attention(tf.concat([features[0], features[1]], 1))
+                feature_attn = cross_attention(tf.concat([features[0], features[1]], 1))
+                feature = tf.math.reduce_sum(feature_attn, axis=1)
         else:
             feature = features[0]
     
