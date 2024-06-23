@@ -38,7 +38,7 @@ def get_args():
                         help='inference')
     parser.add_argument('--model_type', type= int, required=True,
                         help='1 for simple TT, else 4 together')
-    parser.add_argument('--cobine_omics', type= int, required=True,
+    parser.add_argument('--combine_omics', type= int, required=True,
                         help='0/1')
 
     args = parser.parse_args()
