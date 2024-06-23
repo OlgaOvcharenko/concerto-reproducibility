@@ -16,9 +16,9 @@ source "python_venv/bin/activate"
 # test=1
 # model_type=("2 3")
 
-epochs=("50")
+epochs=("130")
 lrs=("1e-3")
-batch_sizes=("64")
+batch_sizes=("64 128")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
@@ -27,7 +27,7 @@ data=("simulated")
 train=1
 test=0
 model_type=("1")
-combine_omics=1
+combine_omics=0
 
 for e in $epochs; do
     for lr in $lrs; do
