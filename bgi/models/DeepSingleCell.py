@@ -11,6 +11,22 @@ from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers, losses, metrics, datasets
 from bgi.layers.attention import AttentionWithContext
 
+class CrossAttention(tf.keras.layers.Layer):
+  def __init__(self,**kwargs):
+    super().__init__()
+    self.mha = tf.keras.layers.MultiHeadAttention(**kwargs)
+    self.add = tf.keras.layers.Add() 
+    self.layernorm = tf.keras.layers.LayerNormalization()
+
+  def call(self, x, y, **kwargs):
+    attn, attention_scores = self.mha(
+             query=x, value=y,
+             return_attention_scores=True)
+
+    self.last_attention_scores = attention_scores
+
+    x = self.add([x, attn])
+    return self.layernorm(x)
 
 
 def multi_embedding_attention_transfer(supvised_train: bool = False,
@@ -26,7 +42,8 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
                                     drop_rate=0.05,
                                     include_attention: bool = False,
                                     use_bias=True,
-                                    combine_omics: bool = True
+                                    combine_omics: bool = True,
+                                    model_type: int = 0
                                     ):
     assert len(multi_max_features) == len(mult_feature_names)
 
@@ -95,7 +112,11 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
     if combine_omics:
         if len(features) > 1:
         #feature = concatenate(features)
-            feature = Add()([features[0],features[1]])
+            if model_type == 0:
+                feature = Add()([features[0],features[1]])
+            elif model_type == 1:
+                cross_attention = CrossAttention(num_heads=head_2, key_dim=256, dropout=drop_rate) # FIXME
+                feature = cross_attention([features[0],features[1]])
         else:
             feature = features[0]
     
