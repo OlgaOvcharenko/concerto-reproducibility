@@ -16,7 +16,7 @@ class CrossAttention(tf.keras.layers.Layer):
     super().__init__()
     self.mha = tf.keras.layers.MultiHeadAttention(**kwargs)
     self.add = tf.keras.layers.Add() 
-    self.layernorm = tf.keras.layers.LayerNormalization()f
+    self.layernorm = tf.keras.layers.LayerNormalization()
 
   def call(self, x, y, **kwargs):
     attn, attention_scores = self.mha(
