@@ -11,24 +11,17 @@ from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers, losses, metrics, datasets
 from bgi.layers.attention import AttentionWithContext
 
-class CrossAttention(tf.keras.layers.Layer):
-  def __init__(self,**kwargs):
+class CausalSelfAttention(tf.keras.layers.Layer):
+  def __init__(self, **kwargs):
     super().__init__()
     self.mha = tf.keras.layers.MultiHeadAttention(**kwargs)
+    # Use Add instead of + so the keras mask propagates through.
     self.add = tf.keras.layers.Add() 
     self.layernorm = tf.keras.layers.LayerNormalization()
 
-  def call(self, x, y, **kwargs):
-    print(tf.size(x))
-    print(tf.size(y))
-    print(x)
-    print(y)
-    attn, attention_scores = self.mha(
-             query=x, value=y,
-             return_attention_scores=True)
-
-    self.last_attention_scores = attention_scores
-
+  def call(self, x):
+    attn = self.mha(query=x, value=x,
+                    use_causal_mask=True)
     x = self.add([x, attn])
     return self.layernorm(x)
 
@@ -120,8 +113,11 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
             if model_type == 0:
                 feature = Add()([features[0],features[1]])
             elif model_type == 1:
-                cross_attention = CrossAttention(num_heads=head_2, key_dim=256, dropout=drop_rate) # FIXME
-                feature = cross_attention(features[0],features[1])
+                cross_attention = CausalSelfAttention(num_heads=head_2, key_dim=256, dropout=drop_rate) # FIXME
+                features[0] = tf.expand_dims(features[0], axis=1)
+                features[1] = tf.expand_dims(features[1], axis=1)
+
+                feature = cross_attention(tf.concat([features[0], features[1]], 1))
         else:
             feature = features[0]
     
