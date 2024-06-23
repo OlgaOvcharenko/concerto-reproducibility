@@ -4,7 +4,7 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-epochs=("150")
+epochs=("67")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")
@@ -14,7 +14,7 @@ heads=("64 128")
 data=("simulated")
 train=0
 test=1
-model_type=("1 2 3")
+model_type=("2 3")
 
 # epochs=("100")
 # lrs=("1e-3")
