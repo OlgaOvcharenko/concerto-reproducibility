@@ -21,6 +21,8 @@ class CrossAttention(tf.keras.layers.Layer):
   def call(self, x, y, **kwargs):
     print(tf.size(x))
     print(tf.size(y))
+    print(x)
+    print(y)
     attn, attention_scores = self.mha(
              query=x, value=y,
              return_attention_scores=True)
@@ -109,6 +111,7 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
     # Concatenate
     print(f"Before add modalities input {features}")
     print(f"Before add modalities input 0 {features[0]}")
+    print(f"Before add modalities input 0 {features[1]}")
     print(f"Before add modalities features {len(features)}")
 
     if combine_omics:
