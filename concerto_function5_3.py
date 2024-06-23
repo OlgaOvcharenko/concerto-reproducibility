@@ -1508,7 +1508,6 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
 
                 with tf.GradientTape() as tape:
                     if super_parameters["combine_omics"]:
-                        if super_parameters["model_type"] == 0:
                             z1 = encode_network([[source_features_RNA, source_features_protein],
                                             [source_values_RNA, source_values_protein]], training=True)
                             z2 = decode_network([source_values_RNA, source_values_protein], training=True)
