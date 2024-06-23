@@ -19,6 +19,8 @@ class CrossAttention(tf.keras.layers.Layer):
     self.layernorm = tf.keras.layers.LayerNormalization()
 
   def call(self, x, y, **kwargs):
+    print(tf.size(x))
+    print(tf.size(y))
     attn, attention_scores = self.mha(
              query=x, value=y,
              return_attention_scores=True)
