@@ -24,8 +24,8 @@ attention_t=("1")
 attention_s=("0")
 heads=("128")
 data=("simulated")
-train=1
-test=0
+train=0
+test=1
 model_type=("1")
 combine_omics=0
 
