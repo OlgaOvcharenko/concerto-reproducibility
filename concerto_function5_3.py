@@ -1446,7 +1446,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                                         head_1=super_parameters["heads"],
                                                         head_2=super_parameters["heads"],
                                                         head_3=super_parameters["heads"],
-                                                        combine_omics=super_parameters['combine_omics'])
+                                                        combine_omics=super_parameters['combine_omics'],
+                                                        combine_omics_model=super_parameters['model_type'])
 
     decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
                                                         mult_feature_names=mult_feature_names,
@@ -1456,7 +1457,8 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                                                         head_1=super_parameters["heads"],
                                                         head_2=super_parameters["heads"],
                                                         head_3=super_parameters["heads"],
-                                                        combine_omics=super_parameters['combine_omics'])
+                                                        combine_omics=super_parameters['combine_omics'],
+                                                        combine_omics_model=super_parameters['model_type'])
 
     # tf_list_1 = os.listdir(os.path.join(ref_tf_path))
     tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
@@ -1505,101 +1507,76 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 step += 1
 
                 with tf.GradientTape() as tape:
-                    if super_parameters["model_type"] == 1:
-                        res_en = encode_network([[source_features_RNA, source_features_protein],
+                    if super_parameters["combine_omics"]:
+                        if super_parameters["model_type"] == 0:
+                            z1 = encode_network([[source_features_RNA, source_features_protein],
                                             [source_values_RNA, source_values_protein]], training=True)
-
-                        zt_1, zt_2 = res_en[0], res_en[1]
-                        # zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
-
-                        # logit_scale = tf.math.exp(temperature)
-                        # logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
-                        # logits_2 = tf.transpose(logits_1)
-                        # loss = loss_1(labels, logits_1) + loss_2(labels, logits_2)
-
-                        loss = clip_loss(zt_1, zt_2, temperature)
-
-                    elif super_parameters["model_type"] == 2:
-                        # res_en = encode_network([[source_features_RNA, source_features_protein],
-                        #                  [source_values_RNA, source_values_protein]], training=True)
-                        # res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
-
-                        # logit_scale = tf.math.exp(temperature)
-
-                        # # TT
-                        # zt_1, zt_2 = res_en[0], res_en[1]
-                        # zt_1, zt_2 = tf.math.l2_normalize(zt_1), tf.math.l2_normalize(zt_2)
-                        # logits_1 = logit_scale * zt_1 @ tf.transpose(zt_2)
-                        # logits_2 = tf.transpose(logits_1)
-
-                        # # SS
-                        # zs_1, zs_2 = res_dec[0], res_dec[1]
-                        # zs_1, zs_2 = tf.math.l2_normalize(zs_1), tf.math.l2_normalize(zs_2)
-                        # logits_3 = logit_scale * zs_1 @ tf.transpose(zs_2)
-                        # logits_4 = tf.transpose(logits_3)
-
-                        # # TS
-                        # logits_5 = logit_scale * zt_1 @ tf.transpose(zs_2)
-                        # logits_6 = tf.transpose(logits_5)
+                            z2 = decode_network([source_values_RNA, source_values_protein], training=True)
+                            ssl_loss = simclr_loss(z1, z2, temperature=0.1)
+                            loss = ssl_loss
                         
-                        # # ST
-                        # logits_7 = logit_scale * zt_2 @ tf.transpose(zs_1)
-                        # logits_8 = tf.transpose(logits_7)
+                    elif not super_parameters["combine_omics"]:
+                        if super_parameters["model_type"] == 1:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                                [source_values_RNA, source_values_protein]], training=True)
 
+                            zt_1, zt_2 = res_en[0], res_en[1]
+
+                            loss = clip_loss(zt_1, zt_2, temperature)
+
+                        elif super_parameters["model_type"] == 2:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            zt_1, zt_2 = res_en[0], res_en[1]
+                            zs_1, zs_2 = res_dec[0], res_dec[1]
+
+                            # TT
+                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+
+                            # SS
+                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+
+                            # TS
+                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                            
+                            # ST
+                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+                            
+                            loss = loss_TT + loss_TS + loss_ST + loss_SS
                         
-                        # loss = loss_1(labels, logits_1) + loss_2(labels, logits_2) + loss_3(labels, logits_3)  + loss_4(labels, logits_4) + \
-                        #     loss_5(labels, logits_5) + loss_6(labels, logits_6) + loss_7(labels, logits_7)  + loss_8(labels, logits_8)
+                        elif super_parameters["model_type"] == 3:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            zt_1, zt_2 = res_en[0], res_en[1]
+                            zs_1, zs_2 = res_dec[0], res_dec[1]
 
-                        res_en = encode_network([[source_features_RNA, source_features_protein],
-                                         [source_values_RNA, source_values_protein]], training=True)
-                        res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
-                        zt_1, zt_2 = res_en[0], res_en[1]
-                        zs_1, zs_2 = res_dec[0], res_dec[1]
+                            # TT
+                            loss_TT = clip_loss(zt_1, zt_2, temperature)
 
-                        # TT
-                        loss_TT = clip_loss(zt_1, zt_2, temperature)
+                            # SS
+                            loss_SS = clip_loss(zs_1, zs_2, temperature)
 
-                        # SS
-                        loss_SS = clip_loss(zs_1, zs_2, temperature)
+                            # TS
+                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                            
+                            # ST
+                            loss_ST = clip_loss(zt_2, zs_1, temperature)
 
-                        # TS
-                        loss_TS = clip_loss(zt_1, zs_2, temperature)
-                        
-                        # ST
-                        loss_ST = clip_loss(zt_2, zs_1, temperature)
-                        
-                        loss = loss_TT + loss_TS + loss_ST + loss_SS
-                    
-                    elif super_parameters["model_type"] == 3:
-                        res_en = encode_network([[source_features_RNA, source_features_protein],
-                                         [source_values_RNA, source_values_protein]], training=True)
-                        res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
-                        zt_1, zt_2 = res_en[0], res_en[1]
-                        zs_1, zs_2 = res_dec[0], res_dec[1]
+                            # T1S1
+                            loss_T1S1 = clip_loss(zt_1, zs_1, temperature)
 
-                        # TT
-                        loss_TT = clip_loss(zt_1, zt_2, temperature)
-
-                        # SS
-                        loss_SS = clip_loss(zs_1, zs_2, temperature)
-
-                        # TS
-                        loss_TS = clip_loss(zt_1, zs_2, temperature)
-                        
-                        # ST
-                        loss_ST = clip_loss(zt_2, zs_1, temperature)
-
-                        # T1S1
-                        loss_T1S1 = clip_loss(zt_1, zs_1, temperature)
-
-                        # T2S2
-                        loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
-                        
-                        loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
+                            # T2S2
+                            loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
+                            
+                            loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
                     
                     train_loss(loss)
 
-                if super_parameters["model_type"] == 1:
+                if super_parameters["combine_omics"]:
+                    variables = [encode_network.trainable_variables, decode_network.trainable_variables]
+                elif super_parameters["model_type"] == 1:
                     variables = [encode_network.trainable_variables, [temperature]]
                 else:
                     variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]

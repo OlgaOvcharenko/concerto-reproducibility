@@ -38,6 +38,8 @@ def get_args():
                         help='inference')
     parser.add_argument('--model_type', type= int, required=True,
                         help='1 for simple TT, else 4 together')
+    parser.add_argument('--cobine_omics', type= int, required=True,
+                        help='0/1')
 
     args = parser.parse_args()
     return args
@@ -55,6 +57,7 @@ heads = args.heads
 train = args.train 
 model_type = args.model_type
 test = args.test
+combine_omics = args.combine_omics
 print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
 
@@ -174,7 +177,7 @@ if train == 1:
                                     'attention_t': attention_t, 
                                     'attention_s': attention_s, 
                                     'heads': heads,
-                                    'combine_omics': False,
+                                    'combine_omics': combine_omics,
                                     'model_type': model_type
                                     })
     elif attention_t == True and attention_s == True:
@@ -188,7 +191,7 @@ if train == 1:
                                     'attention_t': attention_t, 
                                     'attention_s': attention_s, 
                                     'heads': heads,
-                                    'combine_omics': False
+                                    'combine_omics': combine_omics
                                     })
     elif attention_t == False and attention_s == False:
         concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
@@ -242,7 +245,7 @@ if test:
                         'attention_t': attention_t, 
                         'attention_s': attention_s, 
                         'heads': heads,
-                        'combine_omics': False
+                        'combine_omics': combine_omics
                     }, 
                     saved_weight_path = saved_weight_path)
                 else:
@@ -259,7 +262,7 @@ if test:
                             'attention_t': attention_t, 
                             'attention_s': attention_s, 
                             'heads': heads,
-                            'combine_omics': False,
+                            'combine_omics': combine_omics,
                             'model_type': model_type
                         }, 
                         saved_weight_path = saved_weight_path)
