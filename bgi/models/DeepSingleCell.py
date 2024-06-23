@@ -16,7 +16,7 @@ class CrossAttention(tf.keras.layers.Layer):
     super().__init__()
     self.mha = tf.keras.layers.MultiHeadAttention(**kwargs)
     self.add = tf.keras.layers.Add() 
-    self.layernorm = tf.keras.layers.LayerNormalization()
+    self.layernorm = tf.keras.layers.LayerNormalization()f
 
   def call(self, x, y, **kwargs):
     attn, attention_scores = self.mha(
@@ -105,9 +105,9 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
         inputs = []
         inputs.append(x_value_inputs)
     # Concatenate
-    print(f"Pefore add modalities input {features}")
-    print(f"Pefore add modalities input 0 {features[0]}")
-    print(f"Pefore add modalities features {len(features)}")
+    print(f"Before add modalities input {features}")
+    print(f"Before add modalities input 0 {features[0]}")
+    print(f"Before add modalities features {len(features)}")
 
     if combine_omics:
         if len(features) > 1:
@@ -116,7 +116,7 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
                 feature = Add()([features[0],features[1]])
             elif model_type == 1:
                 cross_attention = CrossAttention(num_heads=head_2, key_dim=256, dropout=drop_rate) # FIXME
-                feature = cross_attention([features[0],features[1]])
+                feature = cross_attention(features[0],features[1])
         else:
             feature = features[0]
     
