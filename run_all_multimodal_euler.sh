@@ -16,7 +16,7 @@ source "python_venv/bin/activate"
 # test=1
 # model_type=("2 3")
 
-epochs=("130")
+epochs=("66")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")
@@ -24,8 +24,8 @@ attention_t=("1")
 attention_s=("0")
 heads=("128")
 data=("simulated")
-train=1
-test=0
+train=0
+test=1
 model_type=("1")
 combine_omics=1
 
