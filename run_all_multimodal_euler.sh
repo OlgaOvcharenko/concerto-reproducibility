@@ -16,7 +16,7 @@ source "python_venv/bin/activate"
 # test=1
 # model_type=("2 3")
 
-epochs=("50")
+epochs=("130")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")

@@ -11,21 +11,18 @@ from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers, losses, metrics, datasets
 from bgi.layers.attention import AttentionWithContext
 
-class CrossAttention(tf.keras.layers.Layer):
-  def __init__(self,**kwargs):
+class CausalSelfAttention(tf.keras.layers.Layer):
+  def __init__(self, **kwargs):
     super().__init__()
     self.mha = tf.keras.layers.MultiHeadAttention(**kwargs)
+    # Use Add instead of + so the keras mask propagates through.
     self.add = tf.keras.layers.Add() 
     self.layernorm = tf.keras.layers.LayerNormalization()
 
-  def call(self, x, y, **kwargs):
-    attn, attention_scores = self.mha(
-             query=x, value=y,
-             return_attention_scores=True)
-
-    self.last_attention_scores = attention_scores
-
+  def call(self, x):
+    attn = self.mha(query=x, value=x, use_causal_mask=False)
     x = self.add([x, attn])
+    print(x)
     return self.layernorm(x)
 
 
@@ -105,9 +102,10 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
         inputs = []
         inputs.append(x_value_inputs)
     # Concatenate
-    print(f"Pefore add modalities input {features}")
-    print(f"Pefore add modalities input 0 {features[0]}")
-    print(f"Pefore add modalities features {len(features)}")
+    print(f"Before add modalities input {features}")
+    print(f"Before add modalities input 0 {features[0]}")
+    print(f"Before add modalities input 0 {features[1]}")
+    print(f"Before add modalities features {len(features)}")
 
     if combine_omics:
         if len(features) > 1:
@@ -115,8 +113,12 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
             if model_type == 0:
                 feature = Add()([features[0],features[1]])
             elif model_type == 1:
-                cross_attention = CrossAttention(num_heads=head_2, key_dim=256, dropout=drop_rate) # FIXME
-                feature = cross_attention([features[0],features[1]])
+                cross_attention = CausalSelfAttention(num_heads=head_2, key_dim=256, dropout=drop_rate) # FIXME
+                features[0] = tf.expand_dims(features[0], axis=1)
+                features[1] = tf.expand_dims(features[1], axis=1)
+
+                feature_attn = cross_attention(tf.concat([features[0], features[1]], 1))
+                feature = tf.math.reduce_sum(feature_attn, axis=1)
         else:
             feature = features[0]
     

@@ -38,7 +38,7 @@ def get_args():
                         help='inference')
     parser.add_argument('--model_type', type= int, required=True,
                         help='1 for simple TT, else 4 together')
-    parser.add_argument('--cobine_omics', type= int, required=True,
+    parser.add_argument('--combine_omics', type= int, required=True,
                         help='0/1')
 
     args = parser.parse_args()
@@ -228,7 +228,7 @@ if test:
     for dr in [drop_rate]:
         for nn in ["encoder"]:
             for e in ep_vals: 
-                saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
+                saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
                 # saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_model_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
                 
                 if (nn == "decoder" and attention_s == False) or (nn == "encoder" and attention_t == False):
@@ -343,11 +343,11 @@ if test:
                 sc.tl.umap(adata_RNA_1,min_dist=0.1)
                 sc.set_figure_params(dpi=150)
                 sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
-                plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
+                plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
                 
                 # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
 
-    filename = f'./Multimodal_pretraining/data/{data}/{data}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    filename = f'./Multimodal_pretraining/data/{data}/{data}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
     
     print("Merged adata")
     print(adata_merged)
