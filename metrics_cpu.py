@@ -32,8 +32,8 @@ data = args.data
 print("Read adata")
 adata_merged = sc.read_h5ad(data) 
 print(adata_merged)
-sc.pp.subsample(adata_merged, fraction=0.4)
-print(adata_merged)
+#sc.pp.subsample(adata_merged, fraction=0.4)
+#print(adata_merged)
 
 print("Start metrics")
 names_obs = list(adata_merged.obsm.keys())
