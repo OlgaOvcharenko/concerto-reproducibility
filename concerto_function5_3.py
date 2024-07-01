@@ -1570,6 +1570,14 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                             loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
                             
                             loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
+                        
+                        elif super_parameters["model_type"] == 4:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                                [source_values_RNA, source_values_protein]], training=True)
+
+                            zt_1, zt_2 = res_en[0], res_en[1]
+
+                            loss = clip_loss(zt_1, zt_2, temperature) + simclr_loss(z1, z2, temperature=0.1)
                     
                     train_loss(loss)
 
