@@ -26,7 +26,7 @@ heads=("128")
 data=("simulated")
 train=1
 test=1
-model_type=("4")
+model_type=("4 5")
 combine_omics=0
 
 for e in $epochs; do
