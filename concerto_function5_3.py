@@ -1570,12 +1570,43 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                             loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
                             
                             loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
+                        
+                        elif super_parameters["model_type"] == 4:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                                [source_values_RNA, source_values_protein]], training=True)
+
+                            zt_1, zt_2 = res_en[0], res_en[1]
+
+                            alpha = 0.5
+                            loss = alpha * (clip_loss(zt_1, zt_2, temperature)) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
+
+                        elif super_parameters["model_type"] == 5:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            zt_1, zt_2 = res_en[0], res_en[1]
+                            zs_1, zs_2 = res_dec[0], res_dec[1]
+
+                            # TT
+                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+
+                            # SS
+                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+
+                            # TS
+                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                            
+                            # ST
+                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+                            
+                            alpha = 0.5
+                            loss = alpha * (loss_TT + loss_TS + loss_ST + loss_SS) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
                     
                     train_loss(loss)
 
                 if super_parameters["combine_omics"]:
                     variables = [encode_network.trainable_variables, decode_network.trainable_variables]
-                elif super_parameters["model_type"] == 1:
+                elif super_parameters["model_type"] in [1, 4]:
                     variables = [encode_network.trainable_variables, [temperature]]
                 else:
                     variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]
