@@ -1,0 +1,584 @@
+nohup: ignoring input
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/anndata/_core/anndata.py:1820: UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+  utils.warn_names_duplicates("var")
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scanpy/preprocessing/_pca.py:374: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+  warn(msg, FutureWarning)
+Read adata
+AnnData object with n_obs × n_vars = 161600 × 2224
+    obs: 'batch', 'cell_type', 'obs_names', 'n_genes'
+    var: 'var_names', 'n_cells', 'highly_variable', 'means', 'dispersions', 'dispersions_norm', 'highly_variable_nbatches', 'highly_variable_intersection'
+    uns: 'pca'
+    obsm: '16_encoder_0.1', '32_encoder_0.1', '4_encoder_0.1', '59_encoder_0.1', '8_encoder_0.1', 'Unintegrated', 'Unintegrated_HVG_only', 'X_pca'
+    varm: 'PCs'
+Start metrics
+Computing neighbors:   0%|          | 0/7 [00:00<?, ?it/s]Computing neighbors:  14%|█▍        | 1/7 [00:51<05:11, 51.99s/it]Computing neighbors:  29%|██▊       | 2/7 [01:35<03:54, 46.90s/it]Computing neighbors:  43%|████▎     | 3/7 [02:17<02:58, 44.63s/it]Computing neighbors:  57%|█████▋    | 4/7 [03:01<02:12, 44.31s/it]Computing neighbors:  71%|███████▏  | 5/7 [03:44<01:27, 43.92s/it]Computing neighbors:  86%|████████▌ | 6/7 [04:24<00:42, 42.50s/it]Computing neighbors: 100%|██████████| 7/7 [05:06<00:00, 42.53s/it]Computing neighbors: 100%|██████████| 7/7 [05:06<00:00, 43.81s/it]
+Embeddings:   0%|[32m          [0m| 0/7 [00:00<?, ?it/s]
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s][A
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:47<5:31:07, 2207.54s/it, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:47<5:31:07, 2207.54s/it, Bio conservation: nmi_ari_cluster_labels_leiden][A
+Metrics:  20%|[34m██        [0m| 2/10 [37:26<2:04:13, 931.71s/it, Bio conservation: nmi_ari_cluster_labels_leiden] [A
+Metrics:  20%|[34m██        [0m| 2/10 [37:26<2:04:13, 931.71s/it, Bio conservation: silhouette_label]             [A
+Metrics:  30%|[34m███       [0m| 3/10 [1:14:28<2:57:28, 1521.24s/it, Bio conservation: silhouette_label][A
+Metrics:  30%|[34m███       [0m| 3/10 [1:14:28<2:57:28, 1521.24s/it, Bio conservation: clisi_knn]       [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:14:29<1:32:06, 921.07s/it, Bio conservation: clisi_knn] [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:14:29<1:32:06, 921.07s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:19:04<57:20, 688.00s/it, Batch correction: silhouette_batch]  [A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:19:04<57:20, 688.00s/it, Batch correction: ilisi_knn]       [A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:19:05<30:17, 454.27s/it, Batch correction: ilisi_knn][A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:19:05<30:17, 454.27s/it, Batch correction: kbet_per_label][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+
+Metrics:  70%|[34m███████   [0m| 7/10 [1:19:57<16:08, 322.89s/it, Batch correction: kbet_per_label][A
+Metrics:  70%|[34m███████   [0m| 7/10 [1:19:57<16:08, 322.89s/it, Batch correction: graph_connectivity][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_graph_connectivity.py:30: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  tab = pd.value_counts(comps)
+
+Metrics:  80%|[34m████████  [0m| 8/10 [1:19:57<07:20, 220.16s/it, Batch correction: graph_connectivity][A
+Metrics:  80%|[34m████████  [0m| 8/10 [1:19:57<07:20, 220.16s/it, Batch correction: pcr_comparison]    [A
+Metrics:  90%|[34m█████████ [0m| 9/10 [1:19:59<02:31, 151.94s/it, Batch correction: pcr_comparison][AEmbeddings:  14%|[32m█▍        [0m| 1/7 [1:19:59<7:59:58, 4799.79s/it]
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s][A
+                                                                                            [A
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [37:17<5:35:40, 2237.81s/it, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [37:17<5:35:40, 2237.81s/it, Bio conservation: nmi_ari_cluster_labels_leiden][A
+Metrics:  20%|[34m██        [0m| 2/10 [37:54<2:05:45, 943.14s/it, Bio conservation: nmi_ari_cluster_labels_leiden] [A
+Metrics:  20%|[34m██        [0m| 2/10 [37:54<2:05:45, 943.14s/it, Bio conservation: silhouette_label]             [A
+Metrics:  30%|[34m███       [0m| 3/10 [1:15:07<2:58:44, 1532.02s/it, Bio conservation: silhouette_label][A
+Metrics:  30%|[34m███       [0m| 3/10 [1:15:07<2:58:44, 1532.02s/it, Bio conservation: clisi_knn]       [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:15:08<1:32:44, 927.41s/it, Bio conservation: clisi_knn] [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:15:08<1:32:44, 927.41s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:19:36<57:28, 689.77s/it, Batch correction: silhouette_batch]  [A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:19:36<57:28, 689.77s/it, Batch correction: ilisi_knn]       [A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:19:36<30:21, 455.43s/it, Batch correction: ilisi_knn][A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:19:36<30:21, 455.43s/it, Batch correction: kbet_per_label][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+
+Metrics:  70%|[34m███████   [0m| 7/10 [1:20:26<16:08, 322.88s/it, Batch correction: kbet_per_label][A
+Metrics:  70%|[34m███████   [0m| 7/10 [1:20:26<16:08, 322.88s/it, Batch correction: graph_connectivity][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_graph_connectivity.py:30: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  tab = pd.value_counts(comps)
+
+Metrics:  80%|[34m████████  [0m| 8/10 [1:20:27<07:20, 220.15s/it, Batch correction: graph_connectivity][A
+Metrics:  80%|[34m████████  [0m| 8/10 [1:20:27<07:20, 220.15s/it, Batch correction: pcr_comparison]    [A
+Metrics:  90%|[34m█████████ [0m| 9/10 [1:20:28<02:31, 151.80s/it, Batch correction: pcr_comparison][AEmbeddings:  29%|[32m██▊       [0m| 2/7 [2:40:28<6:41:23, 4816.76s/it]
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s][A
+                                                                                            [A
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:45<5:30:45, 2205.03s/it, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:45<5:30:45, 2205.03s/it, Bio conservation: nmi_ari_cluster_labels_leiden][A
+Metrics:  20%|[34m██        [0m| 2/10 [37:19<2:03:45, 928.24s/it, Bio conservation: nmi_ari_cluster_labels_leiden] [A
+Metrics:  20%|[34m██        [0m| 2/10 [37:19<2:03:45, 928.24s/it, Bio conservation: silhouette_label]             [A
+Metrics:  30%|[34m███       [0m| 3/10 [1:13:20<2:53:56, 1490.91s/it, Bio conservation: silhouette_label][A
+Metrics:  30%|[34m███       [0m| 3/10 [1:13:20<2:53:56, 1490.91s/it, Bio conservation: clisi_knn]       [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:13:20<1:30:15, 902.63s/it, Bio conservation: clisi_knn] [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:13:20<1:30:15, 902.63s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:17:54<56:19, 675.83s/it, Batch correction: silhouette_batch]  [A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:17:54<56:19, 675.83s/it, Batch correction: ilisi_knn]       [A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:17:55<29:45, 446.31s/it, Batch correction: ilisi_knn][A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:17:55<29:45, 446.31s/it, Batch correction: kbet_per_label][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+
+Metrics:  70%|[34m███████   [0m| 7/10 [1:18:45<15:50, 316.82s/it, Batch correction: kbet_per_label][A
+Metrics:  70%|[34m███████   [0m| 7/10 [1:18:45<15:50, 316.82s/it, Batch correction: graph_connectivity][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_graph_connectivity.py:30: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  tab = pd.value_counts(comps)
+
+Metrics:  80%|[34m████████  [0m| 8/10 [1:18:45<07:12, 216.02s/it, Batch correction: graph_connectivity][A
+Metrics:  80%|[34m████████  [0m| 8/10 [1:18:45<07:12, 216.02s/it, Batch correction: pcr_comparison]    [A
+Metrics:  90%|[34m█████████ [0m| 9/10 [1:18:47<02:28, 148.97s/it, Batch correction: pcr_comparison][AEmbeddings:  43%|[32m████▎     [0m| 3/7 [3:59:15<5:18:23, 4775.87s/it]
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s][A
+                                                                                            [A
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:18<5:26:42, 2178.10s/it, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:18<5:26:42, 2178.10s/it, Bio conservation: nmi_ari_cluster_labels_leiden][A
+Metrics:  20%|[34m██        [0m| 2/10 [36:56<2:02:34, 919.30s/it, Bio conservation: nmi_ari_cluster_labels_leiden] [A
+Metrics:  20%|[34m██        [0m| 2/10 [36:56<2:02:34, 919.30s/it, Bio conservation: silhouette_label]             [A
+Metrics:  30%|[34m███       [0m| 3/10 [1:13:16<2:54:26, 1495.17s/it, Bio conservation: silhouette_label][A
+Metrics:  30%|[34m███       [0m| 3/10 [1:13:16<2:54:26, 1495.17s/it, Bio conservation: clisi_knn]       [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:13:17<1:30:30, 905.10s/it, Bio conservation: clisi_knn] [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:13:17<1:30:30, 905.10s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:17:53<56:32, 678.51s/it, Batch correction: silhouette_batch]  [A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:17:53<56:32, 678.51s/it, Batch correction: ilisi_knn]       [A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:17:54<29:52, 448.00s/it, Batch correction: ilisi_knn][A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:17:54<29:52, 448.00s/it, Batch correction: kbet_per_label][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+
+Metrics:  70%|[34m███████   [0m| 7/10 [1:18:46<15:55, 318.50s/it, Batch correction: kbet_per_label][A
+Metrics:  70%|[34m███████   [0m| 7/10 [1:18:46<15:55, 318.50s/it, Batch correction: graph_connectivity][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_graph_connectivity.py:30: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  tab = pd.value_counts(comps)
+
+Metrics:  80%|[34m████████  [0m| 8/10 [1:18:46<07:14, 217.17s/it, Batch correction: graph_connectivity][A
+Metrics:  80%|[34m████████  [0m| 8/10 [1:18:46<07:14, 217.17s/it, Batch correction: pcr_comparison]    [A
+Metrics:  90%|[34m█████████ [0m| 9/10 [1:18:48<02:29, 149.74s/it, Batch correction: pcr_comparison][AEmbeddings:  57%|[32m█████▋    [0m| 4/7 [5:18:03<3:57:50, 4756.99s/it]
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s][A
+                                                                                            [A
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:40<5:30:01, 2200.15s/it, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [36:40<5:30:01, 2200.15s/it, Bio conservation: nmi_ari_cluster_labels_leiden][A
+Metrics:  20%|[34m██        [0m| 2/10 [37:15<2:03:33, 926.73s/it, Bio conservation: nmi_ari_cluster_labels_leiden] [A
+Metrics:  20%|[34m██        [0m| 2/10 [37:15<2:03:33, 926.73s/it, Bio conservation: silhouette_label]             [A
+Metrics:  30%|[34m███       [0m| 3/10 [1:13:52<2:55:47, 1506.72s/it, Bio conservation: silhouette_label][A
+Metrics:  30%|[34m███       [0m| 3/10 [1:13:52<2:55:47, 1506.72s/it, Bio conservation: clisi_knn]       [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:13:52<1:31:12, 912.09s/it, Bio conservation: clisi_knn] [A
+Metrics:  40%|[34m████      [0m| 4/10 [1:13:52<1:31:12, 912.09s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:18:30<56:56, 683.33s/it, Batch correction: silhouette_batch]  [A
+Metrics:  50%|[34m█████     [0m| 5/10 [1:18:30<56:56, 683.33s/it, Batch correction: ilisi_knn]       [A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:18:31<30:04, 451.17s/it, Batch correction: ilisi_knn][A
+Metrics:  60%|[34m██████    [0m| 6/10 [1:18:31<30:04, 451.17s/it, Batch correction: kbet_per_label][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+
+Metrics:  70%|[34m███████   [0m| 7/10 [1:19:22<16:01, 320.49s/it, Batch correction: kbet_per_label][A
+Metrics:  70%|[34m███████   [0m| 7/10 [1:19:22<16:01, 320.49s/it, Batch correction: graph_connectivity][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_graph_connectivity.py:30: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  tab = pd.value_counts(comps)
+
+Metrics:  80%|[34m████████  [0m| 8/10 [1:19:22<07:17, 218.53s/it, Batch correction: graph_connectivity][A
+Metrics:  80%|[34m████████  [0m| 8/10 [1:19:22<07:17, 218.53s/it, Batch correction: pcr_comparison]    [A
+Metrics:  90%|[34m█████████ [0m| 9/10 [1:19:24<02:30, 150.69s/it, Batch correction: pcr_comparison][AEmbeddings:  71%|[32m███████▏  [0m| 5/7 [6:37:28<2:38:39, 4759.64s/it]
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s][A
+                                                                                            [A
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [08:34<1:17:10, 514.52s/it, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [08:34<1:17:10, 514.52s/it, Bio conservation: nmi_ari_cluster_labels_leiden][A
+Metrics:  20%|[34m██        [0m| 2/10 [09:04<30:36, 229.52s/it, Bio conservation: nmi_ari_cluster_labels_leiden]  [A
+Metrics:  20%|[34m██        [0m| 2/10 [09:04<30:36, 229.52s/it, Bio conservation: silhouette_label]             [A
+Metrics:  30%|[34m███       [0m| 3/10 [17:36<41:48, 358.29s/it, Bio conservation: silhouette_label][A
+Metrics:  30%|[34m███       [0m| 3/10 [17:36<41:48, 358.29s/it, Bio conservation: clisi_knn]       [A
+Metrics:  40%|[34m████      [0m| 4/10 [17:36<21:42, 217.16s/it, Bio conservation: clisi_knn][A
+Metrics:  40%|[34m████      [0m| 4/10 [17:36<21:42, 217.16s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [18:44<13:36, 163.26s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [18:44<13:36, 163.26s/it, Batch correction: ilisi_knn]       [A
+Metrics:  60%|[34m██████    [0m| 6/10 [18:45<07:12, 108.02s/it, Batch correction: ilisi_knn][A
+Metrics:  60%|[34m██████    [0m| 6/10 [18:45<07:12, 108.02s/it, Batch correction: kbet_per_label][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+
+Metrics:  70%|[34m███████   [0m| 7/10 [19:35<04:27, 89.15s/it, Batch correction: kbet_per_label] [A
+Metrics:  70%|[34m███████   [0m| 7/10 [19:35<04:27, 89.15s/it, Batch correction: graph_connectivity][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_graph_connectivity.py:30: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  tab = pd.value_counts(comps)
+
+Metrics:  80%|[34m████████  [0m| 8/10 [19:35<02:01, 60.83s/it, Batch correction: graph_connectivity][A
+Metrics:  80%|[34m████████  [0m| 8/10 [19:35<02:01, 60.83s/it, Batch correction: pcr_comparison]    [A
+Metrics:  90%|[34m█████████ [0m| 9/10 [19:36<00:41, 41.95s/it, Batch correction: pcr_comparison][AEmbeddings:  86%|[32m████████▌ [0m| 6/7 [6:57:04<59:01, 3541.29s/it]  
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s][A
+                                                                                         [A
+Metrics:   0%|[34m          [0m| 0/10 [00:00<?, ?it/s, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [08:31<1:16:46, 511.82s/it, Bio conservation: isolated_labels][A
+Metrics:  10%|[34m█         [0m| 1/10 [08:31<1:16:46, 511.82s/it, Bio conservation: nmi_ari_cluster_labels_leiden][A
+Metrics:  20%|[34m██        [0m| 2/10 [09:04<30:40, 230.08s/it, Bio conservation: nmi_ari_cluster_labels_leiden]  [A
+Metrics:  20%|[34m██        [0m| 2/10 [09:04<30:40, 230.08s/it, Bio conservation: silhouette_label]             [A
+Metrics:  30%|[34m███       [0m| 3/10 [17:35<41:49, 358.43s/it, Bio conservation: silhouette_label][A
+Metrics:  30%|[34m███       [0m| 3/10 [17:35<41:49, 358.43s/it, Bio conservation: clisi_knn]       [A
+Metrics:  40%|[34m████      [0m| 4/10 [17:36<21:42, 217.12s/it, Bio conservation: clisi_knn][A
+Metrics:  40%|[34m████      [0m| 4/10 [17:36<21:42, 217.12s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [18:43<13:34, 162.91s/it, Batch correction: silhouette_batch][A
+Metrics:  50%|[34m█████     [0m| 5/10 [18:43<13:34, 162.91s/it, Batch correction: ilisi_knn]       [A
+Metrics:  60%|[34m██████    [0m| 6/10 [18:43<07:10, 107.69s/it, Batch correction: ilisi_knn][A
+Metrics:  60%|[34m██████    [0m| 6/10 [18:43<07:10, 107.69s/it, Batch correction: kbet_per_label][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_kbet.py:181: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  comp_size = pd.value_counts(labs)
+
+Metrics:  70%|[34m███████   [0m| 7/10 [19:35<04:28, 89.38s/it, Batch correction: kbet_per_label] [A
+Metrics:  70%|[34m███████   [0m| 7/10 [19:35<04:28, 89.38s/it, Batch correction: graph_connectivity][A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/_graph_connectivity.py:30: FutureWarning: pandas.value_counts is deprecated and will be removed in a future version. Use pd.Series(obj).value_counts() instead.
+  tab = pd.value_counts(comps)
+
+Metrics:  80%|[34m████████  [0m| 8/10 [19:35<02:01, 60.99s/it, Batch correction: graph_connectivity][A
+Metrics:  80%|[34m████████  [0m| 8/10 [19:35<02:01, 60.99s/it, Batch correction: pcr_comparison]    [A
+Metrics:  90%|[34m█████████ [0m| 9/10 [19:35<00:42, 42.05s/it, Batch correction: pcr_comparison][AEmbeddings: 100%|[32m██████████[0m| 7/7 [7:16:40<00:00, 2767.99s/it]Embeddings: 100%|[32m██████████[0m| 7/7 [7:16:40<00:00, 3742.89s/it]
+
+                                                                                         [A/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/benchmark/_core.py:268: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value 'Aggregate score' has dtype incompatible with float64, please explicitly cast to a compatible dtype first.
+  df.loc[_METRIC_TYPE, per_class_score.columns] = _AGGREGATE_SCORE
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/benchmark/_core.py:268: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value 'Aggregate score' has dtype incompatible with float64, please explicitly cast to a compatible dtype first.
+  df.loc[_METRIC_TYPE, per_class_score.columns] = _AGGREGATE_SCORE
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/scib_metrics/benchmark/_core.py:268: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value 'Aggregate score' has dtype incompatible with float64, please explicitly cast to a compatible dtype first.
+  df.loc[_METRIC_TYPE, per_class_score.columns] = _AGGREGATE_SCORE
+Time: 442 min 3 sec
+                        Isolated labels  ...            Total
+Embedding                                ...                 
+16_encoder_0.1                 0.562018  ...         0.707096
+32_encoder_0.1                 0.552607  ...         0.699928
+4_encoder_0.1                  0.603544  ...         0.710798
+59_encoder_0.1                 0.551125  ...         0.694775
+8_encoder_0.1                  0.559132  ...         0.713172
+Unintegrated                   0.436226  ...         0.567257
+Unintegrated_HVG_only          0.573893  ...         0.568173
+Metric Type            Bio conservation  ...  Aggregate score
+
+[8 rows x 13 columns]
+                        Isolated labels  ...            Total
+Embedding                                ...                 
+16_encoder_0.1                 0.751818  ...         0.874099
+32_encoder_0.1                 0.695572  ...         0.822172
+4_encoder_0.1                       1.0  ...         0.888176
+59_encoder_0.1                 0.686714  ...         0.804795
+8_encoder_0.1                  0.734566  ...         0.890995
+Unintegrated                        0.0  ...         0.100961
+Unintegrated_HVG_only          0.822791  ...         0.533266
+Metric Type            Bio conservation  ...  Aggregate score
+
+[8 rows x 13 columns]
