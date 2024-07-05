@@ -180,7 +180,7 @@ def read_data(data: str = "simulated", save_path: str = ""):
 
         RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp, adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
         RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp_test, adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
-    
+
     return RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test
 
 def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, data: str, 
@@ -397,9 +397,7 @@ def main():
     test = args.test
     combine_omics = args.combine_omics
 
-    print(f"Multimodal correction: epoch {epoch}, model type {model_type}, 
-          lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, 
-          attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
+    print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
     # Check num GPUs
     gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
@@ -438,3 +436,5 @@ def main():
                    batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                    heads=heads, combine_omics=combine_omics, model_type=model_type, 
                    save_path=save_path, train=False)
+        
+main()
