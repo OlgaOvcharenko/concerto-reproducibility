@@ -1,5 +1,7 @@
 import os
 import sys
+
+from sklearn.model_selection import train_test_split
 sys.path.append("../")
 from concerto_function5_3 import *
 import numpy as np
@@ -45,47 +47,17 @@ def get_args():
     return args
 
 
-args = get_args()
-data = args.data
-epoch = args.epoch
-lr = args.lr
-batch_size= args.batch_size
-drop_rate= args.drop_rate
-attention_t = True if args.attention_t == 1 else False
-attention_s = True if args.attention_s == 1 else False 
-heads = args.heads
-train = args.train 
-model_type = args.model_type
-test = args.test
-combine_omics = args.combine_omics
-print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
-
-
-gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-print(f"\nAvailable GPUs: {gpus}\n")
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
-
-
-if data == "simulated":
-    path = './Multimodal_pretraining/data/multi_gene_l2.loom'
-    adata_RNA = sc.read(path)
-
-    path = './Multimodal_pretraining/data/multi_protein_l2.loom'
-    adata_Protein = sc.read(path) #cell_type batch
-
-    print("Read simulated data")
-
-    print("Read data.")
-    print(f"{data} RNA data shape {adata_RNA.shape}")
-    print(f"{data} Protein data shape {adata_Protein.shape}")
+def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
+    print("Read PBMC data.")
+    print(f"Train={train} RNA data shape {adata_RNA.shape}")
+    print(f"Train={train} Protein data shape {adata_Protein.shape}")
 
     # Create PCA for benchmarking
     adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
     sc.tl.pca(adata_merged_tmp)
 
-    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True,batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True,batch_key='batch')
+    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True, batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True, batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
@@ -96,39 +68,39 @@ if data == "simulated":
     
     print("Preprocessed data.")
 
-    print(f"{data} RNA data shape {adata_RNA.shape}")
-    print(f"{data} Protein data shape {adata_Protein.shape}")
-    print(f"{data} RNA data: \n {adata_RNA}")
-    print(f"{data} Protein data: \n {adata_Protein}")
+    print(f"RNA data shape {adata_RNA.shape}")
+    print(f"Protein data shape {adata_Protein.shape}")
+    print(f"RNA data: \n {adata_RNA}")
+    print(f"Protein data: \n {adata_Protein}")
 
-    save_path = './Multimodal_pretraining/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    # adata_RNA.write_h5ad(save_path + 'adata_RNA.h5ad')
-    # adata_Protein.write_h5ad(save_path + 'adata_Protein.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_Protein_{"train" if train else "test"}.h5ad')
 
-    # print("Saved adata.")
+    print("Saved adata.")
 
-    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = save_path + 'tfrecord/RNA_tf/',batch_col_name = 'batch')
-    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + 'tfrecord/Protein_tf/',batch_col_name = 'batch')
-    # print("Make tf record.")
+    path_file = 'tfrecord_train/' if train else 'tfrecord_test/'
+    RNA_tf_path = save_path + path_file + 'RNA_tf/'
+    Protein_tf_path = save_path + path_file + 'Protein_tf/'
 
-    RNA_tf_path = save_path + 'tfrecord/RNA_tf/'
-    Protein_tf_path = save_path + 'tfrecord/Protein_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + Protein_tf_path, batch_col_name = 'batch')
 
-else:
-    adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-    adata_RNA = adata_merged_tmp[:, 0:13431] # adata_gex
-    adata_Protein = adata_merged_tmp[:, 13431:] # adata_atac
+    print("Made tf records.")
 
+    return RNA_tf_path, Protein_tf_path, adata_merged
+
+
+def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
     print("Read human data")
+    print(f"Train={train} gex data shape {adata_RNA.shape}")
+    print(f"Train={train} atac data shape {adata_Protein.shape}")
 
     # Create PCA for benchmarking
     sc.tl.pca(adata_merged_tmp)
 
     # FIXME why 20K
-    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=True, batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein, min_features = 0, is_hvg=True, batch_key='batch')
+    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features=0, is_hvg=True, batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein, min_features=0, is_hvg=True, batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
@@ -140,35 +112,87 @@ else:
     
     print("Preprocessed data.")
 
-    print(f"{data} RNA data shape {adata_RNA.shape}")
-    print(f"{data} Protein data shape {adata_Protein.shape}")
-    print(f"{data} RNA data: \n {adata_RNA}")
-    print(f"{data} Protein data: \n {adata_Protein}")
+    print(f"GEX data shape {adata_RNA.shape}")
+    print(f"ATAC data shape {adata_Protein.shape}")
+    print(f"GEX data: \n {adata_RNA}")
+    print(f"ATAC data: \n {adata_Protein}")
 
-    save_path = './Multimodal_pretraining/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    # adata_RNA.write_h5ad(save_path + 'adata_gex.h5ad')
-    # adata_Protein.write_h5ad(save_path + 'adata_atac.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_atac_{"train" if train else "test"}.h5ad')
+    print("Saved adata.")
 
-    # print("Saved adata.")
+    path_file = 'tfrecord_train/' if train else 'tfrecord_test/'
+    RNA_tf_path = save_path + path_file + 'gex_tf/'
+    Protein_tf_path = save_path + path_file + 'atac_tf/'
 
-    # RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = save_path + 'tfrecord/gex_tf/', batch_col_name = 'batch')
-    # Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = save_path + 'tfrecord/atac_tf/', batch_col_name = 'batch')
-    # print("Make tf record.")
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = Protein_tf_path, batch_col_name = 'batch')
+    print("Made tf record.")
 
-    RNA_tf_path = save_path + 'tfrecord/gex_tf/'
-    Protein_tf_path = save_path + 'tfrecord/atac_tf/'
+    return RNA_tf_path, Protein_tf_path, adata_merged
+    
 
-print("Merged adata")
-print(adata_merged)
+def read_data(data: str = "simulated", save_path: str = ""):
+    if data == "simulated":
+        path = './Multimodal_pretraining/data/multi_gene_l2.loom'
+        adata_RNA = sc.read(path)
 
-# Train
-weight_path = save_path + 'weight/'
-if train == 1:
+        path = './Multimodal_pretraining/data/multi_protein_l2.loom'
+        adata_Protein = sc.read(path) #cell_type batch
+
+        train_idx, test_idx = train_test_split(
+            adata_RNA.obs_names.values,
+            test_size=0.3,
+            stratify=adata_RNA.obs["cell_type"],
+            shuffle=True,
+            random_state=42,
+        )
+        
+        adata_RNA = adata_RNA[train_idx, :]
+        adata_Protein = adata_Protein[train_idx, :]
+
+        adata_RNA_test = adata_RNA[test_idx, :]
+        adata_Protein_test = adata_Protein[test_idx, :]
+
+        RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
+        RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
+
+    else:
+        adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+        adata_RNA = adata_merged_tmp[:, 0:13431] # adata_gex
+        adata_Protein = adata_merged_tmp[:, 13431:] # adata_atac
+
+        train_idx, test_idx = train_test_split(
+            adata_RNA.obs_names.values,
+            test_size=0.3,
+            stratify=adata_RNA.obs["cell_type"],
+            shuffle=True,
+            random_state=42,
+        )
+        
+        adata_RNA = adata_RNA[train_idx, :]
+        adata_Protein = adata_Protein[train_idx, :]
+        adata_merged_tmp = adata_merged_tmp[train_idx, :]
+
+        adata_RNA_test = adata_RNA[test_idx, :]
+        adata_Protein_test = adata_Protein[test_idx, :]
+        adata_merged_tmp_test = adata_merged_tmp[test_idx, :]
+
+        RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp, adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
+        RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp_test, adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
+    
+    return RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test
+
+def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, data: str, 
+                   attention_t: bool, attention_s: bool,
+                   batch_size:int, epoch: int, lr: float, drop_rate: float, 
+                   heads: int, combine_omics: int, model_type: int):
+    # Train
     if attention_t == True and attention_s == False:
-        concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                                RNA_tf_path,Protein_tf_path,weight_path, 
+        concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'], 
+                                RNA_tf_path, 
+                                Protein_tf_path, 
+                                weight_path, 
                                 super_parameters={
                                     'data': data,
                                     'batch_size': batch_size, 
@@ -182,7 +206,9 @@ if train == 1:
                                     })
     elif attention_t == True and attention_s == True:
         concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                                RNA_tf_path,Protein_tf_path,weight_path, 
+                                RNA_tf_path, 
+                                Protein_tf_path, 
+                                weight_path, 
                                 super_parameters={
                                     'data': data,
                                     'batch_size': batch_size, 
@@ -195,7 +221,9 @@ if train == 1:
                                     })
     elif attention_t == False and attention_s == False:
         concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                                RNA_tf_path,Protein_tf_path,weight_path, 
+                                RNA_tf_path,
+                                Protein_tf_path,
+                                weight_path, 
                                 super_parameters={
                                     'data': data,
                                     'batch_size': batch_size, 
@@ -209,34 +237,37 @@ if train == 1:
 
     print("Trained.")
 
-ep_vals = []
-i = 4
-while i < epoch:
-    ep_vals.append(i)
-    i = i * 2
-ep_vals.append(epoch)
 
-adata_merged.obs = adata_RNA.obs
+def test_concerto(weight_path: str, RNA_tf_path_test: str, Protein_tf_path_test: str, data: str, 
+                   attention_t: bool, attention_s: bool,
+                   batch_size:int, epoch: int, lr: float, drop_rate: float, 
+                   heads: int, combine_omics: int, model_type: int, 
+                   save_path: str, train: bool = False):
+    ep_vals = []
+    i = 4
+    while i < epoch:
+        ep_vals.append(i)
+        i = i * 2
+    ep_vals.append(epoch)
 
-print("Merged adata")
-print(adata_merged)
+    adata_merged.obs = adata_RNA.obs
 
-# Test
-itr_test = 0
-if test:
+    print("Merged adata")
+    print(adata_merged)
+
+    # Test
     diverse_tests_names = []
     for dr in [drop_rate]:
         for nn in ["encoder"]:
             for e in ep_vals: 
                 saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
-                # saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_model_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5' # You can choose a trained weight or use None to default to the weight of the last epoch.
-                
+
                 if (nn == "decoder" and attention_s == False) or (nn == "encoder" and attention_t == False):
-                    embedding,batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
+                    embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
                     ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
                     weight_path, 
-                    RNA_tf_path,
-                    Protein_tf_path,
+                    RNA_tf_path_test,
+                    Protein_tf_path_test,
                     n_cells_for_sample=None,
                     super_parameters={
                         'batch_size': batch_size, 
@@ -252,8 +283,8 @@ if test:
                     embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal(
                         ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
                         weight_path, 
-                        RNA_tf_path,
-                        Protein_tf_path,
+                        RNA_tf_path_test,
+                        Protein_tf_path_test,
                         n_cells_for_sample=None,
                         super_parameters={
                             'batch_size': batch_size, 
@@ -270,25 +301,16 @@ if test:
                 print("Tested.")
                 
                 if data == "simulated":
-                    adata_RNA = sc.read(save_path + 'adata_RNA.h5ad')
+                    adata_RNA = sc.read(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
                 else:
-                    adata_RNA = sc.read(save_path + 'adata_gex.h5ad')
+                    adata_RNA = sc.read(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
                 
-                # FIXME
                 adata_RNA_1 = adata_RNA[RNA_id]
                 adata_RNA_1.obsm['X_embedding'] = embedding
 
                 print(f"Shape of the embedding {embedding.shape}.")
                 
                 adata_merged = adata_merged[RNA_id]
-                # if itr_test == 0:
-                #     adata_merged = adata_merged[RNA_id]
-
-                #     print("Merged adata")
-                #     print(adata_merged)
-                #     print(len(RNA_id))
-
-                #     itr_test += 1
 
                 adata_merged.obsm[f"{e}_{nn}_{dr}"] = embedding
                 diverse_tests_names.append(f"{e}_{nn}_{dr}")
@@ -343,11 +365,11 @@ if test:
                 sc.tl.umap(adata_RNA_1,min_dist=0.1)
                 sc.set_figure_params(dpi=150)
                 sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
-                plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
+                plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
                 
                 # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
 
-    filename = f'./Multimodal_pretraining/data/{data}/{data}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    filename = f'./Multimodal_pretraining/data/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
     
     print("Merged adata")
     print(adata_merged)
@@ -356,3 +378,63 @@ if test:
     # Benchmark
     print(adata_merged)
     print(f"Saved adata all at {filename}")
+
+
+
+def main():
+    # Parse args
+    args = get_args()
+    data = args.data
+    epoch = args.epoch
+    lr = args.lr
+    batch_size= args.batch_size
+    drop_rate= args.drop_rate
+    attention_t = True if args.attention_t == 1 else False
+    attention_s = True if args.attention_s == 1 else False 
+    heads = args.heads
+    train = args.train 
+    model_type = args.model_type
+    test = args.test
+    combine_omics = args.combine_omics
+
+    print(f"Multimodal correction: epoch {epoch}, model type {model_type}, 
+          lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, 
+          attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
+
+    # Check num GPUs
+    gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
+    print(f"\nAvailable GPUs: {gpus}\n")
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+
+    
+    # Read data
+    save_path = './Multimodal_pretraining/'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = read_data(data=data, save_path=save_path)
+
+
+    # Train
+    weight_path = save_path + 'weight/'
+    if train:
+        train_concerto(weight_path=weight_path, RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, data=data, 
+                   attention_t=attention_t, attention_s=attention_s, 
+                   batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                   heads=heads, combine_omics=combine_omics, model_type=model_type)
+    print("Trained.")
+
+    if test:
+        # Test on train data
+        test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
+                   attention_t=attention_t, attention_s=attention_s,
+                   batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                   heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                   save_path=save_path, train=True)
+
+        # Test on test data
+        test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
+                   attention_t=attention_t, attention_s=attention_s,
+                   batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                   heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                   save_path=save_path, train=False)
