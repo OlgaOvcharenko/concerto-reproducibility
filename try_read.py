@@ -36,8 +36,11 @@ from sklearn.model_selection import (
 # print(adata_adt_rna.X)
 
 
-path = './Multimodal_pretraining/data/multi_gene_l2.loom'
+path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
 adata_RNA = sc.read(path)
+
+path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
+adata_Protein = sc.read(path) #cell_type batch
 
 train_idx, test_idx = train_test_split(
     adata_RNA.obs_names.values,
@@ -47,16 +50,11 @@ train_idx, test_idx = train_test_split(
     random_state=42,
 )
 
-print(
-    f"Train set : \n {adata_RNA[train_idx, :].obs.cell_type.value_counts()} \n \n Test set: \n {adata_RNA[test_idx, :].obs.cell_type.value_counts()}"
-)
+adata_RNA = adata_RNA[train_idx, :]
+adata_Protein = adata_Protein[train_idx, :]
 
-path = './Multimodal_pretraining/data/multi_protein_l2.loom'
-adata_Protein = sc.read(path) #cell_type batch
-
-print(
-    f"Train set : \n {adata_Protein[train_idx, :].obs.cell_type.value_counts()} \n \n Test set: \n {adata_Protein[test_idx, :].obs.cell_type.value_counts()}"
-)
+adata_RNA_test = adata_RNA[test_idx, :]
+adata_Protein_test = adata_Protein[test_idx, :]
 
 # # Create PCA for benchmarking
 # adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
