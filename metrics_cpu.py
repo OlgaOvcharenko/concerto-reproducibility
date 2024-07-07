@@ -57,12 +57,12 @@ print(f"Time: {int((end - start) / 60)} min {int((end - start) % 60)} sec")
 df = bm.get_results(min_max_scale=False)
 print(df)
 df = df.round(decimals=3)
-df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data.split("/")[-1][:-5]}_metrics_False.csv')
+df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data.split("/")[-1][:-5].split("_")[0]}/{data.split("/")[-1][:-5]}_metrics_False.csv')
 
 df = bm.get_results(min_max_scale=True)
 print(df)
 df = df.round(decimals=3)
-df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data.split("/")[-1][:-5]}_metrics_True.csv')
+df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data.split("/")[-1][:-5].split("_")[0]}/{data.split("/")[-1][:-5]}_metrics_True.csv')
 
 # bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/metrics/')
 # df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data[:-5]}')
@@ -72,5 +72,5 @@ dir = f"{data[:-5]}"
 # if not os.path.exists(dir):
 #     os.makedirs(dir)
 
-bm.plot_results_table(save_dir='./Multimodal_pretraining/plots/metrics/', min_max_scale=False)
+bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/metrics/{data.split("/")[-1][:-5].split("_")[0]}', min_max_scale=False)
 
