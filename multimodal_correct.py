@@ -73,8 +73,8 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
     print(f"RNA data: \n {adata_RNA}")
     print(f"Protein data: \n {adata_Protein}")
 
-    adata_RNA.write_h5ad(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
-    adata_Protein.write_h5ad(save_path + f'adata_Protein_{"train" if train else "test"}.h5ad')
+    # adata_RNA.write_h5ad(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
+    # adata_Protein.write_h5ad(save_path + f'adata_Protein_{"train" if train else "test"}.h5ad')
 
     print("Saved adata.")
 
@@ -82,8 +82,8 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
     RNA_tf_path = save_path + path_file + 'RNA_tf/'
     Protein_tf_path = save_path + path_file + 'Protein_tf/'
 
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + Protein_tf_path, batch_col_name = 'batch')
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + Protein_tf_path, batch_col_name = 'batch')
 
     print("Made tf records.")
 
@@ -117,16 +117,16 @@ def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool
     print(f"GEX data: \n {adata_RNA}")
     print(f"ATAC data: \n {adata_Protein}")
 
-    adata_RNA.write_h5ad(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
-    adata_Protein.write_h5ad(save_path + f'adata_atac_{"train" if train else "test"}.h5ad')
+    # adata_RNA.write_h5ad(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
+    # adata_Protein.write_h5ad(save_path + f'adata_atac_{"train" if train else "test"}.h5ad')
     print("Saved adata.")
 
     path_file = 'tfrecord_train/' if train else 'tfrecord_test/'
     RNA_tf_path = save_path + path_file + 'gex_tf/'
     Protein_tf_path = save_path + path_file + 'atac_tf/'
 
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = Protein_tf_path, batch_col_name = 'batch')
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = Protein_tf_path, batch_col_name = 'batch')
     print("Made tf record.")
 
     return RNA_tf_path, Protein_tf_path, adata_merged
@@ -147,12 +147,12 @@ def read_data(data: str = "simulated", save_path: str = ""):
             shuffle=True,
             random_state=42,
         )
-        
-        adata_RNA = adata_RNA[train_idx, :]
-        adata_Protein = adata_Protein[train_idx, :]
 
         adata_RNA_test = adata_RNA[test_idx, :]
         adata_Protein_test = adata_Protein[test_idx, :]
+
+        adata_RNA = adata_RNA[train_idx, :]
+        adata_Protein = adata_Protein[train_idx, :]
 
         RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
         RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
@@ -169,19 +169,19 @@ def read_data(data: str = "simulated", save_path: str = ""):
             shuffle=True,
             random_state=42,
         )
-        
-        adata_RNA = adata_RNA[train_idx, :]
-        adata_Protein = adata_Protein[train_idx, :]
-        adata_merged_tmp = adata_merged_tmp[train_idx, :]
 
         adata_RNA_test = adata_RNA[test_idx, :]
         adata_Protein_test = adata_Protein[test_idx, :]
         adata_merged_tmp_test = adata_merged_tmp[test_idx, :]
 
+        adata_RNA = adata_RNA[train_idx, :]
+        adata_Protein = adata_Protein[train_idx, :]
+        adata_merged_tmp = adata_merged_tmp[train_idx, :]
+
         RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp, adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
         RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp_test, adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
-    
-    return RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test
+
+    return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
 
 def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, data: str, 
                    attention_t: bool, attention_s: bool,
@@ -238,7 +238,7 @@ def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, dat
     print("Trained.")
 
 
-def test_concerto(weight_path: str, RNA_tf_path_test: str, Protein_tf_path_test: str, data: str, 
+def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: str, Protein_tf_path_test: str, data: str, 
                    attention_t: bool, attention_s: bool,
                    batch_size:int, epoch: int, lr: float, drop_rate: float, 
                    heads: int, combine_omics: int, model_type: int, 
@@ -397,9 +397,7 @@ def main():
     test = args.test
     combine_omics = args.combine_omics
 
-    print(f"Multimodal correction: epoch {epoch}, model type {model_type}, 
-          lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, 
-          attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
+    print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
     # Check num GPUs
     gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
@@ -412,7 +410,7 @@ def main():
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = read_data(data=data, save_path=save_path)
+    RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test = read_data(data=data, save_path=save_path)
 
 
     # Train
@@ -430,11 +428,13 @@ def main():
                    attention_t=attention_t, attention_s=attention_s,
                    batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                    heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                   save_path=save_path, train=True)
+                   save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA)
 
         # Test on test data
         test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
                    attention_t=attention_t, attention_s=attention_s,
                    batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                    heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                   save_path=save_path, train=False)
+                   save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test)
+        
+main()
