@@ -347,7 +347,11 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     'HSPC': 'other',
                     'Platelet': 'other'
                 }
-                adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
+
+                if data == 'simulated':
+                    adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
+                else:
+                    adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
                 print(adata_RNA_1)
 
                 sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")

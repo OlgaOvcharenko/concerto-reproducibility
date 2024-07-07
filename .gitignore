@@ -19,3 +19,16 @@ Multimodal_pretraining/.DS_Store
 metrics_python_venv/
 
 logs_tensorboard/gradient_tape/*.zip
+
+Multimodal_pretraining/adata_Protein_test.h5ad
+Multimodal_pretraining/adata_Protein_train.h5ad
+Multimodal_pretraining/adata_RNA_test.h5ad
+Multimodal_pretraining/adata_RNA_train.h5ad
+Multimodal_pretraining/adata_atac_test.h5ad
+Multimodal_pretraining/adata_atac_train.h5ad
+Multimodal_pretraining/adata_gex_test.h5ad
+Multimodal_pretraining/adata_gex_train.h5ad
+
+Multimodal_pretraining/tfrecord_test/
+Multimodal_pretraining/tfrecord_train/
+
