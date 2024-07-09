@@ -8,6 +8,8 @@ import numpy as np
 import scanpy as sc
 import anndata as ad
 import matplotlib.pyplot as plt
+# Inital setting for plot size
+from matplotlib import gridspec, rcParams
 from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
 import tensorflow as tf
 # import scvelo as scv
@@ -45,7 +47,6 @@ def get_args():
 
     args = parser.parse_args()
     return args
-
 
 def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
     print("Read PBMC data.")
@@ -142,9 +143,9 @@ def read_data(data: str = "simulated", save_path: str = ""):
 
         train_idx, test_idx = train_test_split(
             adata_RNA.obs_names.values,
-            test_size=0.3,
-            stratify=adata_RNA.obs["cell_type"],
-            shuffle=True,
+            test_size=0.5,
+            stratify=adata_RNA.obs["batch_size"],
+            shuffle=False,
             random_state=42,
         )
 
@@ -164,9 +165,9 @@ def read_data(data: str = "simulated", save_path: str = ""):
 
         train_idx, test_idx = train_test_split(
             adata_RNA.obs_names.values,
-            test_size=0.3,
-            stratify=adata_RNA.obs["cell_type"],
-            shuffle=True,
+            test_size=0.5,
+            stratify=adata_RNA.obs["batch_size"],
+            shuffle=False,
             random_state=42,
         )
 
@@ -366,9 +367,11 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
 
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
-                sc.tl.umap(adata_RNA_1,min_dist=0.1)
+                sc.tl.umap(adata_RNA_1, min_dist=0.1)
+                adata_merged.obsm[f"umap_{e}_{nn}_{dr}"] = adata_RNA_1.obsm["X_umap"]
+                adata_merged.obs[f"leiden_{e}_{nn}_{dr}"] = adata_RNA_1.obs["leiden"]
                 sc.set_figure_params(dpi=150)
-                sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
+                sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden','batch'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
                 plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
                 
                 # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
