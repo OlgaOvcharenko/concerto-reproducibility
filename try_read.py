@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import scanpy as sc
 import anndata as ad
@@ -7,15 +8,42 @@ from sklearn.model_selection import (
 import matplotlib.pyplot as plt
 # Inital setting for plot size
 from matplotlib import rcParams
+
+X_train = np.random.rand(1000, 128)
+X_test = np.random.rand(250, 128)
+y_train = np.random.randint(low=1, high=2, size=1000)
+y_test = np.random.randint(low=1, high=3, size=250)
+
+adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
+print(adata_new)
+sc.pp.neighbors(adata_new, metric="cosine", use_rep='X')
+sc.tl.leiden(adata_new, resolution=0.2)
+
+print(adata_new)
+
+
 # # from scib_metrics.benchmark import Benchmarker
 
-# # adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
-# # adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-# # adata_adt_cite = adata_adt[:, 0:13431]
-# # adata_adt_rna = adata_adt[:, 13431:]
+# adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
+# adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+# adata_adt_cite = adata_adt[:, 0:13431]
+# adata_adt_rna = adata_adt[:, 13431:]
 
-# # print(adata_adt.shape)
-# # print(adata_adt)
+# print(np.unique(adata_adt_rna.obs["batch"].to_list()))
+# print(np.unique(adata_adt_rna.obs["cell_type"].to_list()))
+
+
+# b_list = np.unique(adata_adt_rna.obs["batch"].to_list())
+# res = np.unique(adata_adt_rna[adata_adt_rna.obs["batch"] == b_list[0], :].obs["cell_type"].to_list())
+# for b in b_list[1:]:
+#     print(b)
+#     tmp_res = np.unique(adata_adt_rna[adata_adt_rna.obs["batch"] == b, :].obs["cell_type"].to_list())
+#     if len(res) != len(tmp_res):
+#         print(False)
+#     else:
+#         print(all(res == tmp_res))
+#     print(np.unique(adata_adt_rna[adata_adt_rna.obs["batch"] == b, :].obs["cell_type"].to_list()))
+
 
 # # print(adata_adt.obs["cell_type"])
 
@@ -40,32 +68,52 @@ from matplotlib import rcParams
 # # print(adata_adt_rna.X)
 
 
-# # path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
-# # adata_RNA = sc.read(path)
-# # adata_RNA = adata_RNA[0:1000, 0:100]
+# path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
+# adata_RNA = sc.read(path)
 
-# # path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
-# # adata_Protein = sc.read(path) #cell_type batch
+# path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
+# adata_Protein = sc.read(path) #cell_type batch
 
-# # train_idx, test_idx = train_test_split(
-# #     adata_RNA.obs_names.values,
-# #     test_size=0.3,
-# #     stratify=adata_RNA.obs["cell_type"],
-# #     shuffle=True,
-# #     random_state=42,
-# # )
+# train_idx, test_idx = train_test_split(
+#     adata_RNA.obs_names.values,
+#     test_size=0.3,
+#     stratify=adata_RNA.obs["batch"],
+#     shuffle=True,
+#     random_state=42,
+# )
 
-# # adata_RNA = adata_RNA[train_idx, :]
-# # adata_Protein = adata_Protein[train_idx, :]
+# adata_RNA_train = adata_RNA[train_idx, :]
+# adata_RNA_test = adata_RNA[test_idx, :]
 
-# # adata_RNA_test = adata_RNA[test_idx, :]
-# # adata_Protein_test = adata_Protein[test_idx, :]
+# print(adata_RNA)
 
-# # Create PCA for benchmarking
-# # adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
-# # # adata_merged.var_names_make_unique()
-# # adata_merged.obs = adata_RNA.obs
-# # adata_merged.obsm = adata_RNA.obsm
+# print(np.unique(adata_RNA.obs["batch"].to_list()))
+# print(np.unique(adata_RNA.obs["cell_type"].to_list()))
+# print(np.unique(adata_RNA.obs["batch"].to_list()))
+# print(np.unique(adata_RNA.obs["cell_type"].to_list()))
+
+# train_idx = (adata_RNA.obs["batch"] != "P6") & (adata_RNA.obs["batch"] != "P7") & (adata_RNA.obs["batch"] != "P8")
+# print(np.unique(adata_RNA[train_idx, :].obs["batch"]))
+# print(np.unique(adata_RNA[(train_idx != 1), :].obs["batch"]))
+
+# b_list = np.unique(adata_RNA.obs["batch"].to_list())
+# res = np.unique(adata_RNA[adata_RNA.obs["batch"] == b_list[0], :].obs["cell_type"].to_list())
+# for b in b_list[1:]:
+#     print(b)
+#     print((res == np.unique(adata_RNA[adata_RNA.obs["batch"] == b, :].obs["cell_type"].to_list())))
+#     print(np.unique(adata_RNA[adata_RNA.obs["batch"] == b, :].obs["cell_type"].to_list()))
+
+
+# adata_Protein = adata_Protein[train_idx, :]
+
+# adata_RNA_test = adata_RNA[test_idx, :]
+# adata_Protein_test = adata_Protein[test_idx, :]
+
+# Create PCA for benchmarking
+# adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
+# # adata_merged.var_names_make_unique()
+# adata_merged.obs = adata_RNA.obs
+# adata_merged.obsm = adata_RNA.obsm
 # path = './Multimodal_pretraining/data/simulated_train_0_mt_3_bs_64_100_0.001_0.1_False_True_128.h5ad'
 # adata_RNA = sc.read(path)
 # print(adata_RNA)
@@ -193,4 +241,4 @@ def make_plot():
 
     plt.savefig("test.jpg")
 
-make_plot()
+# make_plot()

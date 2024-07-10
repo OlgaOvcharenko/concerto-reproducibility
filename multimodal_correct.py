@@ -2,6 +2,7 @@ import os
 import sys
 
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 sys.path.append("../")
 from concerto_function5_3 import *
 import numpy as np
@@ -74,8 +75,8 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
     print(f"RNA data: \n {adata_RNA}")
     print(f"Protein data: \n {adata_Protein}")
 
-    # adata_RNA.write_h5ad(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
-    # adata_Protein.write_h5ad(save_path + f'adata_Protein_{"train" if train else "test"}.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_Protein_{"train" if train else "test"}.h5ad')
 
     print("Saved adata.")
 
@@ -83,8 +84,8 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
     RNA_tf_path = save_path + path_file + 'RNA_tf/'
     Protein_tf_path = save_path + path_file + 'Protein_tf/'
 
-    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
-    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + Protein_tf_path, batch_col_name = 'batch')
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + Protein_tf_path, batch_col_name = 'batch')
 
     print("Made tf records.")
 
@@ -118,16 +119,16 @@ def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool
     print(f"GEX data: \n {adata_RNA}")
     print(f"ATAC data: \n {adata_Protein}")
 
-    # adata_RNA.write_h5ad(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
-    # adata_Protein.write_h5ad(save_path + f'adata_atac_{"train" if train else "test"}.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_atac_{"train" if train else "test"}.h5ad')
     print("Saved adata.")
 
     path_file = 'tfrecord_train/' if train else 'tfrecord_test/'
     RNA_tf_path = save_path + path_file + 'gex_tf/'
     Protein_tf_path = save_path + path_file + 'atac_tf/'
 
-    # RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
-    # Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = Protein_tf_path, batch_col_name = 'batch')
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = Protein_tf_path, batch_col_name = 'batch')
     print("Made tf record.")
 
     return RNA_tf_path, Protein_tf_path, adata_merged
@@ -141,19 +142,34 @@ def read_data(data: str = "simulated", save_path: str = ""):
         path = './Multimodal_pretraining/data/multi_protein_l2.loom'
         adata_Protein = sc.read(path) #cell_type batch
 
-        train_idx, test_idx = train_test_split(
-            adata_RNA.obs_names.values,
-            test_size=0.5,
-            stratify=adata_RNA.obs["batch_size"],
-            shuffle=False,
-            random_state=42,
-        )
+        # train_idx, test_idx = train_test_split(
+        #     adata_RNA.obs_names.values,
+        #     test_size=0.5,
+        #     stratify=adata_RNA.obs["batch_size"],
+        #     shuffle=False,
+        #     random_state=42,
+        # )
+
+        train_idx = (adata_RNA.obs["batch"] != "P6") & (adata_RNA.obs["batch"] != "P7") & (adata_RNA.obs["batch"] != "P8")
+        test_idx = (train_idx != 1)
+
+        # ['ASDC' 'B intermediate' 'B memory' 'B naive' 'CD14 Mono' 'CD16 Mono'
+        # 'CD4 CTL' 'CD4 Naive' 'CD4 Proliferating' 'CD4 TCM' 'CD4 TEM' 'CD8 Naive'
+        # 'CD8 Proliferating' 'CD8 TCM' 'CD8 TEM' 'Doublet' 'Eryth' 'HSPC' 'ILC'
+        # 'MAIT' 'NK' 'NK Proliferating' 'NK_CD56bright' 'Plasmablast' 'Platelet'
+        # 'Treg' 'cDC1' 'cDC2' 'dnT' 'gdT' 'pDC']
 
         adata_RNA_test = adata_RNA[test_idx, :]
         adata_Protein_test = adata_Protein[test_idx, :]
 
         adata_RNA = adata_RNA[train_idx, :]
         adata_Protein = adata_Protein[train_idx, :]
+
+        # Remove cell type from reference
+
+        cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
+        adata_RNA = adata_RNA[cell_ix, :]
+        adata_Protein = adata_Protein[cell_ix, :]
 
         RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
         RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
@@ -163,13 +179,24 @@ def read_data(data: str = "simulated", save_path: str = ""):
         adata_RNA = adata_merged_tmp[:, 0:13431] # adata_gex
         adata_Protein = adata_merged_tmp[:, 13431:] # adata_atac
 
-        train_idx, test_idx = train_test_split(
-            adata_RNA.obs_names.values,
-            test_size=0.5,
-            stratify=adata_RNA.obs["batch_size"],
-            shuffle=False,
-            random_state=42,
-        )
+        # train_idx, test_idx = train_test_split(
+        #     adata_RNA.obs_names.values,
+        #     test_size=0.5,
+        #     stratify=adata_RNA.obs["batch_size"],
+        #     shuffle=False,
+        #     random_state=42,
+        # )
+
+        # ['s1d1' 's1d2' 's1d3' 's2d1' 's2d4' 's2d5' 's3d10' 's3d3' 's3d6' 's3d7' 's4d1' 's4d8' 's4d9']
+
+        train_idx = (adata_RNA.obs["batch"] != "s4d1") & (adata_RNA.obs["batch"] != "s4d8") & (adata_RNA.obs["batch"] != "s4d9")
+        test_idx = (train_idx != 1)
+
+        # ['B1 B' 'CD14+ Mono' 'CD16+ Mono' 'CD4+ T activated' 'CD4+ T naive'
+        # 'CD8+ T' 'CD8+ T naive' 'Erythroblast' 'G/M prog' 'HSC'
+        # 'ID2-hi myeloid prog' 'ILC' 'Lymph prog' 'MK/E prog' 'NK' 'Naive CD20+ B'
+        # 'Normoblast' 'Plasma cell' 'Proerythroblast' 'Transitional B' 'cDC2'
+        # 'pDC']
 
         adata_RNA_test = adata_RNA[test_idx, :]
         adata_Protein_test = adata_Protein[test_idx, :]
@@ -313,8 +340,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                 
                 adata_merged = adata_merged[RNA_id]
 
-                adata_merged.obsm[f"{e}_{nn}_{dr}"] = embedding
-                diverse_tests_names.append(f"{e}_{nn}_{dr}")
+                adata_merged.obsm[f"{"train" if train else "test"}_{e}_{nn}_{dr}"] = embedding
+                diverse_tests_names.append(f"{train}_{e}_{nn}_{dr}")
 
                 l2tol1 = {
                     'CD8 Naive': 'CD8 T',
@@ -351,8 +378,10 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
 
                 if data == 'simulated':
                     adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
+                    adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
                 else:
                     adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
+                    adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
                 print(adata_RNA_1)
 
                 sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
@@ -368,24 +397,49 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
                 sc.tl.umap(adata_RNA_1, min_dist=0.1)
-                adata_merged.obsm[f"umap_{e}_{nn}_{dr}"] = adata_RNA_1.obsm["X_umap"]
-                adata_merged.obs[f"leiden_{e}_{nn}_{dr}"] = adata_RNA_1.obs["leiden"]
+                adata_merged.obsm[f"{"train" if train else "test"}_umap_{e}_{nn}_{dr}"] = adata_RNA_1.obsm["X_umap"]
+                adata_merged.obs[f"{"train" if train else "test"}_leiden_{e}_{nn}_{dr}"] = adata_RNA_1.obs["leiden"]
                 sc.set_figure_params(dpi=150)
                 sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden','batch'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
                 plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
                 
                 # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
 
-    filename = f'./Multimodal_pretraining/data/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-    
-    print("Merged adata")
-    print(adata_merged)
+    return adata_merged
+
+def save_merged_adata(adata_merged, filename):
     adata_merged.write(filename)
 
-    # Benchmark
     print(adata_merged)
     print(f"Saved adata all at {filename}")
 
+def query_to_reference(X_train, X_test, y_train, y_test):
+    X_train = np.random.rand(1000, 128)
+    X_test = np.random.rand(250, 128)
+    y_train = np.random.randint(low=1, high=2, size=1000)
+    y_test = np.random.randint(low=1, high=3, size=250)
+
+    adata_new = ad.AnnData(np.append([X_train, X_test], axis=0))
+    sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
+    sc.tl.leiden(adata_new, resolution=0.2)
+
+    # _, clusters = np.unique(adata_new.obs["leiden"], return_inverse=True)
+    clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
+    clusters_test = np.array(adata_new.obs["leiden"])[0:X_test.shape[0]]
+
+    clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
+    for cl in np.unique(clusters_train):
+        clusters_test_ix = clusters_test_ix & (clusters_test == cl)
+
+    neigh = KNeighborsClassifier(n_neighbors=3)
+    neigh.fit(X_train, y_train)
+
+    y_predicted = np.zeros(y_test.shape)
+    y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
+    print(f"Accuracy known: {accuracy_score(y_test[clusters_test_ix], y_predicted[clusters_test_ix], normalize=False)}")
+
+    y_predicted[clusters_test_ix != 1] == clusters_test[clusters_test_ix != 1]
+    print(f"Accuracy all: {accuracy_score(y_test, y_predicted, normalize=False)}")
 
 
 def main():
@@ -431,17 +485,20 @@ def main():
 
     if test:
         # Test on train data
-        test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
+        adata_merged = test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
                    attention_t=attention_t, attention_s=attention_s,
                    batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                    heads=heads, combine_omics=combine_omics, model_type=model_type, 
                    save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA)
 
         # Test on test data
-        test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
+        adata_merged = test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
                    attention_t=attention_t, attention_s=attention_s,
                    batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                    heads=heads, combine_omics=combine_omics, model_type=model_type, 
                    save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test)
+    
+    filename = f'./Multimodal_pretraining/data/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    save_merged_adata(adata_merged=adata_merged, filename=filename)
         
 main()

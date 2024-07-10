@@ -14,9 +14,10 @@ heads=("128")
 data=("human")
 train=1
 test=1
-model_type=("5")
-model_type=("1 2 3 4 5")
-combine_omics=0
+# model_type=("1 2 3 4 5")
+# combine_omics=0
+model_type=("0")
+combine_omics=1
 
 for e in $epochs; do
     for lr in $lrs; do
