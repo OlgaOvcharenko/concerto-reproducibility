@@ -340,7 +340,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                 
                 adata_merged = adata_merged[RNA_id]
 
-                adata_merged.obsm[f"{"train" if train else "test"}_{e}_{nn}_{dr}"] = embedding
+                adata_merged.obsm[f'{"train" if train else "test"}_{e}_{nn}_{dr}'] = embedding
                 diverse_tests_names.append(f"{train}_{e}_{nn}_{dr}")
 
                 l2tol1 = {
@@ -397,8 +397,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
                 sc.tl.umap(adata_RNA_1, min_dist=0.1)
-                adata_merged.obsm[f"{"train" if train else "test"}_umap_{e}_{nn}_{dr}"] = adata_RNA_1.obsm["X_umap"]
-                adata_merged.obs[f"{"train" if train else "test"}_leiden_{e}_{nn}_{dr}"] = adata_RNA_1.obs["leiden"]
+                adata_merged.obsm[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}'] = adata_RNA_1.obsm["X_umap"]
+                adata_merged.obs[f'{"train" if train else "test"}_leiden_{e}_{nn}_{dr}'] = adata_RNA_1.obs["leiden"]
                 sc.set_figure_params(dpi=150)
                 sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden','batch'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
                 plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
