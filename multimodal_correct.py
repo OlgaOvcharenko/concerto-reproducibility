@@ -85,7 +85,7 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
     Protein_tf_path = save_path + path_file + 'Protein_tf/'
 
     RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = save_path + Protein_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
 
     print("Made tf records.")
 
@@ -170,20 +170,10 @@ def read_data(data: str = "simulated", save_path: str = ""):
         cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
         adata_RNA = adata_RNA[cell_ix, :]
         adata_Protein = adata_Protein[cell_ix, :]
-        print(Protein_tf_path)
-        print(RNA_tf_path)
-
-        print(Protein_tf_path_test)
-        print(RNA_tf_path_test)
 
         RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
         RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
-        print("After:")
-        print(Protein_tf_path)
-        print(RNA_tf_path)
 
-        print(Protein_tf_path_test)
-        print(RNA_tf_path_test)
     else:
         adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
         adata_RNA = adata_merged_tmp[:, 0:13431] # adata_gex
@@ -482,9 +472,6 @@ def main():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test = read_data(data=data, save_path=save_path)
-
-    print("Main 1")
-    print(Protein_tf_path)
 
     # Train
     weight_path = save_path + 'weight/'
