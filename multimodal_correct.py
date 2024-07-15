@@ -395,7 +395,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
 
                 if not train:
-                    adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], adata_merged_train.obs["cell_type_l1"], adata_merged.obsm[f'test_{e}_{nn}_{dr}'], adata_merged.obs["cell_type_l1"], )
+                    adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
 
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
@@ -422,6 +422,8 @@ def save_merged_adata(adata_merged, filename):
     print(f"Saved adata all at {filename}")
 
 def query_to_reference(X_train, X_test, y_train, y_test):
+    print(X_train.shape)
+    print(X_test.shape)
     adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     sc.tl.leiden(adata_new, resolution=0.2)
