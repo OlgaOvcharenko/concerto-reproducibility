@@ -270,7 +270,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                    attention_t: bool, attention_s: bool,
                    batch_size:int, epoch: int, lr: float, drop_rate: float, 
                    heads: int, combine_omics: int, model_type: int, 
-                   save_path: str, train: bool = False):
+                   save_path: str, train: bool = False, adata_merged_train = None):
     ep_vals = []
     i = 4
     while i < epoch:
@@ -394,13 +394,21 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     n_cluster = len(list(set(target_preds)))
                     print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
 
+                if not train:
+                    adata_RNA_1.obs['pred_cell_type'] = query_to_reference(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], adata_merged_train.obs["cell_type_l1"], adata_merged.obsm[f'train_{e}_{nn}_{dr}'], adata_merged.obs["cell_type_l1"], )
+
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
                 sc.tl.umap(adata_RNA_1, min_dist=0.1)
-                adata_merged.obsm[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}'] = adata_RNA_1.obsm["X_umap"]
+                adata_merged.obs[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}'] = adata_RNA_1.obsm["X_umap"]
                 adata_merged.obs[f'{"train" if train else "test"}_leiden_{e}_{nn}_{dr}'] = adata_RNA_1.obs["leiden"]
                 sc.set_figure_params(dpi=150)
-                sc.pl.umap(adata_RNA_1, color=['cell_type_l1','leiden','batch'], legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
+
+                if not train:
+                    color=['cell_type_l1', 'pred_cell_type', 'leiden', 'batch']
+                else:
+                    color=['cell_type_l1', 'leiden', 'batch']
+                sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
                 plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
                 
                 # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
@@ -441,6 +449,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_predicted[clusters_test_ix != 1] == clusters_test[clusters_test_ix != 1]
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted, normalize=False)}")
 
+    return y_predicted
 
 def main():
     # Parse args
@@ -491,13 +500,16 @@ def main():
                    save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA)
 
         # Test on test data
-        adata_merged = test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
+        adata_merged_test = test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
                    attention_t=attention_t, attention_s=attention_s,
                    batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                    heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                   save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test)
+                   save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test, adata_merged_train=adata_merged)
     
-    filename = f'./Multimodal_pretraining/data/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    filename = f'./Multimodal_pretraining/data/{data}/{data}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
     save_merged_adata(adata_merged=adata_merged, filename=filename)
+
+    filename = f'./Multimodal_pretraining/data/{data}/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    save_merged_adata(adata_merged=adata_merged_test, filename=filename)
         
 main()
