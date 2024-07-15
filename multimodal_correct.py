@@ -422,8 +422,11 @@ def save_merged_adata(adata_merged, filename):
     print(f"Saved adata all at {filename}")
 
 def query_to_reference(X_train, X_test, y_train, y_test):
-    print(X_train.shape)
-    print(X_test.shape)
+    print(X_train)
+    print(X_test)
+    print(y_train)
+    print(y_test)
+
     adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     sc.tl.leiden(adata_new, resolution=0.2)
@@ -440,6 +443,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     neigh.fit(X_train, y_train)
 
     y_predicted = np.zeros(y_test.shape)
+    print(clusters_test_ix)
+    print(X_test[clusters_test_ix])
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
     print(f"Accuracy known: {accuracy_score(y_test[clusters_test_ix], y_predicted[clusters_test_ix], normalize=False)}")
 
