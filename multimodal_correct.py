@@ -395,17 +395,17 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
 
                 if not train:
-                    adata_RNA_1.obs['pred_cell_type'] = query_to_reference(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], adata_merged_train.obs["cell_type_l1"], adata_merged.obsm[f'train_{e}_{nn}_{dr}'], adata_merged.obs["cell_type_l1"], )
+                    adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], adata_merged_train.obs["cell_type_l1"], adata_merged.obsm[f'train_{e}_{nn}_{dr}'], adata_merged.obs["cell_type_l1"], )
 
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
                 sc.tl.umap(adata_RNA_1, min_dist=0.1)
-                adata_merged.obs[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}'] = adata_RNA_1.obsm["X_umap"]
+                adata_merged.obsm[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}'] = adata_RNA_1.obsm["X_umap"]
                 adata_merged.obs[f'{"train" if train else "test"}_leiden_{e}_{nn}_{dr}'] = adata_RNA_1.obs["leiden"]
                 sc.set_figure_params(dpi=150)
 
                 if not train:
-                    color=['cell_type_l1', 'pred_cell_type', 'leiden', 'batch']
+                    color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
                 else:
                     color=['cell_type_l1', 'leiden', 'batch']
                 sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
