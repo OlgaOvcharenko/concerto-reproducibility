@@ -422,12 +422,7 @@ def save_merged_adata(adata_merged, filename):
     print(f"Saved adata all at {filename}")
 
 def query_to_reference(X_train, X_test, y_train, y_test):
-    X_train = np.random.rand(1000, 128)
-    X_test = np.random.rand(250, 128)
-    y_train = np.random.randint(low=1, high=2, size=1000)
-    y_test = np.random.randint(low=1, high=3, size=250)
-
-    adata_new = ad.AnnData(np.append([X_train, X_test], axis=0))
+    adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     sc.tl.leiden(adata_new, resolution=0.2)
 
