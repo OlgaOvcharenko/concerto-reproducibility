@@ -395,7 +395,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
 
                 if not train:
-                    adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], adata_merged_train.obs["cell_type_l1"], adata_merged.obsm[f'train_{e}_{nn}_{dr}'], adata_merged.obs["cell_type_l1"], )
+                    adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], adata_merged_train.obs["cell_type_l1"], adata_merged.obsm[f'test_{e}_{nn}_{dr}'], adata_merged.obs["cell_type_l1"], )
 
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
