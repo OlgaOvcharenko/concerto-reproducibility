@@ -435,8 +435,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     label_types = dict()
     for i, lbl in enumerate(pd.unique(y_train)):
         label_types[lbl] = i
-        y_train[lbl] = i
-        y_test[lbl] = i
+        y_train[y_train==lbl] = i
+        y_test[y_test==lbl] = i
 
     print(y_train)
     print(y_test)
