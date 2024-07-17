@@ -1,6 +1,7 @@
 import os
 import sys
 
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 sys.path.append("../")
@@ -431,19 +432,32 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_train.__class__)
     print(y_test.__class__)
 
+    label_types = dict()
+    for i, lbl in enumerate(pd.unique(y_train)):
+        label_types[lbl] = i
+        y_train[lbl] = i
+        y_test[lbl] = i
+
+    print(y_train)
+    print(y_test)
+    print(X_train.__class__)
+    print(X_test.__class__)
+    print(y_train.__class__)
+    print(y_test.__class__)
+
     adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     sc.tl.leiden(adata_new, resolution=0.2)
 
     # _, clusters = np.unique(adata_new.obs["leiden"], return_inverse=True)
     clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
-    clusters_test = np.array(adata_new.obs["leiden"])[0:X_test.shape[0]]
+    clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
 
     clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
     for cl in np.unique(clusters_train):
         clusters_test_ix = clusters_test_ix & (clusters_test == cl)
 
-    neigh = KNeighborsClassifier(n_neighbors=3)
+    neigh = KNeighborsClassifier(n_neighbors=5)
     neigh.fit(X_train, y_train)
 
     y_predicted = np.zeros(y_test.shape)
