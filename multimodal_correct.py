@@ -426,6 +426,10 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(X_test)
     print(y_train)
     print(y_test)
+    print(X_train.__class__)
+    print(X_test.__class__)
+    print(y_train.__class__)
+    print(y_test.__class__)
 
     adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
