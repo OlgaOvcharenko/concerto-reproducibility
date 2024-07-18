@@ -395,8 +395,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     n_cluster = len(list(set(target_preds)))
                     print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
 
-                if not train:
-                    adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
+                # if not train:
+                #     adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
 
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
@@ -444,6 +444,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(X_test.__class__)
     print(y_train.__class__)
     print(y_test.__class__)
+
+    X_train = np.nan_to_num(X_train)
+    X_test = np.nan_to_num(X_test)
 
     adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
