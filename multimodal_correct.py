@@ -433,6 +433,12 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_train.__class__)
     print(y_test.__class__)
 
+    for col in y_train.select_dtypes(include=['category']).columns:
+        y_train[col] = y_train[col].astype('str')
+
+    for col in y_test.select_dtypes(include=['category']).columns:
+        y_test[col] = y_test[col].astype('str')
+
     label_types = dict()
     for i, lbl in enumerate(pd.unique(y_train)):
         label_types[lbl] = i
@@ -474,8 +480,11 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted, normalize=False)}")
 
     print(y_predicted)
-
+    
     y_predicted = pd.DataFrame(data=y_predicted)
+    for col in y_predicted.select_dtypes(include=['category']).columns:
+        y_predicted[col] = y_predicted[col].astype('str')
+
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted[y_predicted==num_lbl] = lbl
 
