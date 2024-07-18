@@ -433,6 +433,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_train.__class__)
     print(y_test.__class__)
 
+    y_train = y_train.to_frame()
+    y_test= y_test.to_frame()
+
     for col in y_train.select_dtypes(include=['category']).columns:
         y_train[col] = y_train[col].astype('str')
 
