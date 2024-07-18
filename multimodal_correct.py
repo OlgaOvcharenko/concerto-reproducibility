@@ -433,20 +433,20 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_train.__class__)
     print(y_test.__class__)
 
-    y_train = y_train.to_frame()
-    y_test= y_test.to_frame()
+    y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
+    y_test= pd.DataFrame(y_test.to_list(), columns=["ct"])
 
-    for col in y_train.select_dtypes(include=['category']).columns:
-        y_train[col] = y_train[col].astype('str')
+    # for col in y_train.select_dtypes(include=['category']).columns:
+    #     y_train[col] = y_train[col].astype('str')
 
-    for col in y_test.select_dtypes(include=['category']).columns:
-        y_test[col] = y_test[col].astype('str')
+    # for col in y_test.select_dtypes(include=['category']).columns:
+    #     y_test[col] = y_test[col].astype('str')
 
     label_types = dict()
     for i, lbl in enumerate(pd.unique(y_train)):
         label_types[lbl] = i
-        y_train[y_train==lbl] = i
-        y_test[y_test==lbl] = i
+        y_train["ct"][y_train["ct"]==lbl] = i
+        y_test["ct"][y_test["ct"]==lbl] = i
 
     print(y_train)
     print(y_test)
