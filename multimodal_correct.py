@@ -395,8 +395,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     n_cluster = len(list(set(target_preds)))
                     print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
 
-                # if not train:
-                #     adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
+                if not train:
+                    adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
 
                 # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                 sc.tl.leiden(adata_RNA_1, resolution=0.2)
@@ -406,12 +406,12 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                 sc.set_figure_params(dpi=150)
 
                 if not train:
-                    # color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
-                    color=['cell_type_l1', 'leiden', 'batch']
+                    color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
+                    # color=['cell_type_l1', 'leiden', 'batch']
                 else:
                     color=['cell_type_l1', 'leiden', 'batch']
                 sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
-                plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
+                plt.savefig(f'./Multimodal_pretraining/plots/4_{data}/{data}_{"train" if train else "test"}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
                 
                 # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
 
@@ -472,6 +472,12 @@ def query_to_reference(X_train, X_test, y_train, y_test):
 
     y_predicted[clusters_test_ix != 1] == clusters_test[clusters_test_ix != 1]
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted, normalize=False)}")
+
+    print(y_predicted)
+
+    y_predicted = pd.DataFrame(data=y_predicted)
+    for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
+        y_predicted[y_predicted==num_lbl] = lbl
 
     return y_predicted
 
