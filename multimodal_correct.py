@@ -406,7 +406,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                 sc.set_figure_params(dpi=150)
 
                 if not train:
-                    color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
+                    # color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
+                    color=['cell_type_l1', 'leiden', 'batch']
                 else:
                     color=['cell_type_l1', 'leiden', 'batch']
                 sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
