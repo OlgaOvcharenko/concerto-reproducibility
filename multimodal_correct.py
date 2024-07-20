@@ -553,5 +553,16 @@ def main():
 
     filename = f'./Multimodal_pretraining/data/{data}/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
     save_merged_adata(adata_merged=adata_merged_test, filename=filename)
+
+def test_r():
+    adata_merged_train = "./Multimodal_pretraining/data/simulated/simulated_train_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad"
+    adata_merged = "./Multimodal_pretraining/data/simulated/simulated_test_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad"
+    res = query_to_reference(X_train=adata_merged_train.obsm[f'train_64_emcoder_0.1'], 
+                             y_train=adata_merged_train.obs["cell_type_l1"], 
+                             X_test=adata_merged.obsm[f'test_64_encoder_0.1'], 
+                             y_test=adata_merged.obs["cell_type_l1"])
+    
+    print(res)
         
-main()
+# main()
+test_r()
