@@ -424,29 +424,29 @@ def save_merged_adata(adata_merged, filename):
     print(f"Saved adata all at {filename}")
 
 def query_to_reference(X_train, X_test, y_train, y_test):
-    print(X_train)
-    print(X_test)
-    print(y_train)
-    print(y_test)
-    print(X_train.__class__)
-    print(X_test.__class__)
-    print(y_train.__class__)
-    print(y_test.__class__)
+    # Prepare
+    X_train = np.nan_to_num(X_train)
+    X_test = np.nan_to_num(X_test)
 
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_train.fillna(-1, inplace=True)
-    y_train = y_train['ct'].astype('int')
 
-    y_test= pd.DataFrame(y_test.to_list(), columns=["ct"])
+    y_test = pd.DataFrame(y_test.to_list(), columns=["ct"])
 
+    # Encode
     label_types = dict()
     for i, lbl in enumerate(y_train["ct"].unique()):
         label_types[lbl] = i
         y_train["ct"][y_train["ct"]==lbl] = i
         y_test["ct"][y_test["ct"]==lbl] = i
+    y_train['ct'] = y_train['ct'].astype('int')
+    print(y_train)
+    print(y_train['ct'])
+    print(f"Unique y: {y_train['ct'].unique()}")
 
-    X_train = np.nan_to_num(X_train)
-    X_test = np.nan_to_num(X_test)
+    # Fit
+    neigh = KNeighborsClassifier(n_neighbors=5)
+    neigh.fit(X_train, y_train["ct"].to_numpy())
 
     adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
@@ -459,13 +459,6 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
     for cl in np.unique(clusters_train):
         clusters_test_ix = clusters_test_ix & (clusters_test == cl)
-    
-
-    print(X_train)
-    print(y_train["ct"])
-    print(f"Unique y: {y_train['ct'].unique()}")
-    neigh = KNeighborsClassifier(n_neighbors=5)
-    neigh.fit(X_train, y_train["ct"].to_numpy())
 
     y_predicted = np.zeros(y_test.shape)
     print(clusters_test_ix)
