@@ -443,6 +443,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     #     y_test[col] = y_test[col].astype('str')
 
     label_types = dict()
+    print(pd.unique(y_train))
     for i, lbl in enumerate(pd.unique(y_train)):
         label_types[lbl] = i
         y_train["ct"][y_train["ct"]==lbl] = i
