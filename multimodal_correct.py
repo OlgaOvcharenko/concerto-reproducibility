@@ -2,7 +2,7 @@ import os
 import sys
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 sys.path.append("../")
 from concerto_function5_3 import *
@@ -555,8 +555,8 @@ def main():
     save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 def test_r():
-    adata_merged_train = "./Multimodal_pretraining/data/simulated/simulated_train_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad"
-    adata_merged = "./Multimodal_pretraining/data/simulated/simulated_test_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad"
+    adata_merged_train = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_train_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad")
+    adata_merged = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_test_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad")
     res = query_to_reference(X_train=adata_merged_train.obsm[f'train_64_emcoder_0.1'], 
                              y_train=adata_merged_train.obs["cell_type_l1"], 
                              X_test=adata_merged.obsm[f'test_64_encoder_0.1'], 
