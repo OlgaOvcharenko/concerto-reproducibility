@@ -432,6 +432,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_train.fillna(-1, inplace=True)
 
     y_test = pd.DataFrame(y_test.to_list(), columns=["ct"])
+    y_test.fillna(-1, inplace=True)
 
     # Encode
     label_types = dict()
@@ -440,14 +441,13 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_train["ct"][y_train["ct"]==lbl] = i
         y_test["ct"][y_test["ct"]==lbl] = i
     y_train['ct'] = y_train['ct'].astype('int')
-    print(y_train)
-    print(y_train['ct'])
-    print(f"Unique y: {y_train['ct'].unique()}")
+    y_test['ct'] = y_test['ct'].astype('int')
 
     # Fit
     neigh = KNeighborsClassifier(n_neighbors=5)
     neigh.fit(X_train, y_train["ct"].to_numpy())
 
+    # Leiden
     adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     sc.tl.leiden(adata_new, resolution=0.2)
@@ -460,7 +460,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     for cl in np.unique(clusters_train):
         clusters_test_ix = clusters_test_ix & (clusters_test == cl)
 
-    y_predicted = np.zeros(y_test.shape)
+    y_predicted = np.zeros((y_test.shape[0],))
     print(clusters_test_ix)
     print(X_test[clusters_test_ix])
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
