@@ -436,6 +436,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_test= pd.DataFrame(y_test.to_list(), columns=["ct"])
 
+    print(y_train.astype('category'))
+    print(y_train.astype('category').to_numpy())
+
     # for col in y_train.select_dtypes(include=['category']).columns:
     #     y_train[col] = y_train[col].astype('str')
 
