@@ -435,11 +435,11 @@ def query_to_reference(X_train, X_test, y_train, y_test):
 
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_train.fillna(-1, inplace=True)
+    y_train = y_train['ct'].astype('int')
 
     y_test= pd.DataFrame(y_test.to_list(), columns=["ct"])
 
     label_types = dict()
-    print(y_train["ct"].unique())
     for i, lbl in enumerate(y_train["ct"].unique()):
         label_types[lbl] = i
         y_train["ct"][y_train["ct"]==lbl] = i
@@ -465,7 +465,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_train["ct"])
     print(f"Unique y: {y_train['ct'].unique()}")
     neigh = KNeighborsClassifier(n_neighbors=5)
-    neigh.fit(X_train, y_train["ct"])
+    neigh.fit(X_train, y_train["ct"].to_numpy())
 
     y_predicted = np.zeros(y_test.shape)
     print(clusters_test_ix)
