@@ -452,7 +452,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_test["ct"][y_test["ct"]==lbl] = i
 
     print(y_train["ct"])
-    print(f"Unique y: {y_train["ct"].unique()}")
+    print(f"Unique y: {y_train['ct'].unique()}")
     print(f"Unique X: {np.unique(X_train)}")
 
     X_train = np.nan_to_num(X_train)
