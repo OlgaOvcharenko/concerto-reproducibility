@@ -441,7 +441,6 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_train["ct"][y_train["ct"]==lbl] = i
         y_test["ct"][y_test["ct"]==lbl] = i
     y_train['ct'] = y_train['ct'].astype('int')
-    y_test['ct'] = y_test['ct'].astype('int')
 
     # Fit
     neigh = KNeighborsClassifier(n_neighbors=5)
@@ -452,6 +451,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     sc.tl.leiden(adata_new, resolution=0.2)
 
+    # Filter clusters
     # _, clusters = np.unique(adata_new.obs["leiden"], return_inverse=True)
     clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
     clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
