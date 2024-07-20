@@ -461,13 +461,14 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         clusters_test_ix = clusters_test_ix | (clusters_test == cl)
 
     y_predicted = np.zeros((y_test.shape[0],))
-    print(clusters_test_ix)
+    print(y_test)
+    print(clusters_test_ix.shape)
     print(sum(clusters_test_ix))
     print(X_test[clusters_test_ix])
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
-    print(y_test[clusters_test_ix])
+    print(y_test["ct"][clusters_test_ix])
     print(y_predicted[clusters_test_ix])
-    print(f"Accuracy known: {accuracy_score(y_test[clusters_test_ix], y_predicted[clusters_test_ix], normalize=False)}")
+    print(f"Accuracy known: {accuracy_score(y_test["ct"][clusters_test_ix], y_predicted[clusters_test_ix], normalize=False)}")
 
     y_predicted[clusters_test_ix != 1] == clusters_test[clusters_test_ix != 1]
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted, normalize=False)}")
