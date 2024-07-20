@@ -456,17 +456,17 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
     clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
 
-    clusters_test_ix = np.zeros(clusters_test.shape, dtype=int)
-    for cl in np.unique(clusters_train):
-        clusters_test_ix = clusters_test_ix | (clusters_test == cl)
+    clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
+    for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
+        clusters_test_ix[clusters_test == cl] = 0
 
     y_predicted = np.zeros((y_test.shape[0],))
     print(y_test)
     print(clusters_test_ix.shape)
+    print(X_test.shape)
     print(sum(clusters_test_ix))
-    print(X_test[clusters_test_ix])
-    y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
     print(y_test["ct"][clusters_test_ix])
+    y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
     print(y_predicted[clusters_test_ix])
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix], normalize=False)}")
 
@@ -476,8 +476,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_predicted)
     
     y_predicted = pd.DataFrame(data=y_predicted)
-    for col in y_predicted.select_dtypes(include=['category']).columns:
-        y_predicted[col] = y_predicted[col].astype('str')
+    # for col in y_predicted.select_dtypes(include=['category']).columns:
+    #     y_predicted[col] = y_predicted[col].astype('str')
 
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted[y_predicted==num_lbl] = lbl
