@@ -436,8 +436,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_test= pd.DataFrame(y_test.to_list(), columns=["ct"])
 
-    print(y_train.astype('category'))
-    print(y_train.astype('category').to_numpy())
+    print(y_train)
 
     # for col in y_train.select_dtypes(include=['category']).columns:
     #     y_train[col] = y_train[col].astype('str')
@@ -447,17 +446,13 @@ def query_to_reference(X_train, X_test, y_train, y_test):
 
     label_types = dict()
     print(pd.unique(y_train))
-    for i, lbl in enumerate(pd.unique(y_train)):
+    for i, lbl in enumerate(pd.unique(y_train["ct"])):
         label_types[lbl] = i
         y_train["ct"][y_train["ct"]==lbl] = i
         y_test["ct"][y_test["ct"]==lbl] = i
 
-    print(y_train)
-    print(y_test)
-    print(X_train.__class__)
-    print(X_test.__class__)
-    print(y_train.__class__)
-    print(y_test.__class__)
+    print(y_train["ct"])
+    print(y_train["ct"].to_numpy())
 
     X_train = np.nan_to_num(X_train)
     X_test = np.nan_to_num(X_test)
