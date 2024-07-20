@@ -443,8 +443,10 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_test["ct"][y_test["ct"]==lbl] = i
 
     i = len(y_train["ct"].unique()) + 1
+    clusters_test_ix = np.ones(y_test.shape, dtype=int)
     for lbl in y_test["ct"].unique():
         if lbl not in list(label_types.keys()):
+            clusters_test_ix[y_test["ct"]==lbl] = 0 # FIXME
             y_test["ct"][y_test["ct"]==lbl] = i
             label_types[lbl] = i
             i += 1
@@ -461,15 +463,15 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     sc.tl.leiden(adata_new, resolution=0.2)
 
-    # Filter clusters
+    # FIXME Filter clusters
     # _, clusters = np.unique(adata_new.obs["leiden"], return_inverse=True)
-    clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
-    clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
+    # clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
+    # clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
 
-    clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
-    print(set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()))
-    for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
-        clusters_test_ix[clusters_test == cl] = 0
+    # clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
+    # print(set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()))
+    # for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
+    #     clusters_test_ix[clusters_test == cl] = 0
 
     y_predicted = np.zeros((y_test.shape[0],))
     print(y_test)
@@ -481,7 +483,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_predicted[clusters_test_ix])
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix], normalize=False)}")
 
-    y_predicted[clusters_test_ix != 1] == clusters_test[clusters_test_ix != 1]
+    y_predicted[clusters_test_ix != 1] == -1
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted, normalize=False)}")
 
     print(y_predicted)
