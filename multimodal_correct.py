@@ -452,7 +452,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_test["ct"][y_test["ct"]==lbl] = i
 
     print(y_train["ct"])
-    print(y_train["ct"].to_numpy())
+    print(f"Unique y: {y_train["ct"].unique()}")
+    print(f"Unique X: {np.unique(X_train)}")
 
     X_train = np.nan_to_num(X_train)
     X_test = np.nan_to_num(X_test)
@@ -470,7 +471,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         clusters_test_ix = clusters_test_ix & (clusters_test == cl)
 
     neigh = KNeighborsClassifier(n_neighbors=5)
-    neigh.fit(X_train, y_train)
+    neigh.fit(X_train, y_train["ct"])
 
     y_predicted = np.zeros(y_test.shape)
     print(clusters_test_ix)
