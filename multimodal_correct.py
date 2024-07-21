@@ -451,7 +451,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_train["ct"][y_train["ct"]==lbl] = i
         y_test["ct"][y_test["ct"]==lbl] = i
 
-    i = len(y_train["ct"].unique()) + 1
+    i = len(y_train["ct"].unique())
     clusters_test_ix = np.ones((y_test.shape[0],), dtype=int)
     for lbl in y_test["ct"].unique():
         if (lbl not in list(label_types.keys())) and (lbl not in list(label_types.values())):
@@ -473,9 +473,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     neigh.fit(X_train, y_train["ct"].to_numpy())
 
     # Leiden
-    adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
-    sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
-    sc.tl.leiden(adata_new, resolution=0.2)
+    # adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
+    # sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
+    # sc.tl.leiden(adata_new, resolution=0.2)
 
     # FIXME Filter clusters
     # _, clusters = np.unique(adata_new.obs["leiden"], return_inverse=True)
@@ -493,12 +493,14 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print("Predicted")
     print(y_predicted[clusters_test_ix])
     print("Test")
-    print(y_test["ct"][clusters_test_ix])
+    print(y_test.iloc[clusters_test_ix, "ct"])
+    print("y_test[ct]")
+    print(y_test["ct"])
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test['ct'][clusters_test_ix] == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
-    y_predicted[clusters_test_ix != 1] == -1
+    y_predicted[clusters_test_ix != 1] == -2
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
     
     y_predicted = pd.DataFrame(data=y_predicted, columns=["ct"])
