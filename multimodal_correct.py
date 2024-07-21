@@ -401,8 +401,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
 
                     if not train:
                         print("Predict")
-                        adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
-                        print(adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'])
+                        adata_RNA_1.obsm[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
+                        print(adata_RNA_1.obsm[f'pred_cell_type_{e}_{nn}_{dr}'])
 
                     # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                     sc.tl.leiden(adata_RNA_1, resolution=0.2)
@@ -494,8 +494,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     #     y_predicted[col] = y_predicted[col].astype('str')
 
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
-        y_predicted["ct"][y_predicted["ct"]==num_lbl] = lbl
-
+        y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
+    
+    print(y_predicted["val_ct"])
     return y_predicted
 
 def main():
@@ -568,6 +569,8 @@ def test_r():
                              y_test=adata_merged.obs["cell_type_l1"])
     
     print(res)
-        
-main()
-# test_r()
+
+    adata_merged.obsm[f'pred_cell_type_1'] = res
+
+# main()
+test_r()
