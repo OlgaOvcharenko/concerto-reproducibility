@@ -440,9 +440,6 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_test = pd.DataFrame(y_test.to_list(), columns=["ct"])
     y_test.fillna(-1, inplace=True)
 
-    print(y_train['ct'].unique())
-    print(y_test['ct'].unique())
-
     # Encode
     label_types = dict()
     i = 0
@@ -468,7 +465,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(label_types)
 
     # Fit
-    neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
+    neigh = KNeighborsClassifier(n_neighbors=50, metric='cosine')
     neigh.fit(X_train, y_train["ct"].to_numpy())
 
     # Leiden
@@ -492,18 +489,22 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_predicted = np.full((y_test.shape[0],), -1, dtype=int)
     res = neigh.predict(X_test[clusters_test_ix,:])
     y_predicted[clusters_test_ix] = res
-    print("Predicted directly")
-    print(res)
+    print(X_test[clusters_test_ix,:])
+    print(res.shape)
+    print(y_predicted[clusters_test_ix].shape)
+    print(np.unique(res, return_counts=True))
+    # print("Predicted directly")
+    # print(res)
 
-    print("Test original")
-    print(y_test.loc[clusters_test_ix, "ct"])
+    # print("Test original")
+    # print(y_test.loc[clusters_test_ix, "ct"])
 
-    print("Predicted")
-    print(y_predicted[clusters_test_ix])
-    print("Test")
-    print(y_test.loc[clusters_test_ix, "ct"].to_numpy())
-    print("y_test[ct]")
-    print(y_test["ct"])
+    # print("Predicted")
+    # print(y_predicted[clusters_test_ix])
+    # print("Test")
+    # print(y_test.loc[clusters_test_ix, "ct"].to_numpy())
+    # print("y_test[ct]")
+    # print(y_test["ct"])
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
