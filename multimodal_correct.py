@@ -480,12 +480,13 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     #     clusters_test_ix[clusters_test == cl] = 0
 
     y_predicted = np.zeros((y_test.shape[0],), dtype=int)
-    print(y_test)
-    print(clusters_test_ix.shape)
-    print(y_test["ct"][clusters_test_ix])
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
+
+    print(y_predicted[clusters_test_ix])
+    print(y_test["ct"][clusters_test_ix])
+
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
-    print(f"Accuracy known (my): {sum(y_test['ct'][clusters_test_ix]== y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
+    print(f"Accuracy known (my): {sum(y_test['ct'][clusters_test_ix] == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
     y_predicted[clusters_test_ix != 1] == -1
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
@@ -497,7 +498,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
     print(y_predicted["val_ct"])
-    return y_predicted
+    return y_predicted["val_ct"].to_list()
 
 def main():
     # Parse args
