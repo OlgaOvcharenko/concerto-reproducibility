@@ -498,7 +498,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
     print(y_predicted["val_ct"])
-    return y_predicted["val_ct"]
+    return y_predicted
 
 def main():
     # Parse args
@@ -571,7 +571,8 @@ def test_r():
     
     print(res)
 
-    adata_merged.obsm[f'pred_cell_type_1'] = res
+    adata_merged.obsm[f'pred_cell_type_1'] = res.set_index(adata_merged.obs_names)["val_ct"]
+    print(adata_merged)
 
 # main()
 test_r()
