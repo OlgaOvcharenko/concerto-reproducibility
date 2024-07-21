@@ -2476,7 +2476,7 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
 
 
 def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: str, Protein_tf_path: str, n_cells_for_sample=None,super_parameters=None,
-                             saved_weight_path=None):
+                             saved_weight_path=None, only_RNA=False):
     if super_parameters is None:
         super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5, 'drop_rate': 0.1, 'combine_omics': False}
     
@@ -2559,7 +2559,10 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                     encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                                 [source_values_RNA, source_values_protein]],
                                                                 training=False)
-                    encode_output = tf.concat([encode_output1, encode_output2], axis=1)
+                    if not only_RNA:
+                        encode_output = encode_output1
+                    else:
+                        encode_output = tf.concat([encode_output1, encode_output2], axis=1)
                     break
 
         dim = encode_output.shape[1]
@@ -2594,7 +2597,10 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                 encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                               [source_values_RNA, source_values_protein]],
                                                              training=False)
-                encode_output = tf.concat([encode_output1, encode_output2], axis=1)
+                if not only_RNA:
+                    encode_output = encode_output1
+                else:
+                    encode_output = tf.concat([encode_output1, encode_output2], axis=1)
 
             encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
             source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
