@@ -463,6 +463,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_test['ct'] = y_test['ct'].astype('int')
 
     print(label_types)
+    print(X_test.__class__)
     print(X_test[clusters_test_ix,:].shape)
 
     # Fit
