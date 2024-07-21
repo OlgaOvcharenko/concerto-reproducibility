@@ -463,15 +463,15 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_test['ct'] = y_test['ct'].astype('int')
 
     # Fit
-    neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
+    neigh = KNeighborsClassifier(n_neighbors=100) #, metric='cosine'
     neigh.fit(X_train, y_train["ct"].to_numpy())
 
-    # Leiden
+    # # Leiden
     # adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     # sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
     # sc.tl.leiden(adata_new, resolution=0.2)
 
-    # FIXME Filter clusters
+    # # FIXME Filter clusters
     # _, clusters = np.unique(adata_new.obs["leiden"], return_inverse=True)
     # clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
     # clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
