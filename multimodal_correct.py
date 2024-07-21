@@ -466,21 +466,20 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
     neigh.fit(X_train, y_train["ct"].to_numpy())
 
-    # Leiden
-    adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
-    sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
-    sc.tl.leiden(adata_new, resolution=0.2)
+    # # Leiden
+    # adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
+    # sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
+    # sc.tl.leiden(adata_new, resolution=0.2)
 
-    # FIXME Filter clusters
-    _, clusters = np.unique(adata_new.obs["leiden"], return_inverse=True)
-    clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
-    clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
+    # # FIXME Filter clusters
+    # clusters_train = np.array(adata_new.obs["leiden"])[0:X_train.shape[0]]
+    # clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
 
-    clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
-    print(np.unique(clusters_test).tolist())
-    print(np.unique(clusters_train).tolist())
-    for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
-        clusters_test_ix[clusters_test == cl] = 0
+    # clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
+    # print(np.unique(clusters_test).tolist())
+    # print(np.unique(clusters_train).tolist())
+    # for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
+    #     clusters_test_ix[clusters_test == cl] = 0
 
     clusters_test_ix = np.array(clusters_test_ix, dtype=bool)
 
@@ -579,5 +578,5 @@ def test_r():
     adata_merged.obsm[f'pred_cell_type_1'] = res.set_index(adata_merged.obs_names)["val_ct"]
     print(adata_merged)
 
-# main()
-test_r()
+main()
+# test_r()
