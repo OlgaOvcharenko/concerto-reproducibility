@@ -498,7 +498,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
     print(y_predicted["val_ct"])
-    return y_predicted["val_ct"].to_list()
+    return y_predicted["val_ct"]
 
 def main():
     # Parse args
