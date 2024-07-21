@@ -493,7 +493,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print("Predicted")
     print(y_predicted[clusters_test_ix])
     print("Test")
-    print(y_test.iloc[clusters_test_ix, "ct"])
+    print(y_test.loc[clusters_test_ix, "ct"])
+    print(y_test.loc[clusters_test_ix, "ct"].to_numpy())
     print("y_test[ct]")
     print(y_test["ct"])
 
