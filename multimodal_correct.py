@@ -401,7 +401,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
 
                     if not train:
                         print("Predict")
-                        adata_RNA_1.obsm[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], )
+                        adata_RNA_1.obsm[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], ).set_index(adata_RNA_1.obs_names)["val_ct"]
                         print(adata_RNA_1.obsm[f'pred_cell_type_{e}_{nn}_{dr}'])
 
                     # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
@@ -477,7 +477,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     clusters_test = np.array(adata_new.obs["leiden"])[X_train.shape[0]:(X_train.shape[0]+X_test.shape[0])]
 
     clusters_test_ix = np.ones(clusters_test.shape, dtype=int)
-    print(set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()))
+    print(np.unique(clusters_test).tolist())
+    print(np.unique(clusters_train).tolist())
     for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
         clusters_test_ix[clusters_test == cl] = 0
 
@@ -490,7 +491,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
-    y_predicted[clusters_test_ix != 1] == 9
+    y_predicted[clusters_test_ix != 1] == -2
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
 
     # print(y_test.value_counts())
