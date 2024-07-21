@@ -485,14 +485,14 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_test["ct"][clusters_test_ix])
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
+    print(f"Accuracy known (my): {sum(y_test['ct'][clusters_test_ix]== y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
     y_predicted[clusters_test_ix != 1] == -1
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
     
     y_predicted = pd.DataFrame(data=y_predicted, columns=["ct"])
-    # for col in y_predicted.select_dtypes(include=['category']).columns:
-    #     y_predicted[col] = y_predicted[col].astype('str')
 
+    y_predicted['val_ct'] = pd.Series(dtype='int')
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
