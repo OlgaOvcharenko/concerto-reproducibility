@@ -468,8 +468,6 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_train['ct'].unique())
     print(y_test['ct'].unique())
 
-    print(np.unique(clusters_test_ix))
-
     # Fit
     neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
     neigh.fit(X_train, y_train["ct"].to_numpy())
@@ -492,7 +490,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_predicted = np.zeros((y_test.shape[0],), dtype=int)
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
 
+    print("Predicted")
     print(y_predicted[clusters_test_ix])
+    print("Test")
     print(y_test["ct"][clusters_test_ix])
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
@@ -507,7 +507,6 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
-    print(y_predicted["val_ct"])
     return y_predicted
 
 def main():
