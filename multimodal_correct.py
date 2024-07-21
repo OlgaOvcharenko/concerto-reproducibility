@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec, rcParams
 from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
 import tensorflow as tf
+from sklearn.metrics import confusion_matrix
 # import scvelo as scv
 
 import time
@@ -444,8 +445,11 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_train.fillna(-1, inplace=True)
 
+    y_test_original = y_test.to_list()
+
     y_test = pd.DataFrame(y_test.to_list(), columns=["ct"])
     y_test.fillna(-1, inplace=True)
+    
 
     # Encode
     label_types = dict()
@@ -499,6 +503,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
 
     y_predicted[clusters_test_ix != 1] == -2
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
+    print(label_types)
+    print(list(label_types.values()))
+    print(confusion_matrix(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix], labels=list(label_types.values())))
 
     # print(y_test.value_counts())
     # print(np.unique(y_predicted, return_counts=True))
