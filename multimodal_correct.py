@@ -440,6 +440,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_test = pd.DataFrame(y_test.to_list(), columns=["ct"])
     y_test.fillna(-1, inplace=True)
 
+    print(y_train['ct'].unique())
+    print(y_test['ct'].unique())
+
     # Encode
     label_types = dict()
     i = 0
@@ -457,8 +460,15 @@ def query_to_reference(X_train, X_test, y_train, y_test):
             label_types[lbl] = i
             i += 1
 
+            print("Visited")
+
     y_train['ct'] = y_train['ct'].astype('int')
     y_test['ct'] = y_test['ct'].astype('int')
+
+    print(y_train['ct'].unique())
+    print(y_test['ct'].unique())
+
+    print(np.unique(clusters_test_ix))
 
     # Fit
     neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
