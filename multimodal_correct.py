@@ -454,7 +454,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     i = len(y_train["ct"].unique()) + 1
     clusters_test_ix = np.ones((y_test.shape[0],), dtype=int)
     for lbl in y_test["ct"].unique():
-        if lbl not in list(label_types.keys()):
+        if (lbl not in list(label_types.keys())) and (lbl not in list(label_types.values())):
             clusters_test_ix[y_test["ct"]==lbl] = 0 # FIXME
             y_test["ct"][y_test["ct"]==lbl] = i
             label_types[lbl] = i
