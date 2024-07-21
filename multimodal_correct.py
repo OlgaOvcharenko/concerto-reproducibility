@@ -443,7 +443,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
         y_test["ct"][y_test["ct"]==lbl] = i
 
     i = len(y_train["ct"].unique()) + 1
-    clusters_test_ix = np.ones(y_test.shape, dtype=int)
+    clusters_test_ix = np.ones((y_test.shape[0],), dtype=int)
     for lbl in y_test["ct"].unique():
         if lbl not in list(label_types.keys()):
             clusters_test_ix[y_test["ct"]==lbl] = 0 # FIXME
@@ -455,7 +455,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_test['ct'] = y_test['ct'].astype('int')
 
     # Fit
-    neigh = KNeighborsClassifier(n_neighbors=5)
+    neigh = KNeighborsClassifier(n_neighbors=50)
     neigh.fit(X_train, y_train["ct"].to_numpy())
 
     # Leiden
@@ -476,17 +476,12 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_predicted = np.zeros((y_test.shape[0],))
     print(y_test)
     print(clusters_test_ix.shape)
-    print(X_test.shape)
-    print(sum(clusters_test_ix))
     print(y_test["ct"][clusters_test_ix])
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix])
-    print(y_predicted[clusters_test_ix])
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix], normalize=False)}")
 
     y_predicted[clusters_test_ix != 1] == -1
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted, normalize=False)}")
-
-    print(y_predicted)
     
     y_predicted = pd.DataFrame(data=y_predicted, columns=["ct"])
     # for col in y_predicted.select_dtypes(include=['category']).columns:
