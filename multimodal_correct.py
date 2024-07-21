@@ -462,10 +462,6 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_train['ct'] = y_train['ct'].astype('int')
     y_test['ct'] = y_test['ct'].astype('int')
 
-    print(label_types)
-    print(X_test.__class__)
-    print(X_test[clusters_test_ix,:].shape)
-
     # Fit
     neigh = KNeighborsClassifier(n_neighbors=50, metric='cosine')
     neigh.fit(X_train, y_train["ct"].to_numpy())
@@ -485,9 +481,14 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     # for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
     #     clusters_test_ix[clusters_test == cl] = 0
 
+    print(label_types)
+    print(X_test.__class__)
+    print(X_test[clusters_test_ix,:].shape)
+
     print("Value counts")
     print(np.unique(clusters_test_ix, return_counts=True))
     print(clusters_test_ix)
+    clusters_test_ix = np.array(clusters_test_ix, dtype=bool)
 
     y_predicted = np.full((y_test.shape[0],), -1, dtype=int)
     res = neigh.predict(X_test[clusters_test_ix,:])
