@@ -506,7 +506,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(y_test["ct"])
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
-    print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, "ct"].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
+    print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
     y_predicted[clusters_test_ix != 1] == -2
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
