@@ -463,7 +463,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_test['ct'] = y_test['ct'].astype('int')
 
     # Fit
-    neigh = KNeighborsClassifier(n_neighbors=50, metric='cosine')
+    neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
     neigh.fit(X_train, y_train["ct"].to_numpy())
 
     # Leiden
@@ -481,44 +481,19 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     # for cl in set(np.unique(clusters_test).tolist()).difference(np.unique(clusters_train).tolist()):
     #     clusters_test_ix[clusters_test == cl] = 0
 
-    print(label_types)
-    print(X_test.__class__)
-    print(X_test[clusters_test_ix,:].shape)
-
-    print("Value counts")
-    print(np.unique(clusters_test_ix, return_counts=True))
-    print(clusters_test_ix)
     clusters_test_ix = np.array(clusters_test_ix, dtype=bool)
 
     y_predicted = np.full((y_test.shape[0],), -1, dtype=int)
-    res = neigh.predict(X_test[clusters_test_ix,:])
-    y_predicted[clusters_test_ix] = res
-    print(X_test.shape)
-    print(X_test[clusters_test_ix,:].shape)
-    print(res.shape)
-    print(y_predicted[clusters_test_ix].shape)
-    print(np.unique(res, return_counts=True))
-    # print("Predicted directly")
-    # print(res)
-
-    # print("Test original")
-    # print(y_test.loc[clusters_test_ix, "ct"])
-
-    # print("Predicted")
-    # print(y_predicted[clusters_test_ix])
-    # print("Test")
-    # print(y_test.loc[clusters_test_ix, "ct"].to_numpy())
-    # print("y_test[ct]")
-    # print(y_test["ct"])
+    y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix,:])
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
-    y_predicted[clusters_test_ix != 1] == -2
+    y_predicted[clusters_test_ix != 1] == 9
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
 
-    print(y_test.value_counts())
-    print(np.unique(y_predicted, return_counts=True))
+    # print(y_test.value_counts())
+    # print(np.unique(y_predicted, return_counts=True))
     
     y_predicted = pd.DataFrame(data=y_predicted, columns=["ct"])
 
