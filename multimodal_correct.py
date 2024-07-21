@@ -463,6 +463,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_test['ct'] = y_test['ct'].astype('int')
 
     print(label_types)
+    print(X_test[clusters_test_ix,:].shape)
 
     # Fit
     neigh = KNeighborsClassifier(n_neighbors=50, metric='cosine')
@@ -485,11 +486,13 @@ def query_to_reference(X_train, X_test, y_train, y_test):
 
     print("Value counts")
     print(np.unique(clusters_test_ix, return_counts=True))
+    print(clusters_test_ix)
 
     y_predicted = np.full((y_test.shape[0],), -1, dtype=int)
     res = neigh.predict(X_test[clusters_test_ix,:])
     y_predicted[clusters_test_ix] = res
-    print(X_test[clusters_test_ix,:])
+    print(X_test.shape)
+    print(X_test[clusters_test_ix,:].shape)
     print(res.shape)
     print(y_predicted[clusters_test_ix].shape)
     print(np.unique(res, return_counts=True))
