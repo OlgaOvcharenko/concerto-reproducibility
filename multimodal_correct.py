@@ -389,12 +389,12 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                         'Platelet': 'other'
                     }
 
-                    if data == 'simulated':
-                        adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
-                        adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
-                    else:
-                        adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
-                        adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
+                    # if data == 'simulated':
+                    adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
+                    adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
+                    # else:
+                    #     adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
+                    #     adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
                     print(adata_RNA_1)
 
                     sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
@@ -501,7 +501,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
-    y_predicted[clusters_test_ix != 1] == -2
+    y_predicted["ct"][clusters_test_ix != 1] == -2
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
     print(label_types)
     print(list(label_types.values()))
@@ -515,6 +515,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     y_predicted['val_ct'] = pd.Series(dtype='int')
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
+    
+    y_predicted["val_ct"][y_predicted["ct"]==-2] == "new cell type"
     
     return y_predicted
 
