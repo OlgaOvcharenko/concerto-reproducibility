@@ -16,6 +16,7 @@ from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 # import scvelo as scv
+from sklearn.decomposition import KernelPCA
 
 import time
 
@@ -441,6 +442,12 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     # Prepare
     X_train = np.nan_to_num(X_train)
     X_test = np.nan_to_num(X_test)
+    X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
+    X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    transformer = KernelPCA(n_components=20, kernel='linear')
+    X_train = transformer.fit_transform(X_train)
+    X_test = transformer.transform(X_test)
 
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_train.fillna(-1, inplace=True)
@@ -516,7 +523,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
-    y_predicted["val_ct"][y_predicted["ct"]==-2] == "new cell type"
+    y_predicted[y_predicted["ct"]==-2] == "new cell type"
     
     return y_predicted
 
