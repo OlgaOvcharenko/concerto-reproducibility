@@ -10,9 +10,9 @@ batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("32")
+heads=("128")
 data=("simulated human")
-train=1
+train=0
 test=1
 
 model_type=("1 2 3 4 5")

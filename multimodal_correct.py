@@ -441,8 +441,9 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     # Prepare
     X_train = np.nan_to_num(X_train)
     X_test = np.nan_to_num(X_test)
-    X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
-    X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+    
+    # X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
+    # X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
 
     transformer = KernelPCA(n_components=20, kernel='linear')
     X_train = transformer.fit_transform(X_train)
