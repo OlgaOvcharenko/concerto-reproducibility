@@ -606,9 +606,9 @@ def test_r():
     adata_merged_train = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_train_0_mt_1_bs_64_100_0.001_0.1_False_True_128.h5ad")
     adata_merged = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_test_0_mt_1_bs_64_100_0.001_0.1_False_True_128.h5ad")
     res = query_to_reference(X_train=adata_merged_train.obsm[f'64_encoder_0.1'], 
-                             y_train=adata_merged_train.obs["cell_type_l1"], 
+                             y_train=adata_merged_train.obs["cell_type"], 
                              X_test=adata_merged.obsm[f'64_encoder_0.1'], 
-                             y_test=adata_merged.obs["cell_type_l1"])
+                             y_test=adata_merged.obs["cell_type"])
     
     print(res)
 
