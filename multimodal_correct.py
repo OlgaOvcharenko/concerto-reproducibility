@@ -438,12 +438,12 @@ def save_merged_adata(adata_merged, filename):
     print(adata_merged)
     print(f"Saved adata all at {filename}")
 
-def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
-    measure_mem("Start q-r")
+def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = False):
+    # measure_mem("Start q-r")
     # Prepare
     X_train = pd.DataFrame(np.nan_to_num(X_train))
     X_test = pd.DataFrame(np.nan_to_num(X_test))
-    measure_mem("DFs")
+    # measure_mem("DFs")
     X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
     X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
 
@@ -451,11 +451,11 @@ def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
         transformer = KernelPCA(n_components=20, kernel='linear')
         X_train = transformer.fit_transform(X_train)
         X_test = transformer.transform(X_test)
-        measure_mem("PCA")
+        # measure_mem("PCA")
     else:
         X_train = X_train.to_numpy()
         X_test = X_test.to_numpy()
-        measure_mem("DFs to numpy")
+        # measure_mem("DFs to numpy")
 
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_train.fillna(-1, inplace=True)
@@ -463,7 +463,7 @@ def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
     y_test = pd.DataFrame(y_test.to_list(), columns=["ct"])
     y_test.fillna(-1, inplace=True)
 
-    measure_mem("fill y")
+    # measure_mem("fill y")
 
     # Encode
     label_types = dict()
@@ -491,7 +491,7 @@ def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
     neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
     neigh.fit(X_train, y_train["ct"])
 
-    measure_mem("after KNN")
+    # measure_mem("after KNN")
 
     # # Leiden
     # adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
@@ -514,7 +514,7 @@ def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
     y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix,:])
     print(y_predicted[clusters_test_ix].shape)
 
-    measure_mem("KNN predict")
+    # measure_mem("KNN predict")
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
@@ -528,14 +528,14 @@ def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
 
     # print(y_test.value_counts())
     # print(np.unique(y_predicted, return_counts=True))
-    measure_mem("before final df")
+    # measure_mem("before final df")
     y_predicted = pd.DataFrame(data=y_predicted, columns=["ct"])
 
     y_predicted['val_ct'] = pd.Series(dtype='int')
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
-    measure_mem("final df")
+    # measure_mem("final df")
 
     y_predicted[y_predicted["ct"]==-2] == "new cell type"
     
@@ -620,5 +620,5 @@ def measure_mem(p_s: str):
     print(p_s)
     print(process.memory_info().rss) 
 
-# main()
-test_r()
+main()
+# test_r()
