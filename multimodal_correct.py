@@ -439,11 +439,11 @@ def save_merged_adata(adata_merged, filename):
 
 def query_to_reference(X_train, X_test, y_train, y_test):
     # Prepare
-    X_train = np.nan_to_num(X_train)
-    X_test = np.nan_to_num(X_test)
+    X_train = pd.DataFrame(np.nan_to_num(X_train))
+    X_test = pd.DataFrame(np.nan_to_num(X_test))
     
-    # X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
-    # X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+    X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
+    X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
 
     transformer = KernelPCA(n_components=20, kernel='linear')
     X_train = transformer.fit_transform(X_train)
@@ -482,7 +482,7 @@ def query_to_reference(X_train, X_test, y_train, y_test):
 
     # Fit
     neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
-    neigh.fit(X_train, y_train["ct"].to_numpy())
+    neigh.fit(X_train, y_train["ct"])
 
     # # Leiden
     # adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
@@ -502,13 +502,14 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     clusters_test_ix = np.array(clusters_test_ix, dtype=bool)
 
     y_predicted = np.full((y_test.shape[0],), -1, dtype=int)
-    y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix,:])
+    y_predicted[clusters_test_ix] = neigh.predict(X_test.loc[clusters_test_ix,:])
     print(y_predicted[clusters_test_ix].shape)
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
 
-    y_predicted["ct"][clusters_test_ix != 1] == -2
+    print(clusters_test_ix)
+    y_predicted[clusters_test_ix != True] == -2
     print(f"Accuracy all: {accuracy_score(y_test, y_predicted)}")
     print(label_types)
     print(list(label_types.values()))
