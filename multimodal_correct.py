@@ -17,6 +17,7 @@ import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 # import scvelo as scv
 from sklearn.decomposition import KernelPCA
+import psutil
 
 import time
 
@@ -437,26 +438,32 @@ def save_merged_adata(adata_merged, filename):
     print(adata_merged)
     print(f"Saved adata all at {filename}")
 
-def query_to_reference(X_train, X_test, y_train, y_test):
+def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
+    measure_mem("Start q-r")
     # Prepare
     X_train = pd.DataFrame(np.nan_to_num(X_train))
     X_test = pd.DataFrame(np.nan_to_num(X_test))
-    
+    measure_mem("DFs")
     X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
     X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-    transformer = KernelPCA(n_components=20, kernel='linear')
-    X_train = transformer.fit_transform(X_train)
-    X_test = transformer.transform(X_test)
+    if do_PCA:
+        transformer = KernelPCA(n_components=20, kernel='linear')
+        X_train = transformer.fit_transform(X_train)
+        X_test = transformer.transform(X_test)
+        measure_mem("PCA")
+    else:
+        X_train = X_train.to_numpy()
+        X_test = X_test.to_numpy()
+        measure_mem("DFs to numpy")
 
     y_train = pd.DataFrame(y_train.to_list(), columns=["ct"])
     y_train.fillna(-1, inplace=True)
 
-    y_test_original = y_test.to_list()
-
     y_test = pd.DataFrame(y_test.to_list(), columns=["ct"])
     y_test.fillna(-1, inplace=True)
-    
+
+    measure_mem("fill y")
 
     # Encode
     label_types = dict()
@@ -484,6 +491,8 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     neigh = KNeighborsClassifier(n_neighbors=100, metric='cosine')
     neigh.fit(X_train, y_train["ct"])
 
+    measure_mem("after KNN")
+
     # # Leiden
     # adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
     # sc.pp.neighbors(adata_new, metric="cosine", use_rep="X")
@@ -502,8 +511,10 @@ def query_to_reference(X_train, X_test, y_train, y_test):
     clusters_test_ix = np.array(clusters_test_ix, dtype=bool)
 
     y_predicted = np.full((y_test.shape[0],), -1, dtype=int)
-    y_predicted[clusters_test_ix] = neigh.predict(X_test.loc[clusters_test_ix,:])
+    y_predicted[clusters_test_ix] = neigh.predict(X_test[clusters_test_ix,:])
     print(y_predicted[clusters_test_ix].shape)
+
+    measure_mem("KNN predict")
 
     print(f"Accuracy known: {accuracy_score(y_test['ct'][clusters_test_ix], y_predicted[clusters_test_ix])}")
     print(f"Accuracy known (my): {sum(y_test.loc[clusters_test_ix, 'ct'].to_numpy() == y_predicted[clusters_test_ix]) / y_test['ct'][clusters_test_ix].shape[0]}")
@@ -517,13 +528,15 @@ def query_to_reference(X_train, X_test, y_train, y_test):
 
     # print(y_test.value_counts())
     # print(np.unique(y_predicted, return_counts=True))
-    
+    measure_mem("before final df")
     y_predicted = pd.DataFrame(data=y_predicted, columns=["ct"])
 
     y_predicted['val_ct'] = pd.Series(dtype='int')
     for lbl, num_lbl in zip(list(label_types.keys()), list(label_types.values())):
         y_predicted["val_ct"][y_predicted["ct"]==num_lbl] = lbl
     
+    measure_mem("final df")
+
     y_predicted[y_predicted["ct"]==-2] == "new cell type"
     
     return y_predicted
@@ -590,8 +603,8 @@ def main():
     save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 def test_r():
-    adata_merged_train = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_train_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad")
-    adata_merged = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_test_1_mt_0_bs_64_77_0.001_0.1_False_True_128.h5ad")
+    adata_merged_train = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_train_0_mt_1_bs_64_100_0.001_0.1_False_True_128.h5ad")
+    adata_merged = sc.read_h5ad("./Multimodal_pretraining/data/simulated/simulated_test_0_mt_1_bs_64_100_0.001_0.1_False_True_128.h5ad")
     res = query_to_reference(X_train=adata_merged_train.obsm[f'train_64_encoder_0.1'], 
                              y_train=adata_merged_train.obs["cell_type_l1"], 
                              X_test=adata_merged.obsm[f'test_64_encoder_0.1'], 
@@ -602,5 +615,10 @@ def test_r():
     adata_merged.obsm[f'pred_cell_type_1'] = res.set_index(adata_merged.obs_names)["val_ct"]
     print(adata_merged)
 
-main()
-# test_r()
+def measure_mem(p_s: str):
+    process = psutil.Process()
+    print(p_s)
+    print(process.memory_info().rss) 
+
+# main()
+test_r()
