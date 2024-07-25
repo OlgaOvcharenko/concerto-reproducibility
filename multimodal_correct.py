@@ -421,8 +421,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     sc.set_figure_params(dpi=150)
 
                     if not train:
-                        # color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
-                        color=['cell_type_l1', 'leiden', 'batch']
+                        color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
+                        # color=['cell_type_l1', 'leiden', 'batch']
                     else:
                         color=['cell_type_l1', 'leiden', 'batch']
                     
@@ -453,7 +453,7 @@ def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = True):
     X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
 
     if do_PCA:
-        transformer = KernelPCA(n_components=20, kernel='linear')
+        transformer = KernelPCA(n_components=15, kernel='linear')
         X_train = transformer.fit_transform(X_train)
         X_test = transformer.transform(X_test)
         # measure_mem("PCA")
