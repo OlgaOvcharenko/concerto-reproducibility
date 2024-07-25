@@ -12,7 +12,7 @@ attention_t=("1")
 attention_s=("0")
 heads=("16")
 data=("simulated")
-train=1
+train=0
 test=1
 
 model_type=("1 2 3 4 5")
