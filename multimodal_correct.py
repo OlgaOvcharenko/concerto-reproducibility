@@ -425,6 +425,10 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                         # color=['cell_type_l1', 'leiden', 'batch']
                     else:
                         color=['cell_type_l1', 'leiden', 'batch']
+                    
+                    print(adata_RNA_1.obs[f'cell_type_l1'])
+                    print(adata_RNA_1.obs[f'cell_type_l1'].__class__)
+
                     sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
                     plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{"train" if train else "test"}_{combine_omics}_oRNA{only_RNA}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
                     
@@ -538,6 +542,7 @@ def query_to_reference(X_train, X_test, y_train, y_test, do_PCA = False):
     # measure_mem("final df")
 
     y_predicted[y_predicted["ct"]==-2] == "new cell type"
+    y_predicted["val_ct"] = y_predicted["val_ct"].astype("category")
     
     return y_predicted
 
