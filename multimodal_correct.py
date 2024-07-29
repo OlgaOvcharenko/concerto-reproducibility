@@ -53,7 +53,7 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
+def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
     print("Read PBMC data.")
     print(f"Train={train} RNA data shape {adata_RNA.shape}")
     print(f"Train={train} Protein data shape {adata_Protein.shape}")
@@ -62,8 +62,8 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
     adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
     sc.tl.pca(adata_merged_tmp)
 
-    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True, batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True, batch_key='batch')
+    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=is_hvg_protein, batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
