@@ -53,7 +53,7 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
+def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
     print("Read PBMC data.")
     print(f"Train={train} RNA data shape {adata_RNA.shape}")
     print(f"Train={train} Protein data shape {adata_Protein.shape}")
@@ -62,8 +62,8 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
     adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
     sc.tl.pca(adata_merged_tmp)
 
-    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=True, batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=True, batch_key='batch')
+    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=is_hvg_protein, batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
@@ -411,15 +411,15 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     if not train:
                         print("Predict")
                         # adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], ).set_index(adata_RNA_1.obs_names)["val_ct"]
-                        query_neighbor, query_prob = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
+                        query_neighbor, _ = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
                         print(query_neighbor)
-                        print(query_prob)
 
-                        adata_query_1 = adata_merged
-                        acc = accuracy_score(adata_query_1.obs['celltype'], query_neighbor)
-                        f1 = f1_score(adata_query_1.obs['celltype'], query_neighbor, average=None)
+                        acc = accuracy_score(adata_merged.obs['cell_type_l1'], query_neighbor)
+                        f1 = f1_score(adata_merged.obs['cell_type_l1'], query_neighbor, average=None)
                         f1_median = np.median(f1)
                         print('acc:{:.2f} f1-score:{:.2f}'.format(acc,f1_median))
+
+                        adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_neighbor
 
                     # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                     sc.tl.leiden(adata_RNA_1, resolution=0.2)
@@ -429,8 +429,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     sc.set_figure_params(dpi=150)
 
                     if not train:
-                        # color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
-                        color=['cell_type_l1', 'leiden', 'batch']
+                        color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}', 'leiden', 'batch']
+                        # color=['cell_type_l1', 'leiden', 'batch']
                     else:
                         color=['cell_type_l1', 'leiden', 'batch']
                     
