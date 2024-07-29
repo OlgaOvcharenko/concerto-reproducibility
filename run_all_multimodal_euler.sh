@@ -15,8 +15,8 @@ data=("simulated")
 train=0
 test=1
 
-model_type=("0")
-combine_omics=1
+model_type=("2")
+combine_omics=0
 
 for e in $epochs; do
     for lr in $lrs; do
