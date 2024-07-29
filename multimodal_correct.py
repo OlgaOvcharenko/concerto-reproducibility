@@ -411,7 +411,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     if not train:
                         print("Predict")
                         # adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], ).set_index(adata_RNA_1.obs_names)["val_ct"]
-                        query_neighbor, query_prob = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], query_embedding=embedding, ref_anndata=adata_merged_train, source_data_id=RNA_id, column_name='cell_type_l1', k=5)
+                        query_neighbor, query_prob = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
                         print(query_neighbor)
                         print(query_prob)
 
