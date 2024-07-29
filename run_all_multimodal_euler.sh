@@ -5,14 +5,14 @@ mkdir -p logs
 source "python_venv/bin/activate"
 
 epochs=("150")
-lrs=("1e-1 1e-3 1e-5 1e-8")
-batch_sizes=("64 128")
-drop_rates=("0.0 0.1")
+lrs=("1e-3")
+batch_sizes=("64")
+drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("64")
-data=("human")
-train=1
+heads=("32")
+data=("simulated")
+train=0
 test=1
 
 model_type=("0")

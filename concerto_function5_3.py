@@ -2273,7 +2273,6 @@ def concerto_test_ref_query(model_path:str, ref_tf_path:str, query_tf_path:str, 
     return ref_embedding, query_embedding,source_data_id_subsample,target_data_id # N*dim, 顺序按照adata1， adata2的cell 顺序；
 
 
-
 def concerto_test_ref(model_path:str, ref_tf_path:str, super_parameters=None,saved_weight_path=None):
     if super_parameters is None:
         super_parameters = {'batch_size': 128, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1, "attention_t": True, "heads": 128}
