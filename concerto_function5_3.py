@@ -2273,7 +2273,6 @@ def concerto_test_ref_query(model_path:str, ref_tf_path:str, query_tf_path:str, 
     return ref_embedding, query_embedding,source_data_id_subsample,target_data_id # N*dim, 顺序按照adata1， adata2的cell 顺序；
 
 
-
 def concerto_test_ref(model_path:str, ref_tf_path:str, super_parameters=None,saved_weight_path=None):
     if super_parameters is None:
         super_parameters = {'batch_size': 128, 'epoch': 1, 'lr': 1e-5,'drop_rate': 0.1, "attention_t": True, "heads": 128}
@@ -2476,7 +2475,7 @@ def concerto_test_multimodal_decoder(mult_feature_names:list, model_path: str, R
 
 
 def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: str, Protein_tf_path: str, n_cells_for_sample=None,super_parameters=None,
-                             saved_weight_path=None):
+                             saved_weight_path=None, only_RNA=False):
     if super_parameters is None:
         super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5, 'drop_rate': 0.1, 'combine_omics': False}
     
@@ -2559,7 +2558,10 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                     encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                                 [source_values_RNA, source_values_protein]],
                                                                 training=False)
-                    encode_output = tf.concat([encode_output1, encode_output2], axis=1)
+                    if not only_RNA:
+                        encode_output = encode_output1
+                    else:
+                        encode_output = tf.concat([encode_output1, encode_output2], axis=1)
                     break
 
         dim = encode_output.shape[1]
@@ -2594,7 +2596,10 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                 encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                               [source_values_RNA, source_values_protein]],
                                                              training=False)
-                encode_output = tf.concat([encode_output1, encode_output2], axis=1)
+                if not only_RNA:
+                    encode_output = encode_output1
+                else:
+                    encode_output = tf.concat([encode_output1, encode_output2], axis=1)
 
             encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
             source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
@@ -2749,7 +2754,7 @@ def concerto_test_multimodal_project(model_path: str, RNA_tf_path: str, Protein_
 
 
 
-def knn_classifier(ref_embedding, query_embedding, ref_anndata, source_data_id, column_name,k, num_chunks=100):
+def knn_classifier(ref_embedding, query_embedding, ref_anndata, column_name,k, num_chunks=100):
     '''
     return :
         target_neighbor: predicted label
@@ -2762,7 +2767,7 @@ def knn_classifier(ref_embedding, query_embedding, ref_anndata, source_data_id, 
         imgs_per_chunk = 10
 
     print(num_test_images, imgs_per_chunk)
-    ref_anndata = ref_anndata[source_data_id]
+    # ref_anndata = ref_anndata[source_data_id]
     train_labels = ref_anndata.obs[column_name].tolist()
     target_pred_labels = []
     target_pred_prob = []

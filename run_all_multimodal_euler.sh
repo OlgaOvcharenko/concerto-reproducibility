@@ -4,20 +4,19 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-epochs=("77")
+epochs=("100")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("128")
-data=("simulated human")
-train=1
+heads=("32")
+data=("simulated")
+train=0
 test=1
-model_type=("1 2 3 4 5")
+
+model_type=("1")
 combine_omics=0
-# model_type=("0")
-# combine_omics=1
 
 for e in $epochs; do
     for lr in $lrs; do
