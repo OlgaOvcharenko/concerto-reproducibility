@@ -411,7 +411,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     if not train:
                         print("Predict")
                         # adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], ).set_index(adata_RNA_1.obs_names)["val_ct"]
-                        query_neighbor, _ = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
+                        query_neighbor, _ = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
                         print(query_neighbor)
 
                         acc = accuracy_score(adata_merged.obs['cell_type_l1'], query_neighbor)
@@ -433,10 +433,6 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                         # color=['cell_type_l1', 'leiden', 'batch']
                     else:
                         color=['cell_type_l1', 'leiden', 'batch']
-                    
-                    print(adata_RNA_1.obs[f'cell_type_l1'])
-                    print(adata_RNA_1.obs[f'cell_type_l1'].__class__)
-                    print("PCA")
 
                     sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
                     plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_knn_concerto_{"train" if train else "test"}_{combine_omics}_oRNA{only_RNA}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
