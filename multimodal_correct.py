@@ -414,6 +414,21 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                         query_neighbor, _ = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
                         print(query_neighbor)
 
+                        print(adata_merged.obs['cell_type_l1'])
+
+                        y_pred = pd.DataFrame(query_neighbor, columns=["ct"])
+                        y_test = pd.DataFrame(adata_merged.obs["cell_type_l1"].to_list(), columns=["ct"])
+
+                        # Encode
+                        label_types = dict()
+                        i = 0
+                        for i, lbl in enumerate(y_test["ct"].unique()):
+                            label_types[lbl] = i
+                            y_test["ct"][y_test["ct"]==lbl] = i
+                            y_pred["ct"][y_pred["ct"]==lbl] = i
+
+                        print(f"Accuracy known: {accuracy_score(y_test['ct'], y_pred)}")
+                        
                         acc = accuracy_score(adata_merged.obs['cell_type_l1'], query_neighbor)
                         f1 = f1_score(adata_merged.obs['cell_type_l1'], query_neighbor, average=None)
                         f1_median = np.median(f1)
