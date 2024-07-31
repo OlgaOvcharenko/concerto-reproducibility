@@ -427,8 +427,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                             y_test["ct"][y_test["ct"]==lbl] = i
                             y_pred["ct"][y_pred["ct"]==lbl] = i
 
-                        print(f"Accuracy known: {accuracy_score(y_test['ct'], y_pred)}")
-                        
+                        print(f"Accuracy known: {accuracy_score(y_test['ct'], y_pred['ct'])}")
+
                         acc = accuracy_score(adata_merged.obs['cell_type_l1'], query_neighbor)
                         f1 = f1_score(adata_merged.obs['cell_type_l1'], query_neighbor, average=None)
                         f1_median = np.median(f1)
