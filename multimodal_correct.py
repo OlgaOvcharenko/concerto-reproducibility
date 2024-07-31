@@ -440,7 +440,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                         print(y_pred["ct"].unique())
 
                         try:
-                            print(f"Accuracy known1: {accuracy_score(adata_merged.obs["cell_type_l1"].to_list(), query_neighbor)}")
+                            print(f"Accuracy known1: {accuracy_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor)}")
                         except:
                             print("Exception")
 
