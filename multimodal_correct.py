@@ -411,13 +411,22 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     if not train:
                         print("Predict")
                         # adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], ).set_index(adata_RNA_1.obs_names)["val_ct"]
-                        query_neighbor, _ = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
-                        print(query_neighbor)
+                        query_neighbor, _ = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=10)
 
-                        print(adata_merged.obs['cell_type_l1'])
+                        count = 0
+                        correct = 0
+                        for tr, pr in zip(adata_merged.obs["cell_type_l1"].to_list(), query_neighbor):
+                            if tr == pr:
+                                correct += 1
+                            count += 1
+
+                        print(correct/count)
 
                         y_pred = pd.DataFrame(query_neighbor, columns=["ct"])
                         y_test = pd.DataFrame(adata_merged.obs["cell_type_l1"].to_list(), columns=["ct"])
+
+                        y_pred = y_pred.astype('str')
+                        y_test = y_test.astype('str')
 
                         # Encode
                         label_types = dict()
@@ -426,6 +435,14 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                             label_types[lbl] = i
                             y_test["ct"][y_test["ct"]==lbl] = i
                             y_pred["ct"][y_pred["ct"]==lbl] = i
+
+                        print(y_test["ct"].unique())
+                        print(y_pred["ct"].unique())
+
+                        try:
+                            print(f"Accuracy known1: {accuracy_score(adata_merged.obs["cell_type_l1"].to_list(), query_neighbor)}")
+                        except:
+                            print("Exception")
 
                         print(f"Accuracy known: {accuracy_score(y_test['ct'], y_pred['ct'])}")
 
