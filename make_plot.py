@@ -301,23 +301,22 @@ def main():
     print(f"Plot: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
     
     # Read data
-    # filename_train = f'./Multimodal_pretraining/data/{data}/{data}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-    # filename_test = f'./Multimodal_pretraining/data/{data}/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    filename_train = f'./Multimodal_pretraining/data/{data}/{data}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    filename_test = f'./Multimodal_pretraining/data/{data}/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
 
-    filename_train = f'./Multimodal_pretraining/data/{data}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-    filename_test = f'./Multimodal_pretraining/data/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    # filename_train = f'./Multimodal_pretraining/data/{data}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    # filename_test = f'./Multimodal_pretraining/data/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
 
 
     adata_merged_train = sc.read_h5ad(filename_train)
     adata_merged_test = sc.read_h5ad(filename_test)
 
     ep_vals = [4]
-    # FIXME
-    # i = 4
-    # while i < epoch:
-    #     ep_vals.append(i)
-    #     i = i * 2
-    # ep_vals.append(epoch)
+    i = 4
+    while i < epoch:
+        ep_vals.append(i)
+        i = i * 2
+    ep_vals.append(epoch)
 
     only_RNAs = [True, False] if combine_omics == 1 else [False]
     for only_RNA in only_RNAs:
