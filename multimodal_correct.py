@@ -95,6 +95,60 @@ def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, save_path: s
 
     return RNA_tf_path, Protein_tf_path, adata_merged
 
+def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, train: bool = True, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
+    print("Read PBMC data.")
+    print(f"Train={train} RNA data shape {adata_RNA.shape}")
+    print(f"Train={train} Protein data shape {adata_Protein.shape}")
+
+    # Create PCA for benchmarking
+    adata_RNA = preprocessing_changed_rna(adata_RNA,min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein,min_features = 0, is_hvg=is_hvg_protein, batch_key='batch')
+    
+    adata_RNA_test = adata_RNA[test_idx, :]
+    adata_Protein_test = adata_Protein[test_idx, :]
+
+    adata_RNA = adata_RNA[train_idx, :]
+    adata_Protein = adata_Protein[train_idx, :]
+
+    cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
+    adata_RNA = adata_RNA[cell_ix, :]
+    adata_Protein = adata_Protein[cell_ix, :]
+
+    # Add PCA after preprocessing for benchmarking
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+
+    adata_merged_test = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
+    
+    print("Preprocessed data.")
+
+    adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
+
+    adata_RNA_test.write_h5ad(save_path + f'adata_RNA_test.h5ad')
+    adata_Protein_test.write_h5ad(save_path + f'adata_Protein_test.h5ad')
+
+    print("Saved adata.")
+
+    path_file = 'tfrecord_train/'
+    RNA_tf_path = save_path + path_file + 'RNA_tf/'
+    Protein_tf_path = save_path + path_file + 'Protein_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    path_file = 'tfrecord_test/'
+    RNA_tf_path = save_path + path_file + 'RNA_tf/'
+    Protein_tf_path = save_path + path_file + 'Protein_tf/'
+    RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    print("Made tf records.")
+
+    return RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test
+
 
 def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
     print("Read human data")
@@ -146,36 +200,50 @@ def read_data(data: str = "simulated", save_path: str = ""):
         path = './Multimodal_pretraining/data/multi_protein_l2.loom'
         adata_Protein = sc.read(path) #cell_type batch
 
-        # train_idx, test_idx = train_test_split(
-        #     adata_RNA.obs_names.values,
-        #     test_size=0.5,
-        #     stratify=adata_RNA.obs["batch_size"],
-        #     shuffle=False,
-        #     random_state=42,
-        # )
-
-        train_idx = (adata_RNA.obs["batch"] != "P6") & (adata_RNA.obs["batch"] != "P7") & (adata_RNA.obs["batch"] != "P8")
+        train_idx = (adata_RNA.obs["batch"] != "P2") & (adata_RNA.obs["batch"] != "P5") & (adata_RNA.obs["batch"] != "P8")
         test_idx = (train_idx != 1)
 
-        # ['ASDC' 'B intermediate' 'B memory' 'B naive' 'CD14 Mono' 'CD16 Mono'
-        # 'CD4 CTL' 'CD4 Naive' 'CD4 Proliferating' 'CD4 TCM' 'CD4 TEM' 'CD8 Naive'
-        # 'CD8 Proliferating' 'CD8 TCM' 'CD8 TEM' 'Doublet' 'Eryth' 'HSPC' 'ILC'
-        # 'MAIT' 'NK' 'NK Proliferating' 'NK_CD56bright' 'Plasmablast' 'Platelet'
-        # 'Treg' 'cDC1' 'cDC2' 'dnT' 'gdT' 'pDC']
-
-        adata_RNA_test = adata_RNA[test_idx, :]
-        adata_Protein_test = adata_Protein[test_idx, :]
-
-        adata_RNA = adata_RNA[train_idx, :]
-        adata_Protein = adata_Protein[train_idx, :]
-
         # TODO Remove cell type B from reference
-        # cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
-        # adata_RNA = adata_RNA[cell_ix, :]
-        # adata_Protein = adata_Protein[cell_ix, :]
 
-        RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
-        RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
+        RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
+
+
+        # path = './Multimodal_pretraining/data/multi_gene_l2.loom'
+        # adata_RNA = sc.read(path)
+
+        # path = './Multimodal_pretraining/data/multi_protein_l2.loom'
+        # adata_Protein = sc.read(path) #cell_type batch
+
+        # # train_idx, test_idx = train_test_split(
+        # #     adata_RNA.obs_names.values,
+        # #     test_size=0.5,
+        # #     stratify=adata_RNA.obs["batch_size"],
+        # #     shuffle=False,
+        # #     random_state=42,
+        # # )
+
+        # train_idx = (adata_RNA.obs["batch"] != "P2") & (adata_RNA.obs["batch"] != "P5") & (adata_RNA.obs["batch"] != "P8")
+        # test_idx = (train_idx != 1)
+
+        # # ['ASDC' 'B intermediate' 'B memory' 'B naive' 'CD14 Mono' 'CD16 Mono'
+        # # 'CD4 CTL' 'CD4 Naive' 'CD4 Proliferating' 'CD4 TCM' 'CD4 TEM' 'CD8 Naive'
+        # # 'CD8 Proliferating' 'CD8 TCM' 'CD8 TEM' 'Doublet' 'Eryth' 'HSPC' 'ILC'
+        # # 'MAIT' 'NK' 'NK Proliferating' 'NK_CD56bright' 'Plasmablast' 'Platelet'
+        # # 'Treg' 'cDC1' 'cDC2' 'dnT' 'gdT' 'pDC']
+
+        # adata_RNA_test = adata_RNA[test_idx, :]
+        # adata_Protein_test = adata_Protein[test_idx, :]
+
+        # adata_RNA = adata_RNA[train_idx, :]
+        # adata_Protein = adata_Protein[train_idx, :]
+
+        # # TODO Remove cell type B from reference
+        # # cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
+        # # adata_RNA = adata_RNA[cell_ix, :]
+        # # adata_Protein = adata_Protein[cell_ix, :]
+
+        # RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
+        # RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
 
     else:
         adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
