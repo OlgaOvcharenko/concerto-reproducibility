@@ -125,29 +125,29 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, tr
     
     print("Preprocessed data.")
 
-    adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
-    adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
+    # adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
+    # adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
 
-    adata_RNA_test.write_h5ad(save_path + f'adata_RNA_test.h5ad')
-    adata_Protein_test.write_h5ad(save_path + f'adata_Protein_test.h5ad')
+    # adata_RNA_test.write_h5ad(save_path + f'adata_RNA_test.h5ad')
+    # adata_Protein_test.write_h5ad(save_path + f'adata_Protein_test.h5ad')
 
-    print("Saved adata.")
+    # print("Saved adata.")
 
     path_file = 'tfrecord_train/'
     RNA_tf_path = save_path + path_file + 'RNA_tf/'
     Protein_tf_path = save_path + path_file + 'Protein_tf/'
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
 
     path_file = 'tfrecord_test/'
-    RNA_tf_path = save_path + path_file + 'RNA_tf/'
-    Protein_tf_path = save_path + path_file + 'Protein_tf/'
-    RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path, batch_col_name = 'batch')
-    Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path, batch_col_name = 'batch')
+    RNA_tf_path_test = save_path + path_file + 'RNA_tf/'
+    Protein_tf_path_test = save_path + path_file + 'Protein_tf/'
+    # RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path_test, batch_col_name = 'batch')
+    # Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path_test, batch_col_name = 'batch')
 
-    print("Made tf records.")
+    # print("Made tf records.")
 
-    return RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test
+    return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
 
 
 def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
@@ -204,9 +204,7 @@ def read_data(data: str = "simulated", save_path: str = ""):
         test_idx = (train_idx != 1)
 
         # TODO Remove cell type B from reference
-
-        RNA_tf_path, Protein_tf_path, adata_merged, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
-
+        RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test  = prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
 
         # path = './Multimodal_pretraining/data/multi_gene_l2.loom'
         # adata_RNA = sc.read(path)
