@@ -159,8 +159,8 @@ def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool
     sc.tl.pca(adata_merged_tmp)
 
     # FIXME why 20K
-    adata_RNA = preprocessing_changed_only_hvg(adata_RNA, is_hvg=True, batch_key='batch')
-    adata_Protein = preprocessing_changed_only_hvg(adata_Protein, is_hvg=True, batch_key='batch')
+    # adata_RNA = preprocessing_changed_only_hvg(adata_RNA, is_hvg=True, batch_key='batch')
+    # adata_Protein = preprocessing_changed_only_hvg(adata_Protein, is_hvg=True, batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)

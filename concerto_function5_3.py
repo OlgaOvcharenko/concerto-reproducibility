@@ -88,8 +88,12 @@ def preprocessing_changed_only_hvg(
                       if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
 
     sc.pp.filter_cells(adata, min_genes=600)
+
     sc.pp.filter_genes(adata, min_cells=3)
-    
+
+    sc.pp.normalize_total(adata, target_sum=1e6)
+
+    sc.pp.log1p(adata)
     if is_hvg == True:
         sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=True, subset=True)
 
