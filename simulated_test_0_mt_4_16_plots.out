@@ -1,0 +1,6 @@
+nohup: ignoring input
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/anndata/_core/anndata.py:1820: UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+  utils.warn_names_duplicates("var")
+/local/home/oovcharenko/miniconda3/lib/python3.12/site-packages/anndata/_core/anndata.py:1820: UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+  utils.warn_names_duplicates("var")
+Plot: epoch 150, model type 4, lr 0.001, batch_size 64, drop_rate 0.1, attention_t True, attention_s False, heads 16.
