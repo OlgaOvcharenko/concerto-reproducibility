@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --time=30:00:00
-#SBATCH --gres=gpumem:31G
+#SBATCH --gres=gpumem:22G
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=12G
 #SBATCH --mail-type=END,FAIL
