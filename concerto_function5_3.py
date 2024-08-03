@@ -75,6 +75,18 @@ def preprocessing_rna(
     print('Processed dataset shape: {}'.format(adata.shape))
     return adata
 
+def preprocessing_changed_only_hvg(
+        adata,
+        n_top_features=2000,
+        is_hvg = True,
+        batch_key = 'batch',
+):
+    if is_hvg == True:
+        sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=True, subset=True)
+
+    print('Processed dataset shape: {}'.format(adata.shape))
+    return adata
+
 def preprocessing_changed_rna(
         adata,
         min_features: int = 600,

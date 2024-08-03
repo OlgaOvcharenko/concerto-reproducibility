@@ -159,8 +159,8 @@ def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool
     sc.tl.pca(adata_merged_tmp)
 
     # FIXME why 20K
-    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features=0, is_hvg=True, batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein, min_features=0, is_hvg=True, batch_key='batch')
+    adata_RNA = preprocessing_changed_only_hvg(adata_RNA, is_hvg=True, batch_key='batch')
+    adata_Protein = preprocessing_changed_only_hvg(adata_Protein, is_hvg=True, batch_key='batch')
     
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
@@ -177,16 +177,16 @@ def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool
     print(f"GEX data: \n {adata_RNA}")
     print(f"ATAC data: \n {adata_Protein}")
 
-    # adata_RNA.write_h5ad(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
-    # adata_Protein.write_h5ad(save_path + f'adata_atac_{"train" if train else "test"}.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_atac_{"train" if train else "test"}.h5ad')
     print("Saved adata.")
 
     path_file = 'tfrecord_train/' if train else 'tfrecord_test/'
     RNA_tf_path = save_path + path_file + 'gex_tf/'
     Protein_tf_path = save_path + path_file + 'atac_tf/'
 
-    # RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
-    # Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = Protein_tf_path, batch_col_name = 'batch')
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein, tf_path = Protein_tf_path, batch_col_name = 'batch')
     print("Made tf record.")
 
     return RNA_tf_path, Protein_tf_path, adata_merged
