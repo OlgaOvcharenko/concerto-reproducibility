@@ -81,6 +81,15 @@ def preprocessing_changed_only_hvg(
         is_hvg = True,
         batch_key = 'batch',
 ):
+    if not issparse(adata.X):
+        adata.X = scipy.sparse.csr_matrix(adata.X)
+
+    adata = adata[:, [gene for gene in adata.var_names
+                      if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
+
+    sc.pp.filter_cells(adata, min_genes=600)
+    sc.pp.filter_genes(adata, min_cells=3)
+    
     if is_hvg == True:
         sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=True, subset=True)
 
