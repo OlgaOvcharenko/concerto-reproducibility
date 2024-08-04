@@ -1,6 +1,6 @@
 #!/bin/bash
 
-run_plot={
+run_plot(){
     python make_plot.py --epoch 200 --lr 0.001 --batch_size 64 --drop_rate 0.1 --attention_s 0 --attention_t 1 --heads 16 --data simulated --train 0 --test 1 --model_type $1 --combine_omics 0 > $2 2>&1 &    
 }
 
