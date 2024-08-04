@@ -12,10 +12,10 @@ attention_t=("1")
 attention_s=("0")
 heads=("16")
 data=("simulated")
-train=0
+train=1
 test=1
 
-model_type=("1 2 3 4 5")
+model_type=("1")
 combine_omics=0
 
 # epochs=("100")
