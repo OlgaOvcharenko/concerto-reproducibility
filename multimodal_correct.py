@@ -119,7 +119,7 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, tr
     sc.tl.pca(adata_merged)
     adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
 
-    adata_merged_test = ad.concat([adata_RNA, adata_Protein], axis=1)
+    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
     sc.tl.pca(adata_merged_test)
     adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
     
