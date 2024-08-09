@@ -127,6 +127,7 @@ def preprocessing_changed_rna(
     sc.pp.normalize_total(adata, target_sum=target_sum)
 
     sc.pp.log1p(adata)
+    
     if is_hvg == True:
         sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=True, subset=True)
 
@@ -141,7 +142,7 @@ def serialize_example_batch(x_feature, x_weight, y_batch,x_id):
         'batch': _int64_feature(y_batch),
         'id': _bytes_feature(x_id)
     }
-    
+
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
 

@@ -243,7 +243,7 @@ def read_data(data: str = "simulated", save_path: str = ""):
         # RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
         # RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
 
-    else:
+    elif data == "human":
         adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
         adata_RNA = adata_merged_tmp[:, 0:13431] # adata_gex
         adata_Protein = adata_merged_tmp[:, 13431:] # adata_atac
@@ -278,6 +278,8 @@ def read_data(data: str = "simulated", save_path: str = ""):
         RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp, adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
         RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp_test, adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
 
+    elif data == "spatial":
+        pass
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
 
 def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, data: str, 
