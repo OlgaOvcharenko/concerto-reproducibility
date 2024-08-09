@@ -99,6 +99,9 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     # Create PCA for benchmarking
     sc.tl.pca(adata_RNA)
+
+    sdata["table"].obs["batch"] = np.full(sdata["table"].shape, 1)
+
     adata_RNA = preprocessing_changed_rna(sdata["table"], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
     print(f"RNA data shape {adata_RNA.shape}")
     
@@ -107,7 +110,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     path_file = 'tfrecord/'
     RNA_tf_path = save_path + path_file + 'spatial_RNA_tf/'
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path = RNA_tf_path, batch_col_name = 'batch')
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path=RNA_tf_path, batch_col_name='batch')
     print("Made tf record RNA.")
 
     rows = 128
