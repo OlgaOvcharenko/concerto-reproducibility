@@ -232,7 +232,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
     # Create PCA for benchmarking
     sc.tl.pca(sdata["table"])
 
-    sdata["table"].obs["batch"] = np.full(sdata["table"].shape, 1)
+    sdata["table"].obs["batch"] = np.full((sdata["table"].shape[0],), 1)
 
     adata_RNA = preprocessing_changed_rna(sdata["table"], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
     print(f"RNA data shape {adata_RNA.shape}")
