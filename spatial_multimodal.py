@@ -291,6 +291,8 @@ def read_data_spatial(data: str = "", save_path: str = ""):
     image = xenium_aligned_image(he_path, alignment_matrix_path)
     sdata['he_image'] = image
 
+    print("Read data")
+
     RNA_tf_path, adata_RNA, staining_tf_path  = prepare_data_spatial(sdata=sdata, save_path=save_path, is_hvg_RNA=False)
 
     return RNA_tf_path, adata_RNA, staining_tf_path
