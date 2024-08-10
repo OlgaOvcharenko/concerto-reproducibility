@@ -1,3 +1,5 @@
+import argparse
+from collections import Counter
 import math
 import os
 import sys
@@ -5,7 +7,7 @@ import sys
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
 sys.path.append("../")
-from concerto_function5_3 import *
+# from concerto_function5_3 import *
 import numpy as np
 import scanpy as sc
 import anndata as ad
@@ -22,6 +24,42 @@ import numpy as np
 import matplotlib.pyplot as plt
 from spatialdata import rasterize
 from PIL import Image
+from scipy.sparse import issparse
+import scipy
+
+def preprocessing_changed_rna(
+        adata,
+        min_features: int = 600,
+        min_cells: int = 3,
+        target_sum: int = 10000,
+        n_top_features=2000,  # or gene list
+        chunk_size: int = 20000,
+        is_hvg = True,
+        batch_key = 'batch',
+        log=True
+):
+    if min_features is None: min_features = 600
+    if n_top_features is None: n_top_features = 40000
+
+    if not issparse(adata.X):
+        adata.X = scipy.sparse.csr_matrix(adata.X)
+
+    adata = adata[:, [gene for gene in adata.var_names
+                      if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
+
+    sc.pp.filter_cells(adata, min_genes=min_features)
+
+    sc.pp.filter_genes(adata, min_cells=min_cells)
+
+    sc.pp.normalize_total(adata, target_sum=target_sum)
+
+    sc.pp.log1p(adata)
+    
+    if is_hvg == True:
+        sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=True, subset=True)
+
+    print('Processed dataset shape: {}'.format(adata.shape))
+    return adata
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -55,8 +93,102 @@ def get_args():
     args = parser.parse_args()
     return args
 
+def concerto_make_tfrecord(processed_ref_adata, tf_path, batch_col_name=None):
+    # 有输入batch_col_name的时候，用这列作为batchid， 若无假设所有是一个batch
+	# 不做乱序,
+    if batch_col_name is None:
+        batch_col_name = 'batch_'
+        sample_num = len(processed_ref_adata.obs_names.tolist())
+        processed_ref_adata.obs[batch_col_name]  = ['0']*sample_num
+    print(processed_ref_adata)
+    batch_list = processed_ref_adata.obs[batch_col_name].unique().tolist()
+    cc = dict(Counter(batch_list))
+    cc = list(cc.keys())
+    tfrecord_file = tf_path + '/tf.tfrecord'
+    if not os.path.exists(tf_path):
+        os.makedirs(tf_path)
+    create_tfrecord(processed_ref_adata, cc, tfrecord_file, zero_filter=False, norm=True, batch_key =batch_col_name)
+
+    return tf_path
+
+def serialize_example_batch(x_feature, x_weight, y_batch,x_id):
+
+    feature = {
+        'feature': _int64_feature(x_feature),
+        'value': _float_feature(x_weight),
+        'batch': _int64_feature(y_batch),
+        'id': _bytes_feature(x_id)
+    }
+
+    example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
+    return example_proto.SerializeToString()
+
+def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, norm=False, batch_key = 'batch'):
+    if type(source_file.X) != np.ndarray:
+        x_data = source_file.X.toarray()
+    else:
+        x_data = source_file.X
+    batch_data = source_file.obs[batch_key].tolist()
+    obs_name_list = source_file.obs_names.tolist()
+    batch_number = []
+    for j in range(len(batch_data)):
+        batch = batch_data[j]
+        place = batch_dict.index(batch)
+        batch_number.append(place)
+
+    counter = 0
+    batch_examples = {}
+    for x, batch,k in zip(x_data, batch_number,obs_name_list):
+        if zero_filter is False:
+            x = x + 10e-6
+            indexes = np.where(x >= 0.0)
+        else:
+            indexes = np.where(x > 0.0)
+        values = x[indexes]
+
+        features = np.array(indexes)
+        features = np.reshape(features, (features.shape[1]))
+        values = np.array(values, dtype=float)
+        # values = values / np.linalg.norm(values)
+
+        if batch not in batch_examples:
+            batch_examples[batch] = []
+
+        example = serialize_example_batch(features, values, np.array([int(batch)]),k)
+        batch_examples[batch].append(example)
+
+        counter += 1
+        if counter % 1000 == 0:
+            print('counter: {} shape: {}, batch: {}'.format(counter, features.shape, batch))
+
+            #print(x)
+            #print(values)
+            #print("batchs: ", batch_dict)
+
+    for item in batch_examples.items():
+        batch = item[0]
+        examples = item[1]
+        if zero_filter is False:
+            file = tfrecord_file.replace('.tfrecord', '_{}.tfrecord'.format(batch))
+        else:
+            if norm is False:
+                file = tfrecord_file.replace('.tfrecord', '_{}_no_zero_no_norm.tfrecord'.format(batch))
+            else:
+                file = tfrecord_file.replace('.tfrecord', '_{}_no_zero.tfrecord'.format(batch))
+        with tf.io.TFRecordWriter(file) as writer:
+            for example in examples:
+                writer.write(example)
+    save_dict = {'vocab size': len(features)}
+    file = tfrecord_file.replace('tf.tfrecord','vocab_size.npz')
+    np.savez_compressed(file, **save_dict)
+#     np.savez_compressed('vocab_size.npz', **save_dict)
+
 def _int64_feature(value):
   return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
+def _float_feature(value):
+    """Returns a float_list from a float / double."""
+    return tf.train.Feature(float_list=tf.train.FloatList(value=list(value)))
 
 
 def _bytes_feature(value):
@@ -163,233 +295,6 @@ def read_data_spatial(data: str = "", save_path: str = ""):
 
     return RNA_tf_path, adata_RNA, staining_tf_path
 
-def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, data: str, 
-                   attention_t: bool, attention_s: bool,
-                   batch_size:int, epoch: int, lr: float, drop_rate: float, 
-                   heads: int, combine_omics: int, model_type: int):
-    # Train
-    if attention_t == True and attention_s == False:
-        concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'], 
-                                RNA_tf_path, 
-                                Protein_tf_path, 
-                                weight_path, 
-                                super_parameters={
-                                    'data': data,
-                                    'batch_size': batch_size, 
-                                    'epoch_pretrain': epoch, 'lr': lr, 
-                                    'drop_rate': drop_rate, 
-                                    'attention_t': attention_t, 
-                                    'attention_s': attention_s, 
-                                    'heads': heads,
-                                    'combine_omics': combine_omics,
-                                    'model_type': model_type
-                                    })
-    elif attention_t == True and attention_s == True:
-        concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                                RNA_tf_path, 
-                                Protein_tf_path, 
-                                weight_path, 
-                                super_parameters={
-                                    'data': data,
-                                    'batch_size': batch_size, 
-                                    'epoch_pretrain': epoch, 'lr': lr, 
-                                    'drop_rate': drop_rate, 
-                                    'attention_t': attention_t, 
-                                    'attention_s': attention_s, 
-                                    'heads': heads,
-                                    'combine_omics': combine_omics
-                                    })
-    elif attention_t == False and attention_s == False:
-        concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                                RNA_tf_path,
-                                Protein_tf_path,
-                                weight_path, 
-                                super_parameters={
-                                    'data': data,
-                                    'batch_size': batch_size, 
-                                    'epoch_pretrain': epoch, 'lr': lr, 
-                                    'drop_rate': drop_rate, 
-                                    'attention_t': attention_t, 
-                                    'attention_s': attention_s, 
-                                    'heads': heads,
-                                    'combine_omics': False
-                                    })
-
-    print("Trained.")
-
-
-def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: str, Protein_tf_path_test: str, data: str, 
-                   attention_t: bool, attention_s: bool,
-                   batch_size:int, epoch: int, lr: float, drop_rate: float, 
-                   heads: int, combine_omics: int, model_type: int, 
-                   save_path: str, train: bool = False, adata_merged_train = None):
-    ep_vals = []
-    i = 4
-    while i < epoch:
-        ep_vals.append(i)
-        i = i * 2
-    ep_vals.append(epoch)
-
-    adata_merged.obs = adata_RNA.obs
-
-    print("Merged adata")
-    print(adata_merged)
-
-    # Test
-    diverse_tests_names = []
-
-    only_RNAs = [True, False] if combine_omics == 1 else [False]
-    for only_RNA in only_RNAs:
-        for dr in [drop_rate]:
-            for nn in ["encoder"]:
-                for e in ep_vals: 
-                    saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
-
-                    if (nn == "decoder" and attention_s == False) or (nn == "encoder" and attention_t == False):
-                        embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal_decoder(
-                        ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                        weight_path, 
-                        RNA_tf_path_test,
-                        Protein_tf_path_test,
-                        n_cells_for_sample=None,
-                        super_parameters={
-                            'batch_size': batch_size, 
-                            'epoch': e, 'lr': lr, 
-                            'drop_rate': dr, 
-                            'attention_t': attention_t, 
-                            'attention_s': attention_s, 
-                            'heads': heads,
-                            'combine_omics': combine_omics
-                        }, 
-                        saved_weight_path = saved_weight_path)
-                    else:
-                        embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal(
-                            ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
-                            weight_path, 
-                            RNA_tf_path_test,
-                            Protein_tf_path_test,
-                            n_cells_for_sample=None,
-                            super_parameters={
-                                'batch_size': batch_size, 
-                                'epoch_pretrain': e, 'lr': lr, 
-                                'drop_rate': dr, 
-                                'attention_t': attention_t, 
-                                'attention_s': attention_s, 
-                                'heads': heads,
-                                'combine_omics': combine_omics,
-                                'model_type': model_type
-                            }, 
-                            saved_weight_path = saved_weight_path,
-                            only_RNA=only_RNA)
-
-                    print("Tested.")
-                    
-                    if data == "simulated":
-                        adata_RNA = sc.read(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
-                    else:
-                        adata_RNA = sc.read(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
-                    
-                    adata_RNA_1 = adata_RNA[RNA_id]
-                    adata_RNA_1.obsm['X_embedding'] = embedding
-
-                    print(f"Shape of the embedding {embedding.shape}.")
-                    
-                    adata_merged = adata_merged[RNA_id]
-
-                    adata_merged.obsm[f'{"train" if train else "test"}_{e}_{nn}_{dr}_{only_RNA}'] = embedding
-                    diverse_tests_names.append(f"{train}_{e}_{nn}_{dr}_{only_RNA}")
-
-                    l2tol1 = {
-                        'CD8 Naive': 'CD8 T',
-                        'CD8 Proliferating': 'CD8 T',
-                        'CD8 TCM': 'CD8 T',
-                        'CD8 TEM': 'CD8 T',
-                        'CD8+ T': 'CD8 T',
-                        'CD8+ T naive': 'CD8 T',
-                        'CD4 CTL': 'CD4 T',
-                        'CD4 Naive': 'CD4 T',
-                        'CD4 Proliferating': 'CD4 T',
-                        'CD4 TCM': 'CD4 T',
-                        'CD4 TEM': 'CD4 T',
-                        'CD4+ T activated': 'CD4 T',
-                        'CD4+ T naive': 'CD4 T',
-                        'CD14+ Mono': 'CD14 T',
-                        'CD16+ Mono': 'CD16 T',
-                        'Treg': 'CD4 T',
-                        'NK': 'NK',
-                        'NK Proliferating': 'NK',
-                        'NK_CD56bright': 'NK',
-                        'dnT': 'other T',
-                        'gdT': 'other T',
-                        'ILC': 'other T',
-                        'MAIT': 'other T',
-                        'CD14 Mono': 'Monocytes',
-                        'CD16 Mono': 'Monocytes',
-                        'cDC1': 'DC',
-                        'cDC2': 'DC',
-                        'pDC': 'DC',
-                        'ASDC':'DC',
-                        'B intermediate': 'B',
-                        'B memory': 'B',
-                        'B naive': 'B',
-                        'B1 B': 'B',
-                        'Plasmablast': 'B',
-                        'Eryth': 'other',
-                        'HSPC': 'other',
-                        'Platelet': 'other'
-                    }
-
-                    # if data == 'simulated':
-                    adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
-                    adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type'].map(l2tol1)
-                    # else:
-                    #     adata_RNA_1.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
-                    #     adata_merged.obs['cell_type_l1'] = adata_RNA_1.obs['cell_type']
-                    print(adata_RNA_1)
-
-                    sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
-                    labels = adata_RNA_1.obs['cell_type_l1'].tolist()
-                    for res in [0.05,0.1,0.15,0.2,0.25,0.3]:
-                        sc.tl.leiden(adata_RNA_1, resolution=res)
-                        target_preds = adata_RNA_1.obs['leiden'].tolist()
-                        nmi = np.round(normalized_mutual_info_score(labels, target_preds), 5)
-                        ari = np.round(adjusted_rand_score(labels, target_preds), 5)    
-                        n_cluster = len(list(set(target_preds)))
-                        print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
-
-                    if not train:
-                        print("Predict")
-                        # adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}'] = query_to_reference(X_train=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}'], y_train=adata_merged_train.obs["cell_type_l1"], X_test=adata_merged.obsm[f'test_{e}_{nn}_{dr}'], y_test=adata_merged.obs["cell_type_l1"], ).set_index(adata_RNA_1.obs_names)["val_ct"]
-                        query_neighbor, _ = knn_classifier(ref_embedding=adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}'], query_embedding=embedding, ref_anndata=adata_merged_train, column_name='cell_type_l1', k=5)
-
-                        acc = accuracy_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor)
-                        f1 = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, average=None)
-                        f1_median = np.median(f1)
-                        print('acc:{:.2f} f1-score:{:.2f}'.format(acc,f1_median))
-
-                        adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}'] = query_neighbor
-                        adata_merged.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}'] = query_neighbor
-
-                    # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
-                    sc.tl.leiden(adata_RNA_1, resolution=0.2)
-                    sc.tl.umap(adata_RNA_1, min_dist=0.1)
-                    adata_merged.obsm[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}'] = adata_RNA_1.obsm["X_umap"]
-                    adata_merged.obs[f'{"train" if train else "test"}_leiden_{e}_{nn}_{dr}'] = adata_RNA_1.obs["leiden"]
-                    sc.set_figure_params(dpi=150)
-
-                    if not train:
-                        color=['cell_type_l1', f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}', 'leiden', 'batch']
-                        # color=['cell_type_l1', 'leiden', 'batch']
-                    else:
-                        color=['cell_type_l1', 'leiden', 'batch']
-
-                    sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light', edges=True)
-                    plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_knn_concerto_{"train" if train else "test"}_{combine_omics}_oRNA{only_RNA}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
-                    
-                    # scv.pl.velocity_embedding(f'./Multimodal_pretraining/plots/{data}/{data}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png', basis="umap")
-
-    return adata_merged
-
 def save_merged_adata(adata_merged, filename):
     adata_merged.write(filename)
 
@@ -426,35 +331,5 @@ def main():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     RNA_tf_path, adata_RNA, staining_tf_path = read_data_spatial(data=data, save_path=save_path)
-
-    # Train
-    # weight_path = save_path + 'weight/'
-    # if train:
-    #     train_concerto(weight_path=weight_path, RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, data=data, 
-    #                attention_t=attention_t, attention_s=attention_s, 
-    #                batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-    #                heads=heads, combine_omics=combine_omics, model_type=model_type)
-    # print("Trained.")
-
-    # if test:
-    #     # Test on train data
-    #     adata_merged = test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
-    #                attention_t=attention_t, attention_s=attention_s,
-    #                batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-    #                heads=heads, combine_omics=combine_omics, model_type=model_type, 
-    #                save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA)
-        
-    #     filename = f'./Multimodal_pretraining/data/{data}/{data}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-    #     save_merged_adata(adata_merged=adata_merged, filename=filename)
-
-    #     # Test on test data
-    #     adata_merged_test = test_concerto(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
-    #                attention_t=attention_t, attention_s=attention_s,
-    #                batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-    #                heads=heads, combine_omics=combine_omics, model_type=model_type, 
-    #                save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test, adata_merged_train=adata_merged)
-
-    #     filename = f'./Multimodal_pretraining/data/{data}/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-    #     save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 main()
