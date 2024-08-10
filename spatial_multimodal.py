@@ -111,8 +111,11 @@ def concerto_make_tfrecord(processed_ref_adata, tf_path, batch_col_name=None):
 
     return tf_path
 
-def serialize_example_batch(x_feature, x_weight, y_batch,x_id):
-
+def serialize_example_batch(x_feature, x_weight, y_batch, x_id):
+    print(x_feature)
+    print(x_weight)
+    print(y_batch)
+    print(x_id)
     feature = {
         'feature': _int64_feature(x_feature),
         'value': _float_feature(x_weight),
