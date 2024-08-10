@@ -130,7 +130,7 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
         'value': _float_feature(x_weight),
         'batch': _int64_feature(y_batch),
         'id': _bytes_feature(x_id),
-        'cell_id': _bytes_feature_another(cell_id)
+        'cell_id': _bytes_feature(cell_id)
     }
 
     print(feature)
@@ -169,7 +169,7 @@ def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, 
 
         if batch not in batch_examples:
             batch_examples[batch] = []
-        
+
         example = serialize_example_batch(features, values, np.array([int(batch)]), k, cell_id)
         batch_examples[batch].append(example)
 
