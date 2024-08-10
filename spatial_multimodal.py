@@ -120,6 +120,8 @@ def serialize_example_batch(x_feature, x_weight, y_batch,x_id):
         'id': _bytes_feature(x_id)
     }
 
+    print(feature)
+
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
 
@@ -235,9 +237,6 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
     sc.tl.pca(sdata["table"])
 
     sdata["table"].obs["batch"] = np.full((sdata["table"].shape[0],), 1)
-
-    print(sdata["table"].X)
-    print(sdata["table"])
 
     adata_RNA = preprocessing_changed_rna(sdata["table"], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
     print(f"RNA data shape {adata_RNA.shape}")
