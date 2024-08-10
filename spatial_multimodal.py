@@ -119,11 +119,6 @@ def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value.encode()]))
 
 def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
-    print(x_feature)
-    print(x_weight)
-    print(y_batch)
-    print(x_id)
-    print(cell_id)
 
     feature = {
         'feature': _int64_feature(x_feature),
@@ -267,7 +262,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
     print('Writing ', staining_tf_path)
-    writer = tf.python_io.TFRecordWriter(staining_tf_path)
+    writer = tf.io.TFRecordWriter(staining_tf_path)
     for geom in sdata["cell_boundaries"].index:
         coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
         x_min, y_min = np.min(coords_x), np.min(coords_y)
