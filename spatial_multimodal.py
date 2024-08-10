@@ -230,7 +230,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
     print("Read spatial data.")
 
     # Create PCA for benchmarking
-    sc.tl.pca(adata_RNA)
+    sc.tl.pca(sdata["table"])
 
     sdata["table"].obs["batch"] = np.full(sdata["table"].shape, 1)
 
