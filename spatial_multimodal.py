@@ -111,16 +111,26 @@ def concerto_make_tfrecord(processed_ref_adata, tf_path, batch_col_name=None):
 
     return tf_path
 
-def serialize_example_batch(x_feature, x_weight, y_batch, x_id):
+def _bytes_feature(value):
+    """Returns a bytes_list from a string / byte."""
+    if isinstance(value, type(tf.constant(0))):
+        value = value.numpy()  # BytesList won't unpack a string from an EagerTensor.
+    #return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value.encode()]))
+
+def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
     print(x_feature)
     print(x_weight)
     print(y_batch)
     print(x_id)
+    print(cell_id)
+
     feature = {
         'feature': _int64_feature(x_feature),
         'value': _float_feature(x_weight),
         'batch': _int64_feature(y_batch),
-        'id': _bytes_feature(x_id)
+        'id': _bytes_feature(x_id),
+        'cell_id': _bytes_feature_another(cell_id)
     }
 
     print(feature)
@@ -135,6 +145,7 @@ def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, 
         x_data = source_file.X
     batch_data = source_file.obs[batch_key].tolist()
     obs_name_list = source_file.obs_names.tolist()
+    cell_ids = source_file.obs["cell_id"].tolist()
     batch_number = []
     for j in range(len(batch_data)):
         batch = batch_data[j]
@@ -143,7 +154,7 @@ def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, 
 
     counter = 0
     batch_examples = {}
-    for x, batch,k in zip(x_data, batch_number,obs_name_list):
+    for x, batch, k, cell_id in zip(x_data, batch_number, obs_name_list, cell_ids):
         if zero_filter is False:
             x = x + 10e-6
             indexes = np.where(x >= 0.0)
@@ -158,10 +169,8 @@ def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, 
 
         if batch not in batch_examples:
             batch_examples[batch] = []
-
-        print(features)
-        print(values)
-        example = serialize_example_batch(features, values, np.array([int(batch)]),k)
+        
+        example = serialize_example_batch(features, values, np.array([int(batch)]), k, cell_id)
         batch_examples[batch].append(example)
 
         counter += 1
@@ -198,7 +207,7 @@ def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=list(value)))
 
 
-def _bytes_feature(value):
+def _bytes_feature_another(value):
   return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 def fix_image_size(width, height, x_min, x_max, y_min, y_max):
@@ -278,7 +287,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
         image_raw = res.to_numpy().transpose(1,2,0).tostring()
         example = tf.train.Example(features=tf.train.Features(feature={
             'id': _bytes_feature(geom),
-            'image_raw': _bytes_feature(image_raw)}))
+            'image_raw': _bytes_feature_another(image_raw)}))
         writer.write(example.SerializeToString())
 
     return RNA_tf_path, adata_RNA, staining_tf_path
