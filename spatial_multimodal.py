@@ -154,6 +154,8 @@ def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, 
         if batch not in batch_examples:
             batch_examples[batch] = []
 
+        print(features)
+        print(values)
         example = serialize_example_batch(features, values, np.array([int(batch)]),k)
         batch_examples[batch].append(example)
 
@@ -184,7 +186,7 @@ def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, 
 #     np.savez_compressed('vocab_size.npz', **save_dict)
 
 def _int64_feature(value):
-  return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+  return tf.train.Feature(int64_list=tf.train.Int64List(value=list(value)))
 
 def _float_feature(value):
     """Returns a float_list from a float / double."""
@@ -234,6 +236,9 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     sdata["table"].obs["batch"] = np.full((sdata["table"].shape[0],), 1)
 
+    print(sdata["table"].X)
+    print(sdata["table"])
+
     adata_RNA = preprocessing_changed_rna(sdata["table"], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
     print(f"RNA data shape {adata_RNA.shape}")
     
@@ -270,9 +275,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
         image_raw = res.to_numpy().transpose(1,2,0).tostring()
         example = tf.train.Example(features=tf.train.Features(feature={
-            'height': _int64_feature(rows),
-            'width': _int64_feature(cols),
-            'depth': _bytes_feature(geom),
+            'id': _bytes_feature(geom),
             'image_raw': _bytes_feature(image_raw)}))
         writer.write(example.SerializeToString())
 
