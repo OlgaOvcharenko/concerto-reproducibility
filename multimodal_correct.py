@@ -493,8 +493,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     # sc.pp.neighbors(adata_RNA_1, use_rep='X_embedding', metric='cosine')
                     sc.tl.leiden(adata_RNA_1, resolution=0.2)
                     sc.tl.umap(adata_RNA_1, min_dist=0.1)
-                    adata_merged.obsm[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}'] = adata_RNA_1.obsm["X_umap"]
-                    adata_merged.obs[f'{"train" if train else "test"}_leiden_{e}_{nn}_{dr}'] = adata_RNA_1.obs["leiden"]
+                    adata_merged.obsm[f'{"train" if train else "test"}_umap_{e}_{nn}_{dr}_{only_RNA}'] = adata_RNA_1.obsm["X_umap"]
+                    adata_merged.obs[f'{"train" if train else "test"}_leiden_{e}_{nn}_{dr}_{only_RNA}'] = adata_RNA_1.obs["leiden"]
                     sc.set_figure_params(dpi=150)
 
                     if not train:
