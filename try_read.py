@@ -9,25 +9,31 @@ import matplotlib.pyplot as plt
 # Inital setting for plot size
 from matplotlib import rcParams
 
-X_train = np.random.rand(1000, 128)
-X_test = np.random.rand(250, 128)
-y_train = np.random.randint(low=1, high=2, size=1000)
-y_test = np.random.randint(low=1, high=3, size=250)
+# X_train = np.random.rand(1000, 128)
+# X_test = np.random.rand(250, 128)
+# y_train = np.random.randint(low=1, high=2, size=1000)
+# y_test = np.random.randint(low=1, high=3, size=250)
 
-adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
-print(adata_new)
-sc.pp.neighbors(adata_new, metric="cosine", use_rep='X')
-sc.tl.leiden(adata_new, resolution=0.2)
+# adata_new = ad.AnnData(np.append(X_train, X_test, axis=0))
+# print(adata_new)
+# sc.pp.neighbors(adata_new, metric="cosine", use_rep='X')
+# sc.tl.leiden(adata_new, resolution=0.2)
 
-print(adata_new)
+# print(adata_new)
 
 
 # # from scib_metrics.benchmark import Benchmarker
 
-# adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
-# adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-# adata_adt_cite = adata_adt[:, 0:13431]
-# adata_adt_rna = adata_adt[:, 13431:]
+# adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
+adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+adata_adt_cite = adata_adt[:, 0:13431]
+adata_adt_rna = adata_adt[:, 13431:]
+
+print(adata_adt_cite)
+print(adata_adt_rna)
+
+print(adata_adt.var['feature_types'].value_counts())
+print(adata_adt.var['feature_types'].__class__)
 
 # print(np.unique(adata_adt_rna.obs["batch"].to_list()))
 # print(np.unique(adata_adt_rna.obs["cell_type"].to_list()))
@@ -68,8 +74,10 @@ print(adata_new)
 # # print(adata_adt_rna.X)
 
 
-# path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
-# adata_RNA = sc.read(path)
+path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
+adata_RNA = sc.read(path)
+
+print(adata_RNA.X)
 
 # path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
 # adata_Protein = sc.read(path) #cell_type batch

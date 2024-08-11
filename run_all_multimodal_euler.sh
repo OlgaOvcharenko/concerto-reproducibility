@@ -20,7 +20,7 @@ source "python_venv/bin/activate"
 
 epochs=("200")
 lrs=("1e-3")
-batch_sizes=("14")
+batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
