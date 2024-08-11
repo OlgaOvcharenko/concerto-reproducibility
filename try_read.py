@@ -26,14 +26,15 @@ from matplotlib import rcParams
 
 # adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
 adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-adata_adt_cite = adata_adt[:, 0:13431]
-adata_adt_rna = adata_adt[:, 13431:]
+adata_adt.X = adata_adt.layers["counts"]
+adata_adt_atac = adata_adt[:, 13431:]
+adata_adt_gex = adata_adt[:, 0:13431]
 
-print(adata_adt_cite)
-print(adata_adt_rna)
+print(adata_adt_atac)
+print(adata_adt_gex)
 
-print(adata_adt.var['feature_types'].value_counts())
-print(adata_adt.var['feature_types'].__class__)
+print(adata_adt.X)
+print(adata_adt.X)
 
 # print(np.unique(adata_adt_rna.obs["batch"].to_list()))
 # print(np.unique(adata_adt_rna.obs["cell_type"].to_list()))

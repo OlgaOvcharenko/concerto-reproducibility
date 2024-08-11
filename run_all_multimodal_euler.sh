@@ -29,7 +29,7 @@ data=("human")
 train=0
 test=1
 
-model_type=("1 4 5")
+model_type=("1 2 3 4 5")
 combine_omics=0
 
 for e in $epochs; do

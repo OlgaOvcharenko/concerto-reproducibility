@@ -149,6 +149,55 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, tr
 
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
 
+def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein, train: bool = True, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = True):
+    print("Read human data")
+    print(f"Train={train} gex data shape {adata_RNA.shape}")
+    print(f"Train={train} atac data shape {adata_Protein.shape}")
+
+    # Create PCA for benchmarking
+    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocessing_changed_rna(adata_Protein, min_features = 0, is_hvg=is_hvg_protein, batch_key='batch')
+    
+    adata_RNA_test = adata_RNA[test_idx, :]
+    adata_Protein_test = adata_Protein[test_idx, :]
+
+    adata_RNA = adata_RNA[train_idx, :]
+    adata_Protein = adata_Protein[train_idx, :]
+
+    # Add PCA after preprocessing for benchmarking
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+
+    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
+    sc.tl.pca(adata_merged_test)
+    adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
+    
+    print("Preprocessed data.")
+
+    adata_RNA.write_h5ad(save_path + f'adata_atac_train.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_gex_train.h5ad')
+
+    adata_RNA_test.write_h5ad(save_path + f'adata_atac_test.h5ad')
+    adata_Protein_test.write_h5ad(save_path + f'adata_gex_test.h5ad')
+
+    print("Saved adata.")
+
+    path_file = 'tfrecord_train/'
+    RNA_tf_path = save_path + path_file + 'atac_raw_tf/'
+    Protein_tf_path = save_path + path_file + 'gex_raw_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    path_file = 'tfrecord_test/'
+    RNA_tf_path_test = save_path + path_file + 'atac_raw_tf/'
+    Protein_tf_path_test = save_path + path_file + 'gex_raw_tf/'
+    RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path_test, batch_col_name = 'batch')
+    Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path_test, batch_col_name = 'batch')
+
+    print("Made tf records.")
+    return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
+
 
 def prepare_data_neurips(adata_merged_tmp, adata_RNA, adata_Protein, train: bool = True, save_path: str = ''):
     print("Read human data")
@@ -206,55 +255,17 @@ def read_data(data: str = "simulated", save_path: str = ""):
         # TODO Remove cell type B from reference
         RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test  = prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
 
-        # path = './Multimodal_pretraining/data/multi_gene_l2.loom'
-        # adata_RNA = sc.read(path)
-
-        # path = './Multimodal_pretraining/data/multi_protein_l2.loom'
-        # adata_Protein = sc.read(path) #cell_type batch
-
-        # # train_idx, test_idx = train_test_split(
-        # #     adata_RNA.obs_names.values,
-        # #     test_size=0.5,
-        # #     stratify=adata_RNA.obs["batch_size"],
-        # #     shuffle=False,
-        # #     random_state=42,
-        # # )
-
-        # train_idx = (adata_RNA.obs["batch"] != "P2") & (adata_RNA.obs["batch"] != "P5") & (adata_RNA.obs["batch"] != "P8")
-        # test_idx = (train_idx != 1)
-
         # # ['ASDC' 'B intermediate' 'B memory' 'B naive' 'CD14 Mono' 'CD16 Mono'
         # # 'CD4 CTL' 'CD4 Naive' 'CD4 Proliferating' 'CD4 TCM' 'CD4 TEM' 'CD8 Naive'
         # # 'CD8 Proliferating' 'CD8 TCM' 'CD8 TEM' 'Doublet' 'Eryth' 'HSPC' 'ILC'
         # # 'MAIT' 'NK' 'NK Proliferating' 'NK_CD56bright' 'Plasmablast' 'Platelet'
         # # 'Treg' 'cDC1' 'cDC2' 'dnT' 'gdT' 'pDC']
 
-        # adata_RNA_test = adata_RNA[test_idx, :]
-        # adata_Protein_test = adata_Protein[test_idx, :]
-
-        # adata_RNA = adata_RNA[train_idx, :]
-        # adata_Protein = adata_Protein[train_idx, :]
-
-        # # TODO Remove cell type B from reference
-        # # cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
-        # # adata_RNA = adata_RNA[cell_ix, :]
-        # # adata_Protein = adata_Protein[cell_ix, :]
-
-        # RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
-        # RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
-
     elif data == "human":
         adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-        adata_RNA = adata_merged_tmp[:, 0:13431] # adata_gex
-        adata_Protein = adata_merged_tmp[:, 13431:] # adata_atac
-
-        # train_idx, test_idx = train_test_split(
-        #     adata_RNA.obs_names.values,
-        #     test_size=0.5,
-        #     stratify=adata_RNA.obs["batch_size"],
-        #     shuffle=False,
-        #     random_state=42,
-        # )
+        adata_merged_tmp.X = adata_merged_tmp.layers["counts"]
+        adata_RNA = adata_merged_tmp[:, 13431:] #adata_adt_atac
+        adata_Protein = adata_merged_tmp[:, 0:13431] # adata_adt_gex
 
         # ['s1d1' 's1d2' 's1d3' 's2d1' 's2d4' 's2d5' 's3d10' 's3d3' 's3d6' 's3d7' 's4d1' 's4d8' 's4d9']
 
@@ -267,16 +278,7 @@ def read_data(data: str = "simulated", save_path: str = ""):
         # 'Normoblast' 'Plasma cell' 'Proerythroblast' 'Transitional B' 'cDC2'
         # 'pDC']
 
-        adata_RNA_test = adata_RNA[test_idx, :]
-        adata_Protein_test = adata_Protein[test_idx, :]
-        adata_merged_tmp_test = adata_merged_tmp[test_idx, :]
-
-        adata_RNA = adata_RNA[train_idx, :]
-        adata_Protein = adata_Protein[train_idx, :]
-        adata_merged_tmp = adata_merged_tmp[train_idx, :]
-
-        RNA_tf_path, Protein_tf_path, adata_merged = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp, adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path)
-        RNA_tf_path_test, Protein_tf_path_test, adata_merged_test = prepare_data_neurips(adata_merged_tmp=adata_merged_tmp_test, adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path)
+        RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test  = prepare_data_neurips_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
 
     elif data == "spatial":
         pass
