@@ -18,15 +18,15 @@ source "python_venv/bin/activate"
 # model_type=("0")
 # combine_omics=1
 
-epochs=("40")
+epochs=("200")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("16")
-data=("human")
-train=1
+data=("simulated")
+train=0
 test=1
 
 model_type=("1 2 3 4 5")

@@ -357,7 +357,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
     # Test
     diverse_tests_names = []
 
-    only_RNAs = [True, False] if combine_omics == 1 else [False]
+    only_RNAs = [True, False] if combine_omics == 0 else [False]
     for only_RNA in only_RNAs:
         for dr in [drop_rate]:
             for nn in ["encoder"]:
@@ -417,7 +417,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
 
                     adata_merged.obsm[f'{"train" if train else "test"}_{e}_{nn}_{dr}_{only_RNA}'] = embedding
                     diverse_tests_names.append(f"{train}_{e}_{nn}_{dr}_{only_RNA}")
-
+                    print(f"{train}_{e}_{nn}_{dr}_{only_RNA}")
                     l2tol1 = {
                         'CD8 Naive': 'CD8 T',
                         'CD8 Proliferating': 'CD8 T',
@@ -483,6 +483,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
 
                         acc = accuracy_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor)
                         f1 = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, average=None)
+                        print(f1)
                         f1_median = np.median(f1)
                         print('acc:{:.2f} f1-score:{:.2f}'.format(acc,f1_median))
 
