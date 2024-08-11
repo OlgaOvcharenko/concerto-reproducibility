@@ -291,7 +291,7 @@ def read_existing_tfrecords(save_path: str = ''):
     path_file = 'tfrecord/'
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
 
-    reader = tf.io.TFRecordReader()
+    reader = tf.data.TFRecordReader()
     _, serialized_example = reader.read(staining_tf_path)
     features = tf.parse_single_example(
         serialized_example,
