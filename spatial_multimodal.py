@@ -262,7 +262,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
     print('Writing ', staining_tf_path)
-    writer = tf.compat.v1.TFRecordReader.TFRecordWriter(staining_tf_path)
+    writer = tf.io.TFRecordWriter(staining_tf_path)
     for geom in sdata["cell_boundaries"].index:
         coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
         x_min, y_min = np.min(coords_x), np.min(coords_y)
@@ -291,7 +291,7 @@ def read_existing_tfrecords(save_path: str = ''):
     path_file = 'tfrecord/'
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
 
-    reader = tf.data.TFRecordReader()
+    reader = tf.compat.v1.TFRecordReader()
     _, serialized_example = reader.read(staining_tf_path)
     features = tf.parse_single_example(
         serialized_example,
