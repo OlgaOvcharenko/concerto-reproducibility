@@ -287,6 +287,30 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     return RNA_tf_path, adata_RNA, staining_tf_path
 
+def read_existing_tfrecords(save_path: str = ''):
+    path_file = 'tfrecord/'
+    staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
+
+    reader = tf.TFRecordReader()
+    _, serialized_example = reader.read(staining_tf_path)
+    features = tf.parse_single_example(
+        serialized_example,
+        dense_keys=['id', 'image_raw'],
+        # Defaults are not specified since both keys are required.
+        dense_types=[tf.string, tf.int64])
+
+    # Convert from a scalar string tensor (whose single string has
+    # image = tf.decode_raw(features['image_raw'], tf.uint8)
+    ids = features["id"]
+    print(ids)
+
+    # image = tf.reshape(image, [my_cifar.n_input])
+    # image.set_shape([my_cifar.n_input])
+
+    # Convert label from a scalar uint8 tensor to an int32 scalar.
+
+    # return image
+
 def read_data_spatial(data: str = "", save_path: str = ""):
     if data != 'spatial':
         raise Exception('[SPATIAL] Incorrect dataset name.')
@@ -330,17 +354,19 @@ def main():
 
     print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
-    # Check num GPUs
-    gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-    print(f"\nAvailable GPUs: {gpus}\n")
-    for gpu in gpus:
-        tf.config.experimental.set_memory_growth(gpu, True)
+    # # Check num GPUs
+    # gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
+    # print(f"\nAvailable GPUs: {gpus}\n")
+    # for gpu in gpus:
+    #     tf.config.experimental.set_memory_growth(gpu, True)
 
     
     # Read data
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    RNA_tf_path, adata_RNA, staining_tf_path = read_data_spatial(data=data, save_path=save_path)
+
+    read_existing_tfrecords(save_path=save_path)
+    # RNA_tf_path, adata_RNA, staining_tf_path = read_data_spatial(data=data, save_path=save_path)
 
 main()
