@@ -140,8 +140,6 @@ def serialize_example_batch_spatial(x_feature, x_weight, y_batch, x_id, cell_id)
         'id': _bytes_feature(x_id),
     }
 
-    print(feature)
-
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
 
@@ -277,10 +275,10 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
     print('Writing ', staining_tf_path)
 
-    tfrecord_file = RNA_tf_path + '/tf.tfrecord'
+    tfrecord_file = RNA_tf_path + '/tf_0.tfrecord'
     if not os.path.exists(RNA_tf_path):
         os.makedirs(RNA_tf_path)
-    with tf.io.TFRecordWriter(file) as writer:
+    with tf.io.TFRecordWriter(tfrecord_file) as writer:
         for geom in adata_RNA.obs['cell_id']:
             coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
             x_min, y_min = np.min(coords_x), np.min(coords_y)
@@ -303,7 +301,6 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
                 'image_raw': _bytes_feature_another(image_raw)}))
             
             example = serialize_example_batch_spatial(image_raw, id)
-            file = tfrecord_file.replace('.tfrecord', '_{}.tfrecord'.format(0))
             writer.write(example)
 
     return RNA_tf_path, adata_RNA, staining_tf_path
