@@ -128,8 +128,6 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
         'cell_id': _bytes_feature(cell_id)
     }
 
-    print(feature)
-
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
 
