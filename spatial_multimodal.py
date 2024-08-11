@@ -118,6 +118,13 @@ def _bytes_feature(value):
     #return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value.encode()]))
 
+def _bytes_feature_image(value):
+    """Returns a bytes_list from a string / byte."""
+    if isinstance(value, type(tf.constant(0))):
+        value = value.numpy()  # BytesList won't unpack a string from an EagerTensor.
+    #return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
 def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
 
     feature = {
@@ -134,7 +141,7 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
 def serialize_example_batch_spatial(x_feature, x_id):
 
     feature = {
-        'image_raw': _bytes_feature(x_feature),
+        'image_raw': _bytes_feature_image(x_feature),
         'id': _bytes_feature(x_id),
     }
 
@@ -208,10 +215,6 @@ def _int64_feature(value):
 def _float_feature(value):
     """Returns a float_list from a float / double."""
     return tf.train.Feature(float_list=tf.train.FloatList(value=list(value)))
-
-
-def _bytes_feature_another(value):
-  return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 def fix_image_size(width, height, x_min, x_max, y_min, y_max):
     slice_width_to_add = width - (x_max - x_min)
@@ -294,10 +297,6 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
             )
 
             image_raw = res.to_numpy().transpose(1,2,0).tostring()
-            example = tf.train.Example(features=tf.train.Features(feature={
-                'id': _bytes_feature(geom),
-                'image_raw': _bytes_feature_another(image_raw)}))
-            
             example = serialize_example_batch_spatial(image_raw, geom)
             writer.write(example)
 
