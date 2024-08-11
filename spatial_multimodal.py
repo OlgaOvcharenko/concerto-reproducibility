@@ -328,7 +328,7 @@ def decode_fn(record_bytes):
 
       # Schema
       {"id": tf.io.FixedLenFeature([], dtype=tf.string),
-       "image_row": tf.io.FixedLenFeature([], dtype=tf.float32)
+       "image_row": tf.io.FixedLenFeature([], dtype=tf.uint8)
        }
   )
 
