@@ -32,3 +32,5 @@ Multimodal_pretraining/adata_gex_train.h5ad
 Multimodal_pretraining/tfrecord_test/
 Multimodal_pretraining/tfrecord_train/
 
+Multimodal_pretraining/spatial_adata_RNA.h5ad
+
