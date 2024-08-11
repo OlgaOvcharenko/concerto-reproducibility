@@ -321,19 +321,32 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 #     dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
 #     return dataset
 
+def decode_fn(record_bytes):
+  return tf.io.parse_single_example(
+      # Data
+      record_bytes,
+
+      # Schema
+      {"id": tf.io.FixedLenFeature([], dtype=tf.string),
+       "image_row": tf.io.FixedLenFeature([], dtype=tf.float32)
+       }
+  )
+
 def read_existing_tfrecords(save_path: str = ''):
     path_file = 'tfrecord/'
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
 
-    tf_list_1 = [f for f in os.listdir(os.path.join(staining_tf_path)) if 'tfrecord' in f]
-    train_source_list_RNA = []
-    for i in tf_list_1:
-        train_source_list_RNA.append(os.path.join(staining_tf_path, i))
+    # tf_list_1 = [f for f in os.listdir(os.path.join(staining_tf_path)) if 'tfrecord' in f]
+    # train_source_list_RNA = []
+    # for i in tf_list_1:
+    #     train_source_list_RNA.append(os.path.join(staining_tf_path, i))
     
-    print(train_source_list_RNA)
+    # print(train_source_list_RNA)
 
-    reader = tf.data.TFRecordDataset(staining_tf_path)
-    print(reader)
+    # reader = tf.data.TFRecordDataset(staining_tf_path)
+    for batch in tf.data.TFRecordDataset([staining_tf_path]).map(decode_fn):
+        print(**batch)
+        break
 
 def read_data_spatial(data: str = "", save_path: str = ""):
     if data != 'spatial':
