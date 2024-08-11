@@ -175,25 +175,25 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     
     print("Preprocessed data.")
 
-    adata_RNA.write_h5ad(save_path + f'adata_atac_train.h5ad')
-    adata_Protein.write_h5ad(save_path + f'adata_gex_train.h5ad')
+    # adata_RNA.write_h5ad(save_path + f'adata_atac_train.h5ad')
+    # adata_Protein.write_h5ad(save_path + f'adata_gex_train.h5ad')
 
-    adata_RNA_test.write_h5ad(save_path + f'adata_atac_test.h5ad')
-    adata_Protein_test.write_h5ad(save_path + f'adata_gex_test.h5ad')
+    # adata_RNA_test.write_h5ad(save_path + f'adata_atac_test.h5ad')
+    # adata_Protein_test.write_h5ad(save_path + f'adata_gex_test.h5ad')
 
     print("Saved adata.")
 
     path_file = 'tfrecord_train/'
     RNA_tf_path = save_path + path_file + 'atac_raw_tf/'
     Protein_tf_path = save_path + path_file + 'gex_raw_tf/'
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
-    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
 
     path_file = 'tfrecord_test/'
     RNA_tf_path_test = save_path + path_file + 'atac_raw_tf/'
     Protein_tf_path_test = save_path + path_file + 'gex_raw_tf/'
-    RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path_test, batch_col_name = 'batch')
-    Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path_test, batch_col_name = 'batch')
+    # RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path_test, batch_col_name = 'batch')
+    # Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path_test, batch_col_name = 'batch')
 
     print("Made tf records.")
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
