@@ -131,7 +131,7 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
 
-def serialize_example_batch_spatial(x_feature, x_weight, y_batch, x_id, cell_id):
+def serialize_example_batch_spatial(x_feature, x_id):
 
     feature = {
         'image_raw': _bytes_feature(x_feature),
@@ -298,7 +298,7 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
                 'id': _bytes_feature(geom),
                 'image_raw': _bytes_feature_another(image_raw)}))
             
-            example = serialize_example_batch_spatial(image_raw, id)
+            example = serialize_example_batch_spatial(image_raw, geom)
             writer.write(example)
 
     return RNA_tf_path, adata_RNA, staining_tf_path
