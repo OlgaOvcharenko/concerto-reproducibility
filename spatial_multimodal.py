@@ -287,30 +287,53 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     return RNA_tf_path, adata_RNA, staining_tf_path
 
+# def create_classifier_dataset_multi(record_files: list,
+#                               batch_size: int,
+#                               is_training=True,
+#                               data_augment=False,
+#                               shuffle_size=100,
+#                               seed=42):
+#     """Creates input dataset from (tf)records files for train/eval."""
+#     name_to_features = {
+#         'feature': tf.io.VarLenFeature(tf.int64),
+#         'value': tf.io.VarLenFeature(tf.float32),
+#         'batch': tf.io.FixedLenFeature([], tf.int64),
+#         'id': tf.io.FixedLenFeature([], tf.string)
+#     }
+#     sparse_to_denses = ['feature', 'value', 'batch','id']
+
+#     # 读取记录
+#     dataset = single_file_dataset_multi(record_files, name_to_features, sparse_to_denses)
+
+#     if data_augment is True:
+#         dataset = dataset.map(augment_function, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+#         dataset = dataset.padded_batch(batch_size=batch_size,
+#                                        padded_shapes=([None], [None], [None], [None],[],[]),
+#                                        drop_remainder=True)
+#     else:
+#         dataset = dataset.padded_batch(batch_size=batch_size,
+#                                        padded_shapes=([None], [None],[],[]),
+#                                        drop_remainder=True)
+#     if is_training:
+#         # dataset = dataset.shuffle(shuffle_size)
+#         dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
+
+#     dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+#     return dataset
+
 def read_existing_tfrecords(save_path: str = ''):
     path_file = 'tfrecord/'
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
 
-    reader = tf.data.TFRecordDataset() # tf.data.TFRecordReader()
-    # tf.data.TFRecordDataset
-    _, serialized_example = reader.read(staining_tf_path)
-    features = tf.parse_single_example(
-        serialized_example,
-        dense_keys=['id', 'image_raw'],
-        # Defaults are not specified since both keys are required.
-        dense_types=[tf.string, tf.int64])
+    tf_list_1 = [f for f in os.listdir(os.path.join(staining_tf_path)) if 'tfrecord' in f]
+    train_source_list_RNA = []
+    for i in tf_list_1:
+        train_source_list_RNA.append(os.path.join(staining_tf_path, i))
+    
+    print(train_source_list_RNA)
 
-    # Convert from a scalar string tensor (whose single string has
-    # image = tf.decode_raw(features['image_raw'], tf.uint8)
-    ids = features["id"]
-    print(ids)
-
-    # image = tf.reshape(image, [my_cifar.n_input])
-    # image.set_shape([my_cifar.n_input])
-
-    # Convert label from a scalar uint8 tensor to an int32 scalar.
-
-    # return image
+    reader = tf.data.TFRecordDataset(staining_tf_path)
+    print(reader)
 
 def read_data_spatial(data: str = "", save_path: str = ""):
     if data != 'spatial':
