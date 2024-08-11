@@ -18,7 +18,7 @@ source "python_venv/bin/activate"
 # model_type=("0")
 # combine_omics=1
 
-epochs=("60")
+epochs=("40")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")
