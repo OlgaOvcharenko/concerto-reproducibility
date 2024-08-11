@@ -133,6 +133,18 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
 
+def serialize_example_batch_spatial(x_feature, x_weight, y_batch, x_id, cell_id):
+
+    feature = {
+        'image_raw': _bytes_feature(x_feature),
+        'id': _bytes_feature(x_id),
+    }
+
+    print(feature)
+
+    example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
+    return example_proto.SerializeToString()
+
 def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, norm=False, batch_key = 'batch'):
     if type(source_file.X) != np.ndarray:
         x_data = source_file.X.toarray()
@@ -240,12 +252,14 @@ def fix_image_size(width, height, x_min, x_max, y_min, y_max):
 def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
     print("Read spatial data.")
 
+    sc.pp.subsample(sdata['table'], random_state=42, n_obs=20000)
+    adata_RNA = sdata['table']
     # Create PCA for benchmarking
-    sc.tl.pca(sdata["table"])
+    sc.tl.pca(adata_RNA)
 
-    sdata["table"].obs["batch"] = np.full((sdata["table"].shape[0],), 1)
+    adata_RNA.obs["batch"] = np.full((adata_RNA.shape[0],), 1)
 
-    adata_RNA = preprocessing_changed_rna(sdata["table"], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
     print(f"RNA data shape {adata_RNA.shape}")
     
     adata_RNA.write_h5ad(save_path + f'spatial_adata_RNA.h5ad')
@@ -262,91 +276,38 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
 
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
     print('Writing ', staining_tf_path)
-    writer = tf.io.TFRecordWriter(staining_tf_path)
-    for geom in sdata["cell_boundaries"].index:
-        coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
-        x_min, y_min = np.min(coords_x), np.min(coords_y)
-        x_max, y_max = np.max(coords_x), np.max(coords_y)
 
-        x_min, x_max, y_min, y_max = fix_image_size(rows, cols, x_min, x_max, y_min, y_max)
+    tfrecord_file = RNA_tf_path + '/tf.tfrecord'
+    if not os.path.exists(RNA_tf_path):
+        os.makedirs(RNA_tf_path)
+    with tf.io.TFRecordWriter(file) as writer:
+        for geom in adata_RNA.obs['cell_id']:
+            coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
+            x_min, y_min = np.min(coords_x), np.min(coords_y)
+            x_max, y_max = np.max(coords_x), np.max(coords_y)
 
-        res = rasterize(
-            sdata["he_image"],
-            ["x", "y"],
-            min_coordinate=[x_min, y_min],
-            max_coordinate=[x_max, y_max],
-            target_unit_to_pixels=1.0,
-            target_coordinate_system="global"
-        )
+            x_min, x_max, y_min, y_max = fix_image_size(rows, cols, x_min, x_max, y_min, y_max)
 
-        image_raw = res.to_numpy().transpose(1,2,0).tostring()
-        example = tf.train.Example(features=tf.train.Features(feature={
-            'id': _bytes_feature(geom),
-            'image_raw': _bytes_feature_another(image_raw)}))
-        writer.write(example.SerializeToString())
+            res = rasterize(
+                sdata["he_image"],
+                ["x", "y"],
+                min_coordinate=[x_min, y_min],
+                max_coordinate=[x_max, y_max],
+                target_unit_to_pixels=1.0,
+                target_coordinate_system="global"
+            )
+
+            image_raw = res.to_numpy().transpose(1,2,0).tostring()
+            example = tf.train.Example(features=tf.train.Features(feature={
+                'id': _bytes_feature(geom),
+                'image_raw': _bytes_feature_another(image_raw)}))
+            
+            example = serialize_example_batch_spatial(image_raw, id)
+            file = tfrecord_file.replace('.tfrecord', '_{}.tfrecord'.format(0))
+            writer.write(example)
 
     return RNA_tf_path, adata_RNA, staining_tf_path
 
-# def create_classifier_dataset_multi(record_files: list,
-#                               batch_size: int,
-#                               is_training=True,
-#                               data_augment=False,
-#                               shuffle_size=100,
-#                               seed=42):
-#     """Creates input dataset from (tf)records files for train/eval."""
-#     name_to_features = {
-#         'feature': tf.io.VarLenFeature(tf.int64),
-#         'value': tf.io.VarLenFeature(tf.float32),
-#         'batch': tf.io.FixedLenFeature([], tf.int64),
-#         'id': tf.io.FixedLenFeature([], tf.string)
-#     }
-#     sparse_to_denses = ['feature', 'value', 'batch','id']
-
-#     # 读取记录
-#     dataset = single_file_dataset_multi(record_files, name_to_features, sparse_to_denses)
-
-#     if data_augment is True:
-#         dataset = dataset.map(augment_function, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-#         dataset = dataset.padded_batch(batch_size=batch_size,
-#                                        padded_shapes=([None], [None], [None], [None],[],[]),
-#                                        drop_remainder=True)
-#     else:
-#         dataset = dataset.padded_batch(batch_size=batch_size,
-#                                        padded_shapes=([None], [None],[],[]),
-#                                        drop_remainder=True)
-#     if is_training:
-#         # dataset = dataset.shuffle(shuffle_size)
-#         dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
-
-#     dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
-#     return dataset
-
-def decode_fn(record_bytes):
-  return tf.io.parse_single_example(
-      # Data
-      record_bytes,
-
-      # Schema
-      {"id": tf.io.FixedLenFeature([], dtype=tf.string),
-       "image_row": tf.io.FixedLenFeature([], dtype=tf.uint8)
-       }
-  )
-
-def read_existing_tfrecords(save_path: str = ''):
-    path_file = 'tfrecord/'
-    staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
-
-    # tf_list_1 = [f for f in os.listdir(os.path.join(staining_tf_path)) if 'tfrecord' in f]
-    # train_source_list_RNA = []
-    # for i in tf_list_1:
-    #     train_source_list_RNA.append(os.path.join(staining_tf_path, i))
-    
-    # print(train_source_list_RNA)
-
-    # reader = tf.data.TFRecordDataset(staining_tf_path)
-    for batch in tf.data.TFRecordDataset([staining_tf_path]).map(decode_fn):
-        print(**batch)
-        break
 
 def read_data_spatial(data: str = "", save_path: str = ""):
     if data != 'spatial':
@@ -403,7 +364,6 @@ def main():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    read_existing_tfrecords(save_path=save_path)
-    # RNA_tf_path, adata_RNA, staining_tf_path = read_data_spatial(data=data, save_path=save_path)
+    RNA_tf_path, adata_RNA, staining_tf_path = read_data_spatial(data=data, save_path=save_path)
 
 main()

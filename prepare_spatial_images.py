@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from spatialdata import rasterize
 from PIL import Image
-
+import scanpy as sc
 
 
 data_path="./Multimodal_pretraining/data/data/Xinium/Xenium_V1_humanLung_Cancer_FFPE_outs"
@@ -23,54 +23,59 @@ sdata['he_image'] = image
 
 align_matrix = np.genfromtxt(alignment_matrix_path, delimiter=",", dtype=float)
 
-# width = 128
-# height = 128
-# for geom in sdata["cell_boundaries"].index[:3]:
-#     coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
-#     x_min, y_min = np.min(coords_x), np.min(coords_y)
-#     x_max, y_max = np.max(coords_x), np.max(coords_y)
+sc.pp.subsample(sdata['table'], random_state=42, n_obs=20000)
+adata_RNA = sdata['table']
+print(adata_RNA)
 
-#     slice_width_to_add = width - (x_max - x_min)
-#     slice_height_to_add = height - (y_max - y_min)
+for geom in adata_RNA.obs['cell_id'][:10]:
+    width = 128
+    height = 128
+    # for geom in sdata["cell_boundaries"].index[:3]:
+    coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
+    x_min, y_min = np.min(coords_x), np.min(coords_y)
+    x_max, y_max = np.max(coords_x), np.max(coords_y)
 
-#     if slice_width_to_add % 2 == 0:
-#         x_min -= slice_width_to_add / 2
-#         x_max += slice_width_to_add / 2
+    slice_width_to_add = width - (x_max - x_min)
+    slice_height_to_add = height - (y_max - y_min)
 
-#     else:
-#         x_min -= math.floor(slice_width_to_add / 2)
-#         x_max += slice_width_to_add - math.floor(slice_width_to_add / 2)
+    if slice_width_to_add % 2 == 0:
+        x_min -= slice_width_to_add / 2
+        x_max += slice_width_to_add / 2
 
-#     if slice_height_to_add % 2 == 0:
-#         y_min -= slice_height_to_add / 2
-#         y_max += slice_height_to_add / 2
+    else:
+        x_min -= math.floor(slice_width_to_add / 2)
+        x_max += slice_width_to_add - math.floor(slice_width_to_add / 2)
 
-#     else:
-#         y_min -= math.floor(slice_height_to_add / 2)
-#         y_max += slice_height_to_add - math.floor(slice_height_to_add / 2)
+    if slice_height_to_add % 2 == 0:
+        y_min -= slice_height_to_add / 2
+        y_max += slice_height_to_add / 2
+
+    else:
+        y_min -= math.floor(slice_height_to_add / 2)
+        y_max += slice_height_to_add - math.floor(slice_height_to_add / 2)
 
 
-#     if int(x_max - x_min) != 128:
-#         x_max += int(x_max - x_min)
+    if int(x_max - x_min) != 128:
+        x_max += int(x_max - x_min)
 
-#     if int(y_max - y_min) != 128:
-#         y_max += int(y_max - y_min)
+    if int(y_max - y_min) != 128:
+        y_max += int(y_max - y_min)
 
-#     res = rasterize(
-#         sdata["he_image"],
-#         ["x", "y"],
-#         min_coordinate=[x_min, y_min],
-#         max_coordinate=[x_max, y_max],
-#         target_unit_to_pixels=1.0,
-#         target_coordinate_system="global"
-#     )
+    res = rasterize(
+        sdata["he_image"],
+        ["x", "y"],
+        min_coordinate=[x_min, y_min],
+        max_coordinate=[x_max, y_max],
+        target_unit_to_pixels=1.0,
+        target_coordinate_system="global"
+    )
 
-#     image = res.to_numpy().transpose(1,2,0) #.values
+    image = res.to_numpy().transpose(1,2,0) #.values
 
-#     print(image.shape)
+    print(image.shape)
 
-#     im = Image.fromarray(image, 'RGB')
-#     im.save(f"your_file{geom}.jpeg")
+    im = Image.fromarray(image, 'RGB')
+    im.save(f"your_file{geom}.jpeg")
 
 
 
