@@ -20,9 +20,7 @@ sdata = spatialdata_io.xenium(data_path)
 image_raw = xenium_aligned_image(he_path, alignment_matrix_path)
 sdata['he_image'] = image_raw
 
-image_raw = image_raw.data.compute()
-print(image_raw)
-print(image_raw.shape)
+image_raw = sdata['he_image'].data.compute()
 
 align_matrix = np.genfromtxt(alignment_matrix_path, delimiter=",", dtype=float)
 
@@ -34,47 +32,40 @@ times, times2, times3 = [], [], []
 width = 128
 height = 128
 
-# oinlhbpf-1
-# for geom, shape in zip(adata_RNA.obs['cell_id'][:3], spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[adata_RNA.obs['cell_id'][:3], "geometry"]):
-for geom, shape in zip(['oinlhbpf-1'], [spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc["oinlhbpf-1", "geometry"]]):
+t0 = time.time()
+geoms = adata_RNA.obs['cell_id'][:5]
+shapes = spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[geoms, ["geometry", "radius"]]
+for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
     t1 = time.time()
     coords_x = shape.x
     coords_y = shape.y
     
-    cor_coords = align_matrix @ np.array([coords_x, coords_y, 1])
-    coords_x, coords_y = cor_coords[0], cor_coords[1]
-    print(coords_x, coords_y)
+    cor_coords = np.linalg.inv(align_matrix) @ np.array([coords_x, coords_y, 1])
+    coords_y_new, coords_x_new = cor_coords[0], cor_coords[1]
 
-    x_min, x_max = coords_x - (width / 2), coords_x + (width / 2)
-    y_min, y_max = coords_y - (height / 2), coords_y + (height / 2)
-    times2.append(time.time()-t1)
-
-    t5 = time.time()
+    x_min, x_max = coords_x_new - (width / 2), coords_x_new + (width / 2)
+    y_min, y_max = coords_y_new - (height / 2), coords_y_new + (height / 2)
+    
     image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
-    im = Image.fromarray(image, 'RGB')
-    im.save(f"your_file{geom}.jpeg")
-    times2.append(time.time()-t5)
+    image = np.rot90(image, 1, axes=(0,1))
 
-    t3 = time.time()
-    image = rasterize(
-        sdata["he_image"],
-        # image_raw,
-        ["x", "y"],
-        min_coordinate=[x_min, y_min],
-        max_coordinate=[x_max, y_max],
-        target_unit_to_pixels=1.0,
-        target_coordinate_system="global"
-    ).data.compute().transpose(1,2,0)
-    t2 = time.time()
-    times.append(t2-t3)
-    times3.append(t2-t1)
+    radius = math.ceil(radius)
+    # mask = np.zeros((width, height))
+    # if radius < width and radius < height:
+    #     mask[int(width/2)-radius: int(width/2)+radius, int(height/2)-radius: int(height/2)+radius] = 256
+    # print(mask)
+    
+    arr = np.arange(-int(width/2), int(width/2)) ** 2
+    mask = np.add.outer(arr, arr) < radius ** 2
+    # or: arr[:, None] + arr[None, :] < radius ** 2
+
+    im = Image.fromarray(mask).convert("L")
+    im.save(f"mask{geom}.png")
     
     im = Image.fromarray(image, 'RGB')
-    im.save(f"their_file{geom}.jpeg")
+    im.save(f"your_file{geom}.jpeg")
 
-print(np.mean(times2))
-print(np.mean(times))
-print(np.mean(times3))
+print(time.time()-t0)
 
 # coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc["giphamfc-1", "geometry"].exterior.coords.xy
 # x_min, y_min = np.min(coords_x), np.min(coords_y)

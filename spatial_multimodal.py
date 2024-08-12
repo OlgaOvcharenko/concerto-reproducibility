@@ -138,11 +138,12 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
 
-def serialize_example_batch_spatial(x_feature, x_id):
+def serialize_example_batch_spatial(x_feature, x_id, radius):
 
     feature = {
         'image_raw': _bytes_feature_image(x_feature),
         'id': _bytes_feature(x_id),
+        'radius': _float_feature(radius)
     }
 
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
@@ -248,10 +249,10 @@ def fix_image_size(width, height, x_min, x_max, y_min, y_max):
 
     return x_min, x_max, y_min, y_max
 
-def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
+def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: bool = False):
     print("Read spatial data.")
 
-    sc.pp.subsample(sdata['table'], random_state=42, n_obs=20000)
+    sc.pp.subsample(sdata['table'], random_state=42, n_obs=50000)
     adata_RNA = sdata['table']
     # Create PCA for benchmarking
     sc.tl.pca(adata_RNA)
@@ -272,6 +273,8 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
     rows = 128
     cols = 128
     depth = 3
+    align_matrix = np.linalg.inv(align_matrix)
+    image_raw = sdata['he_image'].data.compute()
 
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
     print('Writing ', staining_tf_path)
@@ -280,24 +283,23 @@ def prepare_data_spatial(sdata, save_path: str = '', is_hvg_RNA: bool = False):
     if not os.path.exists(RNA_tf_path):
         os.makedirs(RNA_tf_path)
     with tf.io.TFRecordWriter(tfrecord_file) as writer:
-        for geom in adata_RNA.obs['cell_id']:
-            coords_x, coords_y = spatialdata.transform(sdata["cell_boundaries"], to_coordinate_system="global").loc[geom, "geometry"].exterior.coords.xy
-            x_min, y_min = np.min(coords_x), np.min(coords_y)
-            x_max, y_max = np.max(coords_x), np.max(coords_y)
+        geoms = adata_RNA.obs['cell_id']
+        shapes = spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[geoms, ["geometry", "radius"]]
+        for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
+            coords_x = shape.x
+            coords_y = shape.y
 
-            x_min, x_max, y_min, y_max = fix_image_size(rows, cols, x_min, x_max, y_min, y_max)
+            cor_coords = align_matrix @ np.array([coords_x, coords_y, 1])
+            coords_y_new, coords_x_new = cor_coords[0], cor_coords[1]
 
-            res = rasterize(
-                sdata["he_image"],
-                ["x", "y"],
-                min_coordinate=[x_min, y_min],
-                max_coordinate=[x_max, y_max],
-                target_unit_to_pixels=1.0,
-                target_coordinate_system="global"
-            )
+            x_min, x_max = coords_x_new - (rows / 2), coords_x_new + (cols / 2)
+            y_min, y_max = coords_y_new - (rows / 2), coords_y_new + (cols / 2)
+            
+            image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+            image = np.rot90(image, 1, axes=(0,1))
 
-            image_raw = res.to_numpy().transpose(1,2,0).tostring()
-            example = serialize_example_batch_spatial(image_raw, geom)
+            image = image.tostring()
+            example = serialize_example_batch_spatial(image, geom, radius)
             writer.write(example)
 
     return RNA_tf_path, adata_RNA, staining_tf_path
@@ -315,10 +317,11 @@ def read_data_spatial(data: str = "", save_path: str = ""):
 
     image = xenium_aligned_image(he_path, alignment_matrix_path)
     sdata['he_image'] = image
+    align_matrix = np.genfromtxt(alignment_matrix_path, delimiter=",", dtype=float)
 
     print("Read data")
 
-    RNA_tf_path, adata_RNA, staining_tf_path  = prepare_data_spatial(sdata=sdata, save_path=save_path, is_hvg_RNA=False)
+    RNA_tf_path, adata_RNA, staining_tf_path  = prepare_data_spatial(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
 
     return RNA_tf_path, adata_RNA, staining_tf_path
 
