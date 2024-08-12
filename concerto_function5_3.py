@@ -2577,14 +2577,14 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                 if super_parameters["combine_omics"]:
                     encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                                     [source_values_RNA, source_values_protein]],
-                                                                    training=False)
+                                                                    training=False, only_RNA=only_RNA)
                     break
 
                 else:
                     encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                                 [source_values_RNA, source_values_protein]],
                                                                 training=False)
-                    if not only_RNA:
+                    if only_RNA:
                         encode_output = encode_output1
                     else:
                         encode_output = tf.concat([encode_output1, encode_output2], axis=1)
@@ -2619,9 +2619,9 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                                                                 training=False)
 
             else:
-                encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein],
-                                                              [source_values_RNA, source_values_protein]],
-                                                             training=False)
+                encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein], 
+                                                                                   [source_values_RNA, source_values_protein]],
+                                                             training=False, only_RNA=only_RNA)
                 if not only_RNA:
                     encode_output = encode_output1
                 else:
@@ -2638,8 +2638,6 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
 
         source_data_feature.extend(source_data_feature_1[:all_samples])
         source_data_batch.extend(source_data_batch_1[:all_samples])
-        print(f"All samples{all_samples}")
-        print(f"RNA_id len {len(RNA_id)}")
         RNA_id_all.extend(RNA_id[:all_samples])
         attention_output_RNA_all.extend(attention_output_RNA[:all_samples])
         attention_output_Protein_all.extend(attention_output_Protein[:all_samples])

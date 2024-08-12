@@ -238,7 +238,8 @@ def multi_embedding_attention_transfer_explainability(supvised_train: bool = Fal
                                     include_attention: bool = False,
                                     use_bias=True,
                                     combine_omics: bool = True,
-                                    model_type: int = 0
+                                    model_type: int = 0,
+                                    only_RNA: bool = False
                                     ):
     assert len(multi_max_features) == len(mult_feature_names)
 
@@ -305,7 +306,10 @@ def multi_embedding_attention_transfer_explainability(supvised_train: bool = Fal
         if len(features) > 1:
         #feature = concatenate(features)
             if model_type == 0:
-                feature = Add()([features[0],features[1]])
+                if only_RNA:
+                    feature = features[0]
+                else:
+                    feature = Add()([features[0],features[1]])
             elif model_type == 1:
                 cross_attention = CausalSelfAttention(num_heads=head_2, key_dim=256, dropout=drop_rate) # FIXME
                 features[0] = tf.expand_dims(features[0], axis=1)
