@@ -262,11 +262,11 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
     adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
     print(f"RNA data shape {adata_RNA.shape}")
     
-    adata_RNA.write_h5ad(save_path + f'spatial_adata_RNA.h5ad')
+    adata_RNA.write_h5ad(save_path + f'spatial_adata_50_RNA.h5ad')
     print("Saved adata.")
 
     path_file = 'tfrecord/'
-    RNA_tf_path = save_path + path_file + 'spatial_RNA_tf/'
+    RNA_tf_path = save_path + path_file + 'spatial_RNA_50_tf/'
     RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path=RNA_tf_path, batch_col_name='batch')
     print("Made tf record RNA.")
 
@@ -276,7 +276,7 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
     align_matrix = np.linalg.inv(align_matrix)
     image_raw = sdata['he_image'].data.compute()
 
-    staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
+    staining_tf_path = save_path + path_file + 'spatial_staining_50_tf/'
     print('Writing ', staining_tf_path)
 
     tfrecord_file = RNA_tf_path + '/tf_0.tfrecord'
