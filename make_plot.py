@@ -174,6 +174,10 @@ def get_joint_umap(X_train, X_test):
     reducer = umap.UMAP()
     return reducer.fit_transform(np.append(X_train, X_test, axis=0))
 
+def get_umap(X):
+    reducer = umap.UMAP()
+    return reducer.fit_transform(X)
+
 def create_plot(adata_merged_train, adata_merged_test, 
                 data: str, attention_t: bool, attention_s: bool,
                 batch_size:int, epoch: int, lr: float, drop_rate: float, 
@@ -182,7 +186,7 @@ def create_plot(adata_merged_train, adata_merged_test,
     X_test = adata_merged_test.obsm[f'test_{epoch}_encoder_{drop_rate}_{only_RNA}']
 
     X_train_umap = adata_merged_train.obsm[f'train_umap_{epoch}_encoder_{drop_rate}']
-    X_test_umap = adata_merged_test.obsm[f'test_umap_{epoch}_encoder_{drop_rate}']
+    X_test_umap = get_umap(X_test)
 
     y_train = adata_merged_train.obs['cell_type_l1']
     y_test = adata_merged_test.obs['cell_type_l1']
