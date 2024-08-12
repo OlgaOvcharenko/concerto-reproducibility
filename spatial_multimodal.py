@@ -126,7 +126,7 @@ def _bytes_feature_image(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
-
+    print(x_weight)
     feature = {
         'feature': _int64_feature(x_feature),
         'value': _float_feature(x_weight),
@@ -139,7 +139,7 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
     return example_proto.SerializeToString()
 
 def serialize_example_batch_spatial(x_feature, x_id, radius):
-
+    print(radius)
     feature = {
         'image_raw': _bytes_feature_image(x_feature),
         'id': _bytes_feature(x_id),
