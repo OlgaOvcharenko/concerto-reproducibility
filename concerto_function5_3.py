@@ -2614,15 +2614,20 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                 break
 
             if super_parameters["combine_omics"]:
-                encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
-                                                                [source_values_RNA, source_values_protein]],
+                if only_RNA:
+                    encode_output, attention_output = encode_network([[source_features_RNA],
+                                                                [source_values_RNA]],
                                                                 training=False)
+                else:
+                    encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
+                                                                    [source_values_RNA, source_values_protein]],
+                                                                    training=False)
 
             else:
                 encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein], 
                                                                                    [source_values_RNA, source_values_protein]],
-                                                             training=False, only_RNA=only_RNA)
-                if not only_RNA:
+                                                             training=False)
+                if only_RNA:
                     encode_output = encode_output1
                 else:
                     encode_output = tf.concat([encode_output1, encode_output2], axis=1)

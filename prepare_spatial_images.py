@@ -21,6 +21,7 @@ image_raw = xenium_aligned_image(he_path, alignment_matrix_path)
 sdata['he_image'] = image_raw
 
 image_raw = image_raw.data.compute()
+print(image_raw)
 print(image_raw.shape)
 
 align_matrix = np.genfromtxt(alignment_matrix_path, delimiter=",", dtype=float)
@@ -39,6 +40,11 @@ for geom, shape in zip(['oinlhbpf-1'], [spatialdata.transform(sdata["cell_circle
     t1 = time.time()
     coords_x = shape.x
     coords_y = shape.y
+    
+    cor_coords = align_matrix @ np.array([coords_x, coords_y, 1])
+    coords_x, coords_y = cor_coords[0], cor_coords[1]
+    print(coords_x, coords_y)
+
     x_min, x_max = coords_x - (width / 2), coords_x + (width / 2)
     y_min, y_max = coords_y - (height / 2), coords_y + (height / 2)
     times2.append(time.time()-t1)
