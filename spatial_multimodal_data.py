@@ -139,7 +139,7 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
 
 def serialize_example_batch_spatial(x_feature, x_id, radius):
     feature = {
-        'image_raw': _float_feature(x_feature),
+        'image_raw': _bytes_feature_image(x_feature),
         'id': _bytes_feature(x_id),
         'radius': _float_feature([radius])
     }
@@ -250,7 +250,6 @@ def fix_image_size(width, height, x_min, x_max, y_min, y_max):
 
 def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: bool = False):
     print("Read spatial data.")
-    
     adata_RNA = sdata['table']
 
     # Create PCA for benchmarking
@@ -299,8 +298,8 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
             image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
             image = np.rot90(image, 1, axes=(0,1))
 
-            # image = image.tostring()
-            example = serialize_example_batch_spatial(image.tolist(), geom, radius)
+            image = image.tostring()
+            example = serialize_example_batch_spatial(image, geom, radius)
             writer.write(example)
 
             i += 1
