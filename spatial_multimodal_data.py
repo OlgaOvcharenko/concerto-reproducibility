@@ -251,9 +251,9 @@ def fix_image_size(width, height, x_min, x_max, y_min, y_max):
 
 def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: bool = False):
     print("Read spatial data.")
-
-    # sc.pp.subsample(sdata['table'], random_state=42, n_obs=50000)
+    
     adata_RNA = sdata['table']
+
     # Create PCA for benchmarking
     sc.tl.pca(adata_RNA)
 
