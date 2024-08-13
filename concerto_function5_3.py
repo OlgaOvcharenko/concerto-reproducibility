@@ -1737,7 +1737,6 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
             train_db_staining = create_classifier_dataset_spatial_multi([staining_file],
                                                                batch_size=super_parameters['batch_size'],
                                                                is_training=True,
-                                                               data_augment=False,
                                                                shuffle_size=10000,
                                                                seed=epoch
                                                                )
