@@ -1735,7 +1735,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                            seed=epoch
                                                            )
             print(train_db_RNA)
-            
+
             train_db_staining = create_classifier_dataset_spatial_multi([staining_file],
                                                                batch_size=super_parameters['batch_size'],
                                                                is_training=True,
@@ -1746,126 +1746,132 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
             # TODO check it takes same ids
             
             step = 0
-            for (source_features_RNA, source_values_RNA, _, _), \
-                (source_features_staining, source_values_staining, _, _) \
+            for (source_features_RNA, source_values_RNA, _, RNA_id), \
+                (source_id_staining, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
+                
+                print(RNA_id)
+                print(source_id_staining)
+                print(source_image_raw_staining)
+                print(source_radius_staining)
 
-                with tf.GradientTape() as tape:
-                    if super_parameters["combine_omics"]:
-                            raise Exception("combine_omics: can not combine omics for image, unlike in Concerto.")
+
+                # with tf.GradientTape() as tape:
+                #     if super_parameters["combine_omics"]:
+                #             raise Exception("combine_omics: can not combine omics for image, unlike in Concerto.")
                         
-                    elif not super_parameters["combine_omics"]:
-                        if super_parameters["model_type"] == 1:
-                            res_en = encode_network([[source_features_RNA, source_features_staining],
-                                                [source_values_RNA, source_values_staining]], training=True)
+                #     elif not super_parameters["combine_omics"]:
+                #         if super_parameters["model_type"] == 1:
+                #             res_en = encode_network([[source_features_RNA, source_features_staining],
+                #                                 [source_values_RNA, source_values_staining]], training=True)
 
-                            zt_1, zt_2 = res_en[0], res_en[1]
+                #             zt_1, zt_2 = res_en[0], res_en[1]
 
-                            loss = clip_loss(zt_1, zt_2, temperature)
+                #             loss = clip_loss(zt_1, zt_2, temperature)
 
-                        elif super_parameters["model_type"] == 2:
-                            res_en = encode_network([[source_features_RNA, source_features_staining],
-                                            [source_values_RNA, source_values_staining]], training=True)
-                            res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
-                            zt_1, zt_2 = res_en[0], res_en[1]
-                            zs_1, zs_2 = res_dec[0], res_dec[1]
+                #         elif super_parameters["model_type"] == 2:
+                #             res_en = encode_network([[source_features_RNA, source_features_staining],
+                #                             [source_values_RNA, source_values_staining]], training=True)
+                #             res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
+                #             zt_1, zt_2 = res_en[0], res_en[1]
+                #             zs_1, zs_2 = res_dec[0], res_dec[1]
 
-                            # TT
-                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+                #             # TT
+                #             loss_TT = clip_loss(zt_1, zt_2, temperature)
 
-                            # SS
-                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+                #             # SS
+                #             loss_SS = clip_loss(zs_1, zs_2, temperature)
 
-                            # TS
-                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                #             # TS
+                #             loss_TS = clip_loss(zt_1, zs_2, temperature)
                             
-                            # ST
-                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+                #             # ST
+                #             loss_ST = clip_loss(zt_2, zs_1, temperature)
                             
-                            loss = loss_TT + loss_TS + loss_ST + loss_SS
+                #             loss = loss_TT + loss_TS + loss_ST + loss_SS
                         
-                        elif super_parameters["model_type"] == 3:
-                            res_en = encode_network([[source_features_RNA, source_features_staining],
-                                            [source_values_RNA, source_values_staining]], training=True)
-                            res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
-                            zt_1, zt_2 = res_en[0], res_en[1]
-                            zs_1, zs_2 = res_dec[0], res_dec[1]
+                #         elif super_parameters["model_type"] == 3:
+                #             res_en = encode_network([[source_features_RNA, source_features_staining],
+                #                             [source_values_RNA, source_values_staining]], training=True)
+                #             res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
+                #             zt_1, zt_2 = res_en[0], res_en[1]
+                #             zs_1, zs_2 = res_dec[0], res_dec[1]
 
-                            # TT
-                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+                #             # TT
+                #             loss_TT = clip_loss(zt_1, zt_2, temperature)
 
-                            # SS
-                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+                #             # SS
+                #             loss_SS = clip_loss(zs_1, zs_2, temperature)
 
-                            # TS
-                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                #             # TS
+                #             loss_TS = clip_loss(zt_1, zs_2, temperature)
                             
-                            # ST
-                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+                #             # ST
+                #             loss_ST = clip_loss(zt_2, zs_1, temperature)
 
-                            # T1S1
-                            loss_T1S1 = clip_loss(zt_1, zs_1, temperature)
+                #             # T1S1
+                #             loss_T1S1 = clip_loss(zt_1, zs_1, temperature)
 
-                            # T2S2
-                            loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
+                #             # T2S2
+                #             loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
                             
-                            loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
+                #             loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
                         
-                        elif super_parameters["model_type"] == 4:
-                            res_en = encode_network([[source_features_RNA, source_features_staining],
-                                                [source_values_RNA, source_values_staining]], training=True)
+                #         elif super_parameters["model_type"] == 4:
+                #             res_en = encode_network([[source_features_RNA, source_features_staining],
+                #                                 [source_values_RNA, source_values_staining]], training=True)
 
-                            zt_1, zt_2 = res_en[0], res_en[1]
+                #             zt_1, zt_2 = res_en[0], res_en[1]
 
-                            alpha = 0.5
-                            loss = alpha * (clip_loss(zt_1, zt_2, temperature)) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
+                #             alpha = 0.5
+                #             loss = alpha * (clip_loss(zt_1, zt_2, temperature)) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
 
-                        elif super_parameters["model_type"] == 5:
-                            res_en = encode_network([[source_features_RNA, source_features_staining],
-                                            [source_values_RNA, source_values_staining]], training=True)
-                            res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
-                            zt_1, zt_2 = res_en[0], res_en[1]
-                            zs_1, zs_2 = res_dec[0], res_dec[1]
+                #         elif super_parameters["model_type"] == 5:
+                #             res_en = encode_network([[source_features_RNA, source_features_staining],
+                #                             [source_values_RNA, source_values_staining]], training=True)
+                #             res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
+                #             zt_1, zt_2 = res_en[0], res_en[1]
+                #             zs_1, zs_2 = res_dec[0], res_dec[1]
 
-                            # TT
-                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+                #             # TT
+                #             loss_TT = clip_loss(zt_1, zt_2, temperature)
 
-                            # SS
-                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+                #             # SS
+                #             loss_SS = clip_loss(zs_1, zs_2, temperature)
 
-                            # TS
-                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                #             # TS
+                #             loss_TS = clip_loss(zt_1, zs_2, temperature)
                             
-                            # ST
-                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+                #             # ST
+                #             loss_ST = clip_loss(zt_2, zs_1, temperature)
                             
-                            alpha = 0.5
-                            loss = alpha * (loss_TT + loss_TS + loss_ST + loss_SS) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
+                #             alpha = 0.5
+                #             loss = alpha * (loss_TT + loss_TS + loss_ST + loss_SS) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
                     
-                    train_loss(loss)
+                #     train_loss(loss)
 
-                if super_parameters["combine_omics"]:
-                    variables = [encode_network.trainable_variables, decode_network.trainable_variables]
-                elif super_parameters["model_type"] in [1, 4]:
-                    variables = [encode_network.trainable_variables, [temperature]]
-                else:
-                    variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]
+                # if super_parameters["combine_omics"]:
+                #     variables = [encode_network.trainable_variables, decode_network.trainable_variables]
+                # elif super_parameters["model_type"] in [1, 4]:
+                #     variables = [encode_network.trainable_variables, [temperature]]
+                # else:
+                #     variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]
 
-                grads = tape.gradient(loss, variables)
-                for grad, var in zip(grads, variables):
-                    optimizer.apply_gradients(zip(grad, var))
+                # grads = tape.gradient(loss, variables)
+                # for grad, var in zip(grads, variables):
+                #     optimizer.apply_gradients(zip(grad, var))
 
-                if step > 0 and step % 5 == 0:
-                    template = 'Epoch {}, step {}, simclr loss: {:0.4f}.'
-                    print(template.format(epoch + 1,
-                                          str(step),
-                                          train_loss.result()))
+                # if step > 0 and step % 5 == 0:
+                #     template = 'Epoch {}, step {}, simclr loss: {:0.4f}.'
+                #     print(template.format(epoch + 1,
+                #                           str(step),
+                #                           train_loss.result()))
                     
-                # Tensorboard
-                with train_summary_writer.as_default():
-                    tf.summary.scalar('loss', train_loss.result(), step=tf_step)
-                tf_step += 1
+                # # Tensorboard
+                # with train_summary_writer.as_default():
+                #     tf.summary.scalar('loss', train_loss.result(), step=tf_step)
+                # tf_step += 1
 
         encode_network.save_weights(
             weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
