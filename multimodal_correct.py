@@ -19,8 +19,6 @@ from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import KernelPCA
 import psutil
 
-import time
-
 l2tol1 = {
                         'CD8 Naive': 'CD8 T',
                         'CD8 Proliferating': 'CD8 T',
