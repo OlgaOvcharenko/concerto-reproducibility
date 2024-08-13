@@ -276,7 +276,7 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
     align_matrix = np.linalg.inv(align_matrix)
     image_raw = sdata['he_image'].data.compute()
 
-    staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
+    staining_tf_path = save_path + path_file + 'spatial_staining_tf'
     print('Writing ', staining_tf_path)
 
     tfrecord_file = staining_tf_path + '/tf_0.tfrecord'
@@ -307,6 +307,9 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
             i += 1
             
         print(f"Written {i} images")
+        save_dict = {'rows': rows, 'cols': cols, 'depth': depth}
+        file = tfrecord_file.replace('tf_0.tfrecord','vocab_size.npz')
+        np.savez_compressed(file, **save_dict)
 
     return RNA_tf_path, adata_RNA, staining_tf_path
 
