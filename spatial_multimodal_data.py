@@ -139,7 +139,7 @@ def serialize_example_batch(x_feature, x_weight, y_batch, x_id, cell_id):
 
 def serialize_example_batch_spatial(x_feature, x_id, radius):
     feature = {
-        'image_raw': _bytes_feature_image(x_feature),
+        'image_raw': _float_feature(x_feature),
         'id': _bytes_feature(x_id),
         'radius': _float_feature([radius])
     }
@@ -213,7 +213,6 @@ def _int64_feature(value):
   return tf.train.Feature(int64_list=tf.train.Int64List(value=list(value)))
 
 def _float_feature(value):
-    print(value)
     """Returns a float_list from a float / double."""
     return tf.train.Feature(float_list=tf.train.FloatList(value=list(value)))
 
@@ -300,7 +299,7 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
             image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
             image = np.rot90(image, 1, axes=(0,1))
 
-            image = image.tostring()
+            # image = image.tostring()
             example = serialize_example_batch_spatial(image, geom, radius)
             writer.write(example)
 
