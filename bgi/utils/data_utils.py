@@ -134,7 +134,56 @@ def single_file_dataset_multi_supervised(input_file: list, name_to_features, spa
 
     return d
 
+def single_file_dataset_spatial_multi(input_file: list, name_to_features, sparse_to_denses):
+    d = tf.data.TFRecordDataset(input_file)
 
+    def single_example_spatial_parser(serialized_example):
+        name_to_features = {
+            'image_raw': tf.io.FixedLenFeature([], tf.string),
+            'id': tf.io.FixedLenFeature([], tf.string),
+            'radius': tf.io.VarLenFeature(tf.float32)
+        }
+        example = tf.io.parse_single_example(serialized_example, name_to_features)
+        image_raw = example['image_raw']
+        id = example['id']
+        radius = example['radius']
+
+        print(id)
+        print(image_raw)
+        print(radius)
+
+        image_raw = tf.sparse.to_dense(image_raw, default_value=0)
+
+        return id, image_raw, radius
+
+    d = d.map(single_example_spatial_parser)
+
+    return d
+
+def create_classifier_dataset_spatial_multi(record_files: list,
+                              batch_size: int,
+                              is_training=True,
+                              shuffle_size=100,
+                              seed=42):
+    """Creates input dataset from (tf)records files for train/eval."""
+    name_to_features = {
+        'image_raw': tf.io.FixedLenFeature([], tf.string),
+        'id': tf.io.FixedLenFeature([], tf.string),
+        'radius': tf.io.VarLenFeature(tf.float32)
+    }
+    sparse_to_denses = ['image_raw', 'id', 'radius']
+
+    # 读取记录
+    dataset = single_file_dataset_spatial_multi(record_files, name_to_features, sparse_to_denses)
+
+    dataset = dataset.padded_batch(batch_size=batch_size,
+                                       padded_shapes=([None], [None],[],[]),
+                                       drop_remainder=True)
+    if is_training:
+        dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
+
+    dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+    return dataset
 
 def create_classifier_dataset_multi(record_files: list,
                               batch_size: int,

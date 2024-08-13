@@ -1734,7 +1734,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                            shuffle_size=10000,
                                                            seed=epoch
                                                            )
-            train_db_Protein = create_classifier_dataset_multi([staining_file],
+            train_db_staining = create_classifier_dataset_spatial_multi([staining_file],
                                                                batch_size=super_parameters['batch_size'],
                                                                is_training=True,
                                                                data_augment=False,
@@ -1742,10 +1742,12 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                                seed=epoch
                                                                )
             
+            # TODO check it takes same ids
+            
             step = 0
             for (source_features_RNA, source_values_RNA, _, _), \
-                (source_features_protein, source_values_protein, _, _) \
-                    in (zip(train_db_RNA, train_db_Protein)):
+                (source_features_staining, source_values_staining, _, _) \
+                    in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
                 with tf.GradientTape() as tape:
@@ -1754,17 +1756,17 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                         
                     elif not super_parameters["combine_omics"]:
                         if super_parameters["model_type"] == 1:
-                            res_en = encode_network([[source_features_RNA, source_features_protein],
-                                                [source_values_RNA, source_values_protein]], training=True)
+                            res_en = encode_network([[source_features_RNA, source_features_staining],
+                                                [source_values_RNA, source_values_staining]], training=True)
 
                             zt_1, zt_2 = res_en[0], res_en[1]
 
                             loss = clip_loss(zt_1, zt_2, temperature)
 
                         elif super_parameters["model_type"] == 2:
-                            res_en = encode_network([[source_features_RNA, source_features_protein],
-                                            [source_values_RNA, source_values_protein]], training=True)
-                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            res_en = encode_network([[source_features_RNA, source_features_staining],
+                                            [source_values_RNA, source_values_staining]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
                             zt_1, zt_2 = res_en[0], res_en[1]
                             zs_1, zs_2 = res_dec[0], res_dec[1]
 
@@ -1783,9 +1785,9 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                             loss = loss_TT + loss_TS + loss_ST + loss_SS
                         
                         elif super_parameters["model_type"] == 3:
-                            res_en = encode_network([[source_features_RNA, source_features_protein],
-                                            [source_values_RNA, source_values_protein]], training=True)
-                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            res_en = encode_network([[source_features_RNA, source_features_staining],
+                                            [source_values_RNA, source_values_staining]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
                             zt_1, zt_2 = res_en[0], res_en[1]
                             zs_1, zs_2 = res_dec[0], res_dec[1]
 
@@ -1810,8 +1812,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                             loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
                         
                         elif super_parameters["model_type"] == 4:
-                            res_en = encode_network([[source_features_RNA, source_features_protein],
-                                                [source_values_RNA, source_values_protein]], training=True)
+                            res_en = encode_network([[source_features_RNA, source_features_staining],
+                                                [source_values_RNA, source_values_staining]], training=True)
 
                             zt_1, zt_2 = res_en[0], res_en[1]
 
@@ -1819,9 +1821,9 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                             loss = alpha * (clip_loss(zt_1, zt_2, temperature)) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
 
                         elif super_parameters["model_type"] == 5:
-                            res_en = encode_network([[source_features_RNA, source_features_protein],
-                                            [source_values_RNA, source_values_protein]], training=True)
-                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            res_en = encode_network([[source_features_RNA, source_features_staining],
+                                            [source_values_RNA, source_values_staining]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_staining], training=True)
                             zt_1, zt_2 = res_en[0], res_en[1]
                             zs_1, zs_2 = res_dec[0], res_dec[1]
 
