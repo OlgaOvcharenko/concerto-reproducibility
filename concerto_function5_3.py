@@ -1678,58 +1678,55 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                             'combine_omics': False,
                             'model_type': 1} 
     
-    f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
-    vocab_size_RNA = int(f['vocab size'])
-    print(f"Vocab size{vocab_size_RNA}")
+    f = int(np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))['vocab size'])
+    vocab_size_RNA = int(f)
 
-    f = np.load(os.path.join(Protein_tf_path, 'vocab_size.npz'))
-    vocab_size_Protein = int(f['vocab size'])
+    f = np.load(os.path.join(staining_tf_path, 'vocab_size.npz'))
+    vocab_size_staining = int(f['rows'])
     
-    encode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
-                                                        mult_feature_names=mult_feature_names,
-                                                        embedding_dims=128,
-                                                        include_attention=super_parameters['attention_t'],
-                                                        drop_rate=super_parameters['drop_rate'],
-                                                        head_1=super_parameters["heads"],
-                                                        head_2=super_parameters["heads"],
-                                                        head_3=super_parameters["heads"],
-                                                        combine_omics=super_parameters['combine_omics'],
-                                                        model_type=super_parameters['model_type'])
+    encode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
+                                                  mult_feature_names=mult_feature_names,
+                                                  embedding_dims=128,
+                                                  include_attention=super_parameters['attention_t'],
+                                                  drop_rate=super_parameters['drop_rate'],
+                                                  head_1=super_parameters["heads"],
+                                                  head_2=super_parameters["heads"],
+                                                  head_3=super_parameters["heads"],
+                                                  combine_omics=super_parameters['combine_omics'],
+                                                  model_type=super_parameters['model_type'])
 
-    decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
-                                                        mult_feature_names=mult_feature_names,
-                                                        embedding_dims=128,
-                                                        include_attention=super_parameters['attention_s'],
-                                                        drop_rate=super_parameters['drop_rate'],
-                                                        head_1=super_parameters["heads"],
-                                                        head_2=super_parameters["heads"],
-                                                        head_3=super_parameters["heads"],
-                                                        combine_omics=super_parameters['combine_omics'],
-                                                        model_type=super_parameters['model_type'])
+    decode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
+                                                  mult_feature_names=mult_feature_names,
+                                                  embedding_dims=128,
+                                                  include_attention=super_parameters['attention_s'],
+                                                  drop_rate=super_parameters['drop_rate'],
+                                                  head_1=super_parameters["heads"],
+                                                  head_2=super_parameters["heads"],
+                                                  head_3=super_parameters["heads"],
+                                                  combine_omics=super_parameters['combine_omics'],
+                                                  model_type=super_parameters['model_type'])
 
-    # tf_list_1 = os.listdir(os.path.join(ref_tf_path))
     tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
     train_source_list_RNA = []
-    train_source_list_Protein = []
+    train_source_list_staining = []
     for i in tf_list_1:
         train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
-        train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
+        train_source_list_staining.append(os.path.join(staining_tf_path, i))
 
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     total_update_steps = 300 * super_parameters['epoch_pretrain']
     lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
                                                                 super_parameters['lr'] * 1e-2, power=1)
-
-    # New try
+    
     optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
-
-    initializer = tf.keras.initializers.Identity()
-    labels = initializer(shape=(super_parameters['batch_size'], super_parameters['batch_size']))
     temperature = tf.Variable(np.log(1/0.07), trainable=True, dtype='float32')
 
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
-        for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
+        for RNA_file, staining_file in zip(train_source_list_RNA, train_source_list_staining):
+            train_loss.reset_states()
+
+            # FIXME
             train_db_RNA = create_classifier_dataset_multi([RNA_file],
                                                            batch_size=super_parameters['batch_size'],
                                                            is_training=True,
@@ -1737,16 +1734,14 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                            shuffle_size=10000,
                                                            seed=epoch
                                                            )
-            train_db_Protein = create_classifier_dataset_multi([Protein_file],
+            train_db_Protein = create_classifier_dataset_multi([staining_file],
                                                                batch_size=super_parameters['batch_size'],
                                                                is_training=True,
                                                                data_augment=False,
                                                                shuffle_size=10000,
                                                                seed=epoch
                                                                )
-            train_loss.reset_states()
-            # train_cls_accuracy.reset_states()
-            # test_cls_accuracy.reset_states()
+            
             step = 0
             for (source_features_RNA, source_values_RNA, _, _), \
                 (source_features_protein, source_values_protein, _, _) \
@@ -1755,11 +1750,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
 
                 with tf.GradientTape() as tape:
                     if super_parameters["combine_omics"]:
-                            z1 = encode_network([[source_features_RNA, source_features_protein],
-                                            [source_values_RNA, source_values_protein]], training=True)
-                            z2 = decode_network([source_values_RNA, source_values_protein], training=True)
-                            ssl_loss = simclr_loss(z1, z2, temperature=0.1)
-                            loss = ssl_loss
+                            raise Exception("combine_omics: can not combine omics for image, unlike in Concerto.")
                         
                     elif not super_parameters["combine_omics"]:
                         if super_parameters["model_type"] == 1:
