@@ -212,7 +212,7 @@ def _int64_feature(value):
   return tf.train.Feature(int64_list=tf.train.Int64List(value=list(value)))
 
 def _float_feature(value):
-    print(value)
+    # print(value)
     """Returns a float_list from a float / double."""
     return tf.train.Feature(float_list=tf.train.FloatList(value=list(value)))
 
@@ -251,7 +251,7 @@ def fix_image_size(width, height, x_min, x_max, y_min, y_max):
 def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: bool = False):
     print("Read spatial data.")
 
-    sc.pp.subsample(sdata['table'], random_state=42, n_obs=50000)
+    # sc.pp.subsample(sdata['table'], random_state=42, n_obs=50000)
     adata_RNA = sdata['table']
     # Create PCA for benchmarking
     sc.tl.pca(adata_RNA)
@@ -261,11 +261,11 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
     adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
     print(f"RNA data shape {adata_RNA.shape}")
     
-    adata_RNA.write_h5ad(save_path + f'spatial_adata_50_RNA.h5ad')
+    adata_RNA.write_h5ad(save_path + f'spatial_adata_RNA.h5ad')
     print("Saved adata.")
 
     path_file = 'tfrecord/'
-    RNA_tf_path = save_path + path_file + 'spatial_RNA_50_tf/'
+    RNA_tf_path = save_path + path_file + 'spatial_RNA_tf/'
     RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path=RNA_tf_path, batch_col_name='batch')
     print("Made tf record RNA.")
 
@@ -275,7 +275,7 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
     align_matrix = np.linalg.inv(align_matrix)
     image_raw = sdata['he_image'].data.compute()
 
-    staining_tf_path = save_path + path_file + 'spatial_staining_50_tf/'
+    staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
     print('Writing ', staining_tf_path)
 
     tfrecord_file = RNA_tf_path + '/tf_0.tfrecord'
@@ -284,6 +284,7 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
     with tf.io.TFRecordWriter(tfrecord_file) as writer:
         geoms = adata_RNA.obs['cell_id']
         shapes = spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[geoms, ["geometry", "radius"]]
+        i = 0
         for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
             coords_x = shape.x
             coords_y = shape.y
@@ -300,6 +301,10 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
             image = image.tostring()
             example = serialize_example_batch_spatial(image, geom, radius)
             writer.write(example)
+
+            i += 1
+            
+        print(f"Written {i} images")
 
     return RNA_tf_path, adata_RNA, staining_tf_path
 
