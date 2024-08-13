@@ -300,7 +300,7 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
             image = np.rot90(image, 1, axes=(0,1))
 
             # image = image.tostring()
-            example = serialize_example_batch_spatial(image, geom, radius)
+            example = serialize_example_batch_spatial(image.tolist(), geom, radius)
             writer.write(example)
 
             i += 1
