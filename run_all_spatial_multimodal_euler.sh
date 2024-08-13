@@ -12,8 +12,8 @@ attention_t=("1")
 attention_s=("0")
 heads=("16")
 data=("spatial")
-train=0
-test=1
+train=1
+test=0
 
 model_type=("1")
 combine_omics=0

@@ -115,12 +115,28 @@ def main():
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
 
-    
     # Read data
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
     RNA_tf_path, adata_RNA, staining_tf_path = read_data_prepared(data=data, save_path=save_path)
+
+    # Train
+    weight_path = save_path + 'weight/'
+    if train:
+        train_concerto(weight_path=weight_path, 
+                       RNA_tf_path=RNA_tf_path, 
+                       staining_tf_path=staining_tf_path, 
+                       data=data, 
+                       attention_t=attention_t, 
+                       attention_s=attention_s, 
+                       batch_size=batch_size, 
+                       epoch=epoch, 
+                       lr=lr, 
+                       drop_rate=drop_rate, 
+                       heads=heads, 
+                       combine_omics=combine_omics, 
+                       model_type=model_type)
 
 main()
