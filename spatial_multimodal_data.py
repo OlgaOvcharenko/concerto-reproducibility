@@ -213,7 +213,7 @@ def _int64_feature(value):
   return tf.train.Feature(int64_list=tf.train.Int64List(value=list(value)))
 
 def _float_feature(value):
-    # print(value)
+    print(value)
     """Returns a float_list from a float / double."""
     return tf.train.Feature(float_list=tf.train.FloatList(value=list(value)))
 
