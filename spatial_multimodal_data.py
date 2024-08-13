@@ -203,6 +203,7 @@ def create_tfrecord(source_file,  batch_dict, tfrecord_file, zero_filter=False, 
         with tf.io.TFRecordWriter(file) as writer:
             for example in examples:
                 writer.write(example)
+    print(f"vocab size {len(features)}")
     save_dict = {'vocab size': len(features)}
     file = tfrecord_file.replace('tf.tfrecord','vocab_size.npz')
     np.savez_compressed(file, **save_dict)

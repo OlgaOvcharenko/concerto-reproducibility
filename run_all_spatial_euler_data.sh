@@ -27,7 +27,7 @@ for e in $epochs; do
                         for h in $heads; do
                             for d in $data; do
                                 for mt in $model_type; do
-                                    sbatch run_spatial_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt $combine_omics
+                                    sbatch run_spatial_data_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt $combine_omics
                                 done
                             done
                         done

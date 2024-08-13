@@ -1660,6 +1660,227 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
     print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
     return print('finished')
 
+def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str, staining_tf_path: str, weight_path: str, super_parameters=None):
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+
+    set_seeds(0)   
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
+    if super_parameters is None:
+        super_parameters = {'batch_size': 32, 
+                            'epoch_pretrain': 3,
+                            'lr': 1e-4,
+                            'drop_rate': 0.1, 
+                            'attention_t': True, 
+                            'attention_s': False, 
+                            'heads': 128,
+                            'combine_omics': False,
+                            'model_type': 1} 
+    
+    f = np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))
+    vocab_size_RNA = int(f['vocab size'])
+    print(f"Vocab size{vocab_size_RNA}")
+
+    f = np.load(os.path.join(Protein_tf_path, 'vocab_size.npz'))
+    vocab_size_Protein = int(f['vocab size'])
+    
+    encode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
+                                                        mult_feature_names=mult_feature_names,
+                                                        embedding_dims=128,
+                                                        include_attention=super_parameters['attention_t'],
+                                                        drop_rate=super_parameters['drop_rate'],
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"],
+                                                        combine_omics=super_parameters['combine_omics'],
+                                                        model_type=super_parameters['model_type'])
+
+    decode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size_RNA,vocab_size_Protein],
+                                                        mult_feature_names=mult_feature_names,
+                                                        embedding_dims=128,
+                                                        include_attention=super_parameters['attention_s'],
+                                                        drop_rate=super_parameters['drop_rate'],
+                                                        head_1=super_parameters["heads"],
+                                                        head_2=super_parameters["heads"],
+                                                        head_3=super_parameters["heads"],
+                                                        combine_omics=super_parameters['combine_omics'],
+                                                        model_type=super_parameters['model_type'])
+
+    # tf_list_1 = os.listdir(os.path.join(ref_tf_path))
+    tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
+    train_source_list_RNA = []
+    train_source_list_Protein = []
+    for i in tf_list_1:
+        train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
+        train_source_list_Protein.append(os.path.join(Protein_tf_path, i))
+
+    train_loss = tf.keras.metrics.Mean(name='train_loss')
+    total_update_steps = 300 * super_parameters['epoch_pretrain']
+    lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(super_parameters['lr'], total_update_steps,
+                                                                super_parameters['lr'] * 1e-2, power=1)
+
+    # New try
+    optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
+
+    initializer = tf.keras.initializers.Identity()
+    labels = initializer(shape=(super_parameters['batch_size'], super_parameters['batch_size']))
+    temperature = tf.Variable(np.log(1/0.07), trainable=True, dtype='float32')
+
+    tf_step = 0
+    for epoch in range(super_parameters['epoch_pretrain']):
+        for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
+            train_db_RNA = create_classifier_dataset_multi([RNA_file],
+                                                           batch_size=super_parameters['batch_size'],
+                                                           is_training=True,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           seed=epoch
+                                                           )
+            train_db_Protein = create_classifier_dataset_multi([Protein_file],
+                                                               batch_size=super_parameters['batch_size'],
+                                                               is_training=True,
+                                                               data_augment=False,
+                                                               shuffle_size=10000,
+                                                               seed=epoch
+                                                               )
+            train_loss.reset_states()
+            # train_cls_accuracy.reset_states()
+            # test_cls_accuracy.reset_states()
+            step = 0
+            for (source_features_RNA, source_values_RNA, _, _), \
+                (source_features_protein, source_values_protein, _, _) \
+                    in (zip(train_db_RNA, train_db_Protein)):
+                step += 1
+
+                with tf.GradientTape() as tape:
+                    if super_parameters["combine_omics"]:
+                            z1 = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+                            z2 = decode_network([source_values_RNA, source_values_protein], training=True)
+                            ssl_loss = simclr_loss(z1, z2, temperature=0.1)
+                            loss = ssl_loss
+                        
+                    elif not super_parameters["combine_omics"]:
+                        if super_parameters["model_type"] == 1:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                                [source_values_RNA, source_values_protein]], training=True)
+
+                            zt_1, zt_2 = res_en[0], res_en[1]
+
+                            loss = clip_loss(zt_1, zt_2, temperature)
+
+                        elif super_parameters["model_type"] == 2:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            zt_1, zt_2 = res_en[0], res_en[1]
+                            zs_1, zs_2 = res_dec[0], res_dec[1]
+
+                            # TT
+                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+
+                            # SS
+                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+
+                            # TS
+                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                            
+                            # ST
+                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+                            
+                            loss = loss_TT + loss_TS + loss_ST + loss_SS
+                        
+                        elif super_parameters["model_type"] == 3:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            zt_1, zt_2 = res_en[0], res_en[1]
+                            zs_1, zs_2 = res_dec[0], res_dec[1]
+
+                            # TT
+                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+
+                            # SS
+                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+
+                            # TS
+                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                            
+                            # ST
+                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+
+                            # T1S1
+                            loss_T1S1 = clip_loss(zt_1, zs_1, temperature)
+
+                            # T2S2
+                            loss_T2S2 = clip_loss(zt_2, zs_2, temperature)
+                            
+                            loss = loss_TT + loss_TS + loss_ST + loss_SS + loss_T1S1 + loss_T2S2
+                        
+                        elif super_parameters["model_type"] == 4:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                                [source_values_RNA, source_values_protein]], training=True)
+
+                            zt_1, zt_2 = res_en[0], res_en[1]
+
+                            alpha = 0.5
+                            loss = alpha * (clip_loss(zt_1, zt_2, temperature)) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
+
+                        elif super_parameters["model_type"] == 5:
+                            res_en = encode_network([[source_features_RNA, source_features_protein],
+                                            [source_values_RNA, source_values_protein]], training=True)
+                            res_dec = decode_network([source_values_RNA, source_values_protein], training=True)
+                            zt_1, zt_2 = res_en[0], res_en[1]
+                            zs_1, zs_2 = res_dec[0], res_dec[1]
+
+                            # TT
+                            loss_TT = clip_loss(zt_1, zt_2, temperature)
+
+                            # SS
+                            loss_SS = clip_loss(zs_1, zs_2, temperature)
+
+                            # TS
+                            loss_TS = clip_loss(zt_1, zs_2, temperature)
+                            
+                            # ST
+                            loss_ST = clip_loss(zt_2, zs_1, temperature)
+                            
+                            alpha = 0.5
+                            loss = alpha * (loss_TT + loss_TS + loss_ST + loss_SS) + (1 - alpha) * simclr_loss(zt_1, zt_2, temperature=0.1)
+                    
+                    train_loss(loss)
+
+                if super_parameters["combine_omics"]:
+                    variables = [encode_network.trainable_variables, decode_network.trainable_variables]
+                elif super_parameters["model_type"] in [1, 4]:
+                    variables = [encode_network.trainable_variables, [temperature]]
+                else:
+                    variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]
+
+                grads = tape.gradient(loss, variables)
+                for grad, var in zip(grads, variables):
+                    optimizer.apply_gradients(zip(grad, var))
+
+                if step > 0 and step % 5 == 0:
+                    template = 'Epoch {}, step {}, simclr loss: {:0.4f}.'
+                    print(template.format(epoch + 1,
+                                          str(step),
+                                          train_loss.result()))
+                    
+                # Tensorboard
+                with train_summary_writer.as_default():
+                    tf.summary.scalar('loss', train_loss.result(), step=tf_step)
+                tf_step += 1
+
+        encode_network.save_weights(
+            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+        decode_network.save_weights(
+            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+
+    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+    return print('finished')
+
 
 def concerto_train_multimodal_tt(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
