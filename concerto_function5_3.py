@@ -1726,7 +1726,6 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
         for RNA_file, staining_file in zip(train_source_list_RNA, train_source_list_staining):
             train_loss.reset_states()
 
-            # FIXME
             train_db_RNA = create_classifier_spatial_RNA_dataset_multi([RNA_file],
                                                            batch_size=super_parameters['batch_size'],
                                                            is_training=True,
@@ -1742,20 +1741,17 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                                seed=epoch
                                                                )
             
-            # TODO check it takes same ids
-            
             step = 0
             for (source_features_RNA, source_values_RNA, _, _, _), \
                 (_, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
-                print(source_features_RNA)
-                print(source_values_RNA)
-
                 radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
 
                 # TODO Add preprocessing of mask
+                if super_parameters['mask'] == 1:
+                    pass
 
                 with tf.GradientTape() as tape:
                     if super_parameters["combine_omics"]:
@@ -2732,11 +2728,6 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                 in (zip(train_db_RNA, train_db_Protein)):
             #train_size += len(source_id_RNA)
             if step == 0:
-                # encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
-                #                                                   [source_values_RNA, source_values_protein]],
-                #                                                  training=False)
-                # break
-
                 if super_parameters["combine_omics"]:
                     encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                                     [source_values_RNA, source_values_protein]],

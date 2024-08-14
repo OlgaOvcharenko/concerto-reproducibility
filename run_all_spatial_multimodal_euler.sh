@@ -16,7 +16,7 @@ train=1
 test=0
 mask=("0")
 
-model_type=("1")
+model_type=("1 2")
 combine_omics=0
 
 for e in $epochs; do
