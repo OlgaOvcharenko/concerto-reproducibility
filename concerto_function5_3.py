@@ -1734,7 +1734,6 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                            shuffle_size=10000,
                                                            seed=epoch
                                                            )
-            print(train_db_RNA)
 
             train_db_staining = create_classifier_dataset_spatial_multi([staining_file],
                                                                batch_size=super_parameters['batch_size'],
@@ -1754,10 +1753,11 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                 print(source_features_RNA)
                 print(source_values_RNA)
 
+                print('id')
                 print(RNA_id)
                 print(source_id_staining)
                 print(source_radius_staining)
-                print(source_image_raw_staining.numpy())
+                print(source_image_raw_staining.numpy().decode())
                 
 
                 exit()

@@ -96,10 +96,6 @@ def single_file_dataset_multi(input_file: list, name_to_features, sparse_to_dens
         domain = example['batch']
         id = example['id']
 
-        print(id)
-        print(feature)
-        print(value)
-
         feature = tf.sparse.to_dense(feature, default_value=0)
         value = tf.sparse.to_dense(value, default_value=0)
 
