@@ -5,6 +5,8 @@
 module load stack/.2024-04-silent stack/2024-04
 module load gcc/8.5.0
 module --ignore_cache load python/3.9.18
+module load cudnn/8.9.7.29-12
+module load python_cuda/3.9.18
 
 if [[ ! -d "python_venv" ]]; then
   echo "Create Python Virtual Environment on $HOSTNAME"
@@ -16,5 +18,6 @@ if [[ ! -d "python_venv" ]]; then
   pip install --upgrade pip
   pip install --upgrade pip
 
-  pip3 install -r requirements_euler.txt
+  # pip3 install -r requirements_euler.txt
+  pip3 install -r new_requirements.txt
 fi

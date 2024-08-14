@@ -15,7 +15,6 @@ mkdir -p logs
 module load stack/.2024-04-silent stack/2024-04
 module load gcc/8.5.0
 module --ignore_cache load python/3.9.18
-
 module load cudnn/8.9.7.29-12
 module load python_cuda/3.9.18
 
