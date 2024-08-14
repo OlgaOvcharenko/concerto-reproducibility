@@ -51,18 +51,15 @@ for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
     image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
     image = np.rot90(image, 1, axes=(0,1))
 
-    print(image.shape)
-    print(np.fromstring(image.tostring(), dtype=int).shape)
-
-    # radius = math.ceil(radius)
-    # # mask = np.zeros((width, height))
-    # # if radius < width and radius < height:
-    # #     mask[int(width/2)-radius: int(width/2)+radius, int(height/2)-radius: int(height/2)+radius] = 256
-    # # print(mask)
+    radius = math.ceil(radius)
+    # mask = np.zeros((width, height))
+    # if radius < width and radius < height:
+    #     mask[int(width/2)-radius: int(width/2)+radius, int(height/2)-radius: int(height/2)+radius] = 256
+    # print(mask)
     
-    # arr = np.arange(-int(width/2), int(width/2)) ** 2
-    # mask = np.add.outer(arr, arr) < radius ** 2
-    # # or: arr[:, None] + arr[None, :] < radius ** 2
+    arr = np.arange(-int(width/2), int(width/2)) ** 2
+    mask = np.add.outer(arr, arr) < radius ** 2
+    # or: arr[:, None] + arr[None, :] < radius ** 2
 
     # im = Image.fromarray(mask).convert("L")
     # im.save(f"mask{geom}.png")
