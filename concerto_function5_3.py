@@ -1727,7 +1727,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
             train_loss.reset_states()
 
             # FIXME
-            train_db_RNA = create_classifier_dataset_multi([RNA_file],
+            train_db_RNA = create_classifier_spatial_RNA_dataset_multi([RNA_file],
                                                            batch_size=super_parameters['batch_size'],
                                                            is_training=True,
                                                            data_augment=False,
@@ -1745,7 +1745,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
             # TODO check it takes same ids
             
             step = 0
-            for (source_features_RNA, source_values_RNA, _, RNA_id), \
+            for (source_features_RNA, source_values_RNA, _, _, RNA_id), \
                 (source_id_staining, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
