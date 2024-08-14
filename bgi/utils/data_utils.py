@@ -122,12 +122,12 @@ def single_file_spatial_RNA_dataset_multi(input_file: list, name_to_features, sp
         value = example['value']
         domain = example['batch']
         id = example['id']
-        id = example['cell_id']
+        sc_id = example['cell_id']
 
         feature = tf.sparse.to_dense(feature, default_value=0)
         value = tf.sparse.to_dense(value, default_value=0)
 
-        return feature, value, domain,id
+        return feature, value, domain, id, sc_id
 
     d = d.map(single_example_parser)
 
