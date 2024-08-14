@@ -33,7 +33,7 @@ width = 128
 height = 128
 
 align_matrix = np.linalg.inv(align_matrix)
-geoms = adata_RNA.obs['cell_id'][:5]
+geoms = adata_RNA.obs['cell_id'][:2]
 shapes = spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[geoms, ["geometry", "radius"]]
 
 t0 = time.time()
@@ -50,6 +50,9 @@ for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
     
     image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
     image = np.rot90(image, 1, axes=(0,1))
+
+    print(image.__class__)
+    print(image.dtype)
 
     # radius = math.ceil(radius)
     # # mask = np.zeros((width, height))

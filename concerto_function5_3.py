@@ -1757,7 +1757,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                 print(RNA_id)
                 print(source_id_staining)
                 print(source_radius_staining)
-                print(source_image_raw_staining.numpy().decode())
+                print(np.fromstring(source_image_raw_staining.numpy(), dtype=int))
                 
 
                 exit()
