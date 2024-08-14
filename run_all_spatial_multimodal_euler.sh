@@ -14,6 +14,7 @@ heads=("16")
 data=("spatial")
 train=1
 test=0
+mask=("0")
 
 model_type=("1")
 combine_omics=0
@@ -27,7 +28,9 @@ for e in $epochs; do
                         for h in $heads; do
                             for d in $data; do
                                 for mt in $model_type; do
-                                    sbatch run_spatial_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt $combine_omics
+                                    for msk in $mask; do
+                                        sbatch run_spatial_multimodal_euler.sh $e $lr $batch_size $drop_rate $s $t $h $d $train $test $mt $combine_omics $msk
+                                    done
                                 done
                             done
                         done

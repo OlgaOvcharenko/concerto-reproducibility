@@ -23,4 +23,4 @@ nvidia-smi
 
 source "python_venv/bin/activate"
 
-python3 spatial_multimodal.py --epoch $1 --lr $2 --batch_size $3 --drop_rate $4 --attention_s $5 --attention_t $6 --heads $7 --data $8 --train $9 --test ${10} --model_type ${11} --combine_omics ${12}
+python3 spatial_multimodal.py --epoch $1 --lr $2 --batch_size $3 --drop_rate $4 --attention_s $5 --attention_t $6 --heads $7 --data $8 --train $9 --test ${10} --model_type ${11} --combine_omics ${12} --mask ${13}

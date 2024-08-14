@@ -44,6 +44,9 @@ def get_args():
                         help='1 for simple TT, else 4 together')
     parser.add_argument('--combine_omics', type= int, required=True,
                         help='0/1')
+    
+    parser.add_argument('--mask', type= int, required=True,
+                        help='0/1')
 
     args = parser.parse_args()
     return args
@@ -51,7 +54,7 @@ def get_args():
 def train_concerto(weight_path: str, RNA_tf_path: str, staining_tf_path: str, data: str, 
                    attention_t: bool, attention_s: bool,
                    batch_size:int, epoch: int, lr: float, drop_rate: float, 
-                   heads: int, combine_omics: int, model_type: int):
+                   heads: int, combine_omics: int, model_type: int, mask: bool):
     # Train
     concerto_train_spatial_multimodal(['RNA','staining'], 
                                       RNA_tf_path, 
@@ -66,7 +69,8 @@ def train_concerto(weight_path: str, RNA_tf_path: str, staining_tf_path: str, da
                                           'attention_s': attention_s, 
                                           'heads': heads,
                                           'combine_omics': combine_omics,
-                                          'model_type': model_type
+                                          'model_type': model_type,
+                                          'mask': mask
                                           })
 
     print("Trained.")
@@ -106,6 +110,7 @@ def main():
     model_type = args.model_type
     test = args.test
     combine_omics = args.combine_omics
+    mask = args.mask
 
     print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
@@ -121,8 +126,6 @@ def main():
         return [x.name for x in local_device_protos]
 
     print(get_available_devices())
-
-    exit()
 
     # Read data
     save_path = './Multimodal_pretraining/'
@@ -146,6 +149,7 @@ def main():
                        drop_rate=drop_rate, 
                        heads=heads, 
                        combine_omics=combine_omics, 
-                       model_type=model_type)
+                       model_type=model_type,
+                       mask=mask)
 
 main()
