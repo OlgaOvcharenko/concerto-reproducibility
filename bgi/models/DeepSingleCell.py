@@ -87,8 +87,6 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         x_value_inputs.append(image_value_input)
 
         inputs.append(x_value_inputs)
-    
-    print(inputs)
 
     dropout0 = Dropout(rate=drop_rate)(features[0])
     output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
@@ -144,7 +142,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
 
 
     output1 = image_network(image_value_input)
-    
+
     return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
 
 def multi_embedding_attention_transfer(supvised_train: bool = False,

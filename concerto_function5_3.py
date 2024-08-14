@@ -1775,7 +1775,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                             loss = clip_loss(zt_1, zt_2, temperature)
 
                         elif super_parameters["model_type"] == 2:
-                            res_en = encode_network([[source_features_RNA, source_image_raw_staining],
+                            res_en = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=True)
                             res_dec = decode_network([source_values_RNA, source_image_raw_staining], training=True)
                             zt_1, zt_2 = res_en[0], res_en[1]

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-
+# from tensorflow.python.client import device_lib
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -114,6 +114,13 @@ def main():
     print(f"\nAvailable GPUs: {gpus}\n")
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
+
+    exit()
+    # def get_available_devices():
+    #     local_device_protos = device_lib.list_local_devices()
+    #     return [x.name for x in local_device_protos]
+
+    # print(get_available_devices())
 
     # Read data
     save_path = './Multimodal_pretraining/'
