@@ -1754,15 +1754,20 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                 print(radius)
 
                 # TODO Add preprocessing of mask
+                batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
                 if super_parameters['mask'] == 1:
                     for im, r in enumerate(radius):
                         arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
-                        mask = tf.convert_to_tensor(np.add.outer(arr, arr) < r ** 2, dtype=tf.uint8)
-                        source_image_raw_staining[im,:,:,0] = tf.math.multiply(source_image_raw_staining[0,:,:,0], mask)
-                        source_image_raw_staining[im,:,:,1] = tf.math.multiply(source_image_raw_staining[0,:,:,1], mask)
-                        source_image_raw_staining[im,:,:,2] = tf.math.multiply(source_image_raw_staining[0,:,:,2], mask)
-                        print(mask)
-                        print(source_image_raw_staining[im,:,:,:])
+                        batch_masks[im,:,:, 0] = np.add.outer(arr, arr) < r ** 2
+                        batch_masks[im,:,:, 1] = np.add.outer(arr, arr) < r ** 2
+                        batch_masks[im,:,:, 2] = np.add.outer(arr, arr) < r ** 2
+                        
+
+                    batch_masks = tf.convert_to_tensor(batch_masks, dtype=tf.uint8)
+                    source_image_raw_staining = tf.math.multiply(source_image_raw_staining, batch_masks)
+
+                    print(batch_masks)
+                    print(source_image_raw_staining)
 
                 with tf.GradientTape() as tape:
                     if super_parameters["combine_omics"]:
