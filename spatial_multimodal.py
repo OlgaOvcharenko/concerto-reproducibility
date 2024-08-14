@@ -126,7 +126,8 @@ def main():
         return [x.name for x in local_device_protos]
 
     print(get_available_devices())
-
+    
+    exit()
     # Read data
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
