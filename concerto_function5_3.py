@@ -1751,10 +1751,11 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
-                print(RNA_id.decode())
-                print(source_id_staining.decode())
-                print(source_image_raw_staining.numpy())
+                print(RNA_id)
+                print(source_id_staining)
                 print(source_radius_staining)
+                print(source_image_raw_staining.numpy())
+                
 
                 break
 
