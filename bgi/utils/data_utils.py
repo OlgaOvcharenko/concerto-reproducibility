@@ -172,12 +172,22 @@ def single_file_dataset_spatial_multi(input_file: list, name_to_features, sparse
             'radius': tf.io.VarLenFeature(tf.float32)
         }
         example = tf.io.parse_single_example(serialized_example, name_to_features)
-        image_raw = example['image_raw']
         id = example['id']
-        radius = example['radius']
 
-        # image_raw = tf.sparse.to_dense(image_raw, default_value=0)
+        image_raw = example['image_raw']
+        image_raw = tf.io.parse_tensor(image_raw)
+
+        radius = example['radius']
         radius = tf.sparse.to_dense(radius, default_value=0)
+
+        # TODO Add preprocessing of mask
+
+        # TODO Add change of radius .numpy() and reshape to get an array
+        # TODO do not return radius
+
+        print(image_raw)
+        print(radius)
+
 
         return id, image_raw, radius
 
