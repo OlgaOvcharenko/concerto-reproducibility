@@ -59,6 +59,7 @@ for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
     
     arr = np.arange(-int(width/2), int(width/2)) ** 2
     mask = np.add.outer(arr, arr) < radius ** 2
+    print(mask)
     # or: arr[:, None] + arr[None, :] < radius ** 2
 
     # im = Image.fromarray(mask).convert("L")
