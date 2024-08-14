@@ -127,7 +127,6 @@ def main():
 
     print(get_available_devices())
     
-    exit()
     # Read data
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
