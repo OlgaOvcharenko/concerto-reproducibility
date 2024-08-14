@@ -51,8 +51,8 @@ for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
     image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
     image = np.rot90(image, 1, axes=(0,1))
 
-    print(image.__class__)
-    print(image.dtype)
+    print(image)
+    print(np.fromstring(image.tostring().numpy(), dtype=int))
 
     # radius = math.ceil(radius)
     # # mask = np.zeros((width, height))
