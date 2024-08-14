@@ -138,17 +138,6 @@ statsmodels==0.14.1
 stdlib-list==0.10.0
 tables==3.9.2
 tblib==3.0.0
-tensorboard==2.11.2
-tensorboard-data-server==0.6.1
-tensorboard-plugin-wit==1.8.1
-tensorflow==2.11.0
-tensorflow-estimator==2.11.0
-tensorflow-gpu==2.11.0
-tensorflow-io-gcs-filesystem==0.37.0
-tensorrt==10.3.0
-tensorrt-cu12==10.3.0
-tensorrt-cu12-bindings==10.3.0
-tensorrt-cu12-libs==10.3.0
 termcolor==2.4.0
 texttable==1.7.0
 threadpoolctl==3.5.0
