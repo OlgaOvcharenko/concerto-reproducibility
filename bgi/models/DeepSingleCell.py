@@ -67,8 +67,8 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         x = BatchNormalization(name='{}-BN-3'.format(name))(x)
         features.append(x)
 
-        # image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
-        # x_value_inputs.append(image_value_input)
+        image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        x_value_inputs.append(image_value_input)
 
         inputs.append(x_feature_inputs)
         inputs.append(x_value_inputs)
@@ -83,8 +83,8 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
 
         features.append(x)
 
-        # image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
-        # x_value_inputs.append(image_value_input)
+        image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        x_value_inputs.append(image_value_input)
 
         inputs.append(x_value_inputs)
     
@@ -93,60 +93,59 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
     dropout0 = Dropout(rate=drop_rate)(features[0])
     output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
 
-    # ####
-    # # Image encoder
-    # max_length, name = multi_max_features[1], mult_feature_names[1]
+    ####
+    # Image encoder
+    max_length, name = multi_max_features[1], mult_feature_names[1]
     
-    # if include_attention:
-    #     # VGG16
-    #     image_network = models.Sequential([
-    #         layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(64, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+    if include_attention:
+        # VGG16
+        image_network = models.Sequential([
+            layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(64, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             
-    #         layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-    #         layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+            layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
 
-    #         layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-    #         layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+            layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
 
-    #         layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-    #         layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             
-    #         layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-    #         layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-    #         layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-    #         layers.Flatten(),
-    #         Dropout(rate=drop_rate),
+            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+            layers.Flatten(),
+            Dropout(rate=drop_rate),
 
-    #         Dense(4096, activation='relu'),
-    #         Dense(2048, activation='relu'),
-    #         Dense(head_1, activation='relu')
-    #     ])
+            Dense(4096, activation='relu'),
+            Dense(2048, activation='relu'),
+            Dense(head_1, activation='relu')
+        ])
 
-    # else:
-    #     image_network = models.Sequential([
-    #         layers.Conv2D(32, (3, 3), activation='relu', padding='valid', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
-    #         layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
-    #         layers.Conv2D(64, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
-    #         layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
-    #         layers.Conv2D(128, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
-    #         layers.Flatten(),
-    #         Dropout(rate=drop_rate),
-    #         Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
-    #     ])
+    else:
+        image_network = models.Sequential([
+            layers.Conv2D(32, (3, 3), activation='relu', padding='valid', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
+            layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
+            layers.Conv2D(64, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
+            layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
+            layers.Conv2D(128, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
+            layers.Flatten(),
+            Dropout(rate=drop_rate),
+            Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
+        ])
 
 
-    # output1 = image_network(image_value_input)
-
-    # tf.keras.Model(inputs=inputs, outputs=[output0, output1])
-    return tf.keras.Model(inputs=inputs, outputs=[output0,])
+    output1 = image_network(image_value_input)
+    
+    return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
 
 def multi_embedding_attention_transfer(supvised_train: bool = False,
                                     scan_train: bool = False,

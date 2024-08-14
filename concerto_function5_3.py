@@ -1767,7 +1767,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                             
                     elif not super_parameters["combine_omics"]:
                         if super_parameters["model_type"] == 1:
-                            res_en = encode_network([source_features_RNA, source_values_RNA], training=True)
+                            res_en = encode_network([[source_features_RNA,],
+                                            [source_values_RNA, source_image_raw_staining]], training=True)
 
                             zt_1, zt_2 = res_en[0], res_en[1]
 
