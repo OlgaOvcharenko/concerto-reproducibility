@@ -179,8 +179,9 @@ def single_file_dataset_spatial_multi(input_file: list, name_to_features, sparse
 
         radius = example['radius']
         radius = tf.sparse.to_dense(radius, default_value=0)
-        
-        image_raw = tf.io.parse_tensor(image_raw, tf.uint16)
+
+        image_raw = tf.io.parse_tensor(image_raw, tf.uint8)
+        print(image_raw)
 
         return id, image_raw, radius
 
