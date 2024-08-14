@@ -3,7 +3,7 @@
 #SBATCH -o logs/log-%j-multimodal.out
 #SBATCH --nodes=1
 #SBATCH --gpus=1
-#SBATCH --time=01:00:00
+#SBATCH --time=00:20:00
 #SBATCH --gres=gpumem:8G
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=10G
@@ -15,6 +15,8 @@ mkdir -p logs
 module load stack/.2024-04-silent stack/2024-04
 module load gcc/8.5.0
 module --ignore_cache load python/3.9.18
+
+module load cudnn/8.9.7.29-12
 nvidia-smi
 
 source "python_venv/bin/activate"
