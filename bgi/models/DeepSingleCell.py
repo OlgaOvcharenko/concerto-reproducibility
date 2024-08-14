@@ -87,6 +87,8 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         # x_value_inputs.append(image_value_input)
 
         inputs.append(x_value_inputs)
+    
+    print(inputs)
 
     dropout0 = Dropout(rate=drop_rate)(features[0])
     output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
