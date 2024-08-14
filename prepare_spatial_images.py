@@ -52,7 +52,7 @@ for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
     image = np.rot90(image, 1, axes=(0,1))
 
     print(image.shape)
-    print(np.fromstring(image.tostring(), dtype=int, count=128*128*3))
+    print(np.fromstring(image.tostring(), dtype=int).shape)
 
     # radius = math.ceil(radius)
     # # mask = np.zeros((width, height))
