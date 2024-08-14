@@ -1757,7 +1757,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                 if super_parameters['mask'] == 1:
                     for im, r in enumerate(radius):
                         arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
-                        mask = tf.tf.convert_to_tensor(np.add.outer(arr, arr) < r ** 2)
+                        mask = tf.convert_to_tensor(np.add.outer(arr, arr) < r ** 2)
                         source_image_raw_staining[im,:,:,:] = tf.math.multiply(source_image_raw_staining[0,:,:,:], mask)
                         print(source_image_raw_staining[im,:,:,:])
 
