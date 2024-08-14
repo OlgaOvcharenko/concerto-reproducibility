@@ -5,7 +5,7 @@
 module load stack/.2024-05-silent stack/2024-05
 module load gcc/13.2.0
 module load cuda/12.2.1
-module load cudnn/8.9.7.29-12
+module load cudnn/9.2.0
 module --ignore_cache load python/3.9.18
 # module load python_cuda/3.9.18
 
