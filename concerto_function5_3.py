@@ -1745,8 +1745,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
             # TODO check it takes same ids
             
             step = 0
-            for (source_features_RNA, source_values_RNA, _, _, RNA_id), \
-                (source_id_staining, source_image_raw_staining, source_radius_staining) \
+            for (source_features_RNA, source_values_RNA, _, _, _), \
+                (_, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
@@ -1754,11 +1754,15 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                 print(source_values_RNA)
 
                 print('id')
-                print(RNA_id)
-                print(source_id_staining)
-                print(source_radius_staining)
+                print(source_radius_staining.numpy().reshape((super_parameters['batch_size'],)))
                 print(source_image_raw_staining)
                 print(source_image_raw_staining.numpy())
+
+                # TODO Add preprocessing of mask
+                # TODO Add change of radius .numpy() and reshape to get an array
+
+
+
                 # print(np.fromstring(source_image_raw_staining.numpy(), dtype=int).shape)
                 # print(source_image_raw_staining.shape)
                 
