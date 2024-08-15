@@ -14,7 +14,7 @@ heads=("16")
 data=("spatial")
 train=0
 test=1
-mask=("1")
+mask=("0")
 
 model_type=("1")
 combine_omics=0
