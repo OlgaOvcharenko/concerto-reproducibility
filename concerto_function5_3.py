@@ -1983,7 +1983,6 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
             source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
             source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
             RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
-            attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
             all_samples += len(source_id_RNA)
 
         source_data_feature.extend(source_data_feature_1[:all_samples])

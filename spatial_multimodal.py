@@ -98,7 +98,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
         for e in ep_vals: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
             
-            embedding, batch, RNA_id, attention_weight =  concerto_test_spatial_multimodal(
+            embedding, _, RNA_id =  concerto_test_spatial_multimodal(
                     ['RNA', 'staining'],
                     weight_path, 
                     RNA_tf_path_test,
