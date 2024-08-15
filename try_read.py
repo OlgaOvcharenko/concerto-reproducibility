@@ -80,8 +80,10 @@ adata_RNA = sc.read(path)
 
 print(adata_RNA.X)
 
-# path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
-# adata_Protein = sc.read(path) #cell_type batch
+path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
+adata_Protein = sc.read(path) #cell_type batch
+
+print(adata_Protein)
 
 # train_idx, test_idx = train_test_split(
 #     adata_RNA.obs_names.values,

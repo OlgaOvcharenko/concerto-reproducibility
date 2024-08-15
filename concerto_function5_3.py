@@ -1932,7 +1932,6 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         
         source_data_feature_1 = np.zeros((feature_len, dim))
         source_data_batch_1 = np.zeros((feature_len))
-        attention_output_RNA = np.zeros((feature_len, vocab_size_RNA, 1))
         RNA_id = []
         all_samples = 0
         for (source_features_RNA, source_values_RNA, source_batch_RNA, source_id_RNA, _), \
@@ -1988,13 +1987,10 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         source_data_feature.extend(source_data_feature_1[:all_samples])
         source_data_batch.extend(source_data_batch_1[:all_samples])
         RNA_id_all.extend(RNA_id[:all_samples])
-        attention_output_RNA_all.extend(attention_output_RNA[:all_samples])
 
     source_data_feature = np.array(source_data_feature).astype('float32')
     source_data_batch = np.array(source_data_batch).astype('int32')
-    attention_weight = {'attention_output_RNA': attention_output_RNA_all,
-                        'attention_output_Protein': attention_output_Protein_all}
-    return source_data_feature, source_data_batch, RNA_id_all, attention_weight
+    return source_data_feature, source_data_batch, RNA_id_all
 
 
 def concerto_train_multimodal_tt(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
