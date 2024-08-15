@@ -112,7 +112,8 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                         'attention_s': attention_s, 
                         'heads': heads,
                         'combine_omics': combine_omics,
-                        'model_type': model_type
+                        'model_type': model_type,
+                        'mask': mask
                     }, 
                     saved_weight_path = saved_weight_path,
                     only_image=only_image)
