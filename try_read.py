@@ -25,12 +25,17 @@ from matplotlib import rcParams
 # # from scib_metrics.benchmark import Benchmarker
 
 adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
+print(adata_gex)
+
+print(adata_gex.X)
 print(adata_gex.var["feature_types"])
 print(adata_gex.var["feature_types"].value_counts())
+print(adata_gex.layers["counts"])
+print(adata_gex.obs["batch"])
 
-adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
-print(adata_adt.var["feature_types"])
-print(adata_adt.var["feature_types"].value_counts())
+# adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+# print(adata_adt.var["feature_types"])
+# print(adata_adt.var["feature_types"].value_counts())
 # adata_adt.X = adata_adt.layers["counts"]
 # adata_adt_atac = adata_adt[:, 13431:]
 # adata_adt_gex = adata_adt[:, 0:13431]
