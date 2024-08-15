@@ -118,11 +118,8 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                     saved_weight_path = saved_weight_path,
                     only_image=only_image)
             
-            if data == "simulated":
-                adata_RNA = sc.read(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
-            else:
-                adata_RNA = sc.read(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
-            
+            print(adata_RNA)
+
             adata_RNA_1 = adata_RNA[RNA_id]
             adata_RNA_1.obsm['X_embedding'] = embedding
 
