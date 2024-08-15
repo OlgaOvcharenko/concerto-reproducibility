@@ -1913,6 +1913,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                     # break
 
                 else:
+                    print(encode_network)
                     encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=False)
 
