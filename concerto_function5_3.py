@@ -1913,7 +1913,6 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                     # break
 
                 else:
-                    print(encode_network)
                     encode_output1, encode_output2 = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=False)
 
@@ -1936,7 +1935,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         attention_output_RNA = np.zeros((feature_len, vocab_size_RNA, 1))
         RNA_id = []
         all_samples = 0
-        for (source_features_RNA, source_values_RNA, source_batch_RNA, source_id_RNA), \
+        for (source_features_RNA, source_values_RNA, source_batch_RNA, source_id_RNA, _), \
                 (_, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
             if all_samples  >= feature_len:
