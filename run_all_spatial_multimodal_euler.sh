@@ -4,7 +4,7 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-epochs=("180")
+epochs=("149")
 lrs=("1e-3")
 batch_sizes=("64")
 drop_rates=("0.1")
@@ -14,7 +14,7 @@ heads=("16")
 data=("spatial")
 train=0
 test=1
-mask=("0")
+mask=("1")
 
 model_type=("1")
 combine_omics=0
@@ -42,7 +42,7 @@ for e in $epochs; do
 done
 
 
-epochs=("100")
+epochs=("97")
 
 model_type=("2")
 combine_omics=0
