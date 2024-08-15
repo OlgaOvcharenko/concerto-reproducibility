@@ -341,7 +341,7 @@ def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, dat
                    heads: int, combine_omics: int, model_type: int):
     # Train
     if attention_t == True and attention_s == False:
-        concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'], 
+        concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'], 
                                 RNA_tf_path, 
                                 Protein_tf_path, 
                                 weight_path, 
@@ -357,7 +357,7 @@ def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, dat
                                     'model_type': model_type
                                     })
     elif attention_t == True and attention_s == True:
-        concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+        concerto_train_multimodal_tt(['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'],
                                 RNA_tf_path, 
                                 Protein_tf_path, 
                                 weight_path, 
@@ -372,7 +372,7 @@ def train_concerto(weight_path: str, RNA_tf_path: str, Protein_tf_path: str, dat
                                     'combine_omics': combine_omics
                                     })
     elif attention_t == False and attention_s == False:
-        concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+        concerto_train_multimodal_ss(['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'],
                                 RNA_tf_path,
                                 Protein_tf_path,
                                 weight_path, 
@@ -419,7 +419,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
 
             for repeat in repeats:
                 embedding, batch, RNA_id, attention_weight =  concerto_test_multimodal(
-                        ['RNA','Protein'] if data == 'simulated' else ['GEX', 'ATAC'],
+                        ['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'],
                         weight_path, 
                         RNA_tf_path_test,
                         Protein_tf_path_test,

@@ -1976,7 +1976,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 if only_image:
                     encode_output = encode_output2
                 else:
-                    encode_output = tf.concat([encode_output2, encode_output1], axis=1)
+                    encode_output = tf.concat([encode_output1, encode_output2], axis=1)
 
             encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
             source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output

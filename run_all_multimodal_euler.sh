@@ -4,13 +4,13 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-epochs=("100")
-lrs=("1e-3 1e-8")
+epochs=("150")
+lrs=("1e-4")
 batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("16")
+heads=("32")
 data=("human")
 train=1
 test=1
