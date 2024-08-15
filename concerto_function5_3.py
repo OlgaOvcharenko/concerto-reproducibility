@@ -1970,8 +1970,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 encode_output1, encode_output2 = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=False)
                 print("Image")
-                print(source_image_raw_staining)
-                print(encode_output2)
+                tf.print(encode_output2, summarize=-1)
                 print(tf.reduce_sum(encode_output2))
 
                 if only_image:
