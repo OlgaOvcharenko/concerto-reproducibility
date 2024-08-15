@@ -1687,7 +1687,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
     encode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
                                                   mult_feature_names=mult_feature_names,
                                                   embedding_dims=128,
-                                                  include_attention=super_parameters['attention_t'],
+                                                  include_attention=True,
                                                   drop_rate=super_parameters['drop_rate'],
                                                   head_1=super_parameters["heads"],
                                                   head_2=super_parameters["heads"],
@@ -1698,7 +1698,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
     decode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
                                                   mult_feature_names=mult_feature_names,
                                                   embedding_dims=128,
-                                                  include_attention=super_parameters['attention_s'],
+                                                  include_attention=True,
                                                   drop_rate=super_parameters['drop_rate'],
                                                   head_1=super_parameters["heads"],
                                                   head_2=super_parameters["heads"],
@@ -1914,7 +1914,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
                 else:
                     print(encode_network)
-                    encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA,],
+                    encode_output1, encode_output2 = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=False)
 
                     if only_image:
@@ -1969,8 +1969,11 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 #                                                     training=False)
 
             else:
-                encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA,],
+                encode_output1, encode_output2 = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=False)
+
+                print(encode_output1)
+                print(encode_output2)
 
                 if only_image:
                     encode_output = encode_output2
