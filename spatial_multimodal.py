@@ -75,6 +75,105 @@ def train_concerto(weight_path: str, RNA_tf_path: str, staining_tf_path: str, da
 
     print("Trained.")
 
+def test_concerto(adata_RNA, weight_path: str, data: str, 
+                  RNA_tf_path_test: str, staining_tf_path: str, 
+                  attention_t: bool, attention_s: bool,
+                  batch_size:int, epoch: int, lr: float, drop_rate: float, 
+                  heads: int, combine_omics: int, model_type: int, mask: int,
+                  save_path: str, train: bool = False, adata_RNA_train = None):
+    ep_vals = []
+    i = 4
+    while i < epoch:
+        ep_vals.append(i)
+        i = i * 2
+    ep_vals.append(epoch)
+
+    adata_merged = adata_RNA
+
+    # Test
+    nn = "encoder"
+    dr = 0.0 # drop_rate
+    only_images = [True, False] # if combine_omics == 0 else [False]
+    for only_image in only_images:
+        for e in ep_vals: 
+            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
+            
+            embedding, batch, RNA_id, attention_weight =  concerto_test_spatial_multimodal(
+                    ['RNA', 'staining'],
+                    weight_path, 
+                    RNA_tf_path_test,
+                    staining_tf_path,
+                    n_cells_for_sample=None,
+                    super_parameters={
+                        'batch_size': batch_size, 
+                        'epoch_pretrain': e, 'lr': lr, 
+                        'drop_rate': dr, 
+                        'attention_t': attention_t, 
+                        'attention_s': attention_s, 
+                        'heads': heads,
+                        'combine_omics': combine_omics,
+                        'model_type': model_type
+                    }, 
+                    saved_weight_path = saved_weight_path,
+                    only_image=only_image)
+            
+            if data == "simulated":
+                adata_RNA = sc.read(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
+            else:
+                adata_RNA = sc.read(save_path + f'adata_gex_{"train" if train else "test"}.h5ad')
+            
+            adata_RNA_1 = adata_RNA[RNA_id]
+            adata_RNA_1.obsm['X_embedding'] = embedding
+
+            print(f"\nShape of the {train}_{e}_{nn}_{dr}_{only_image} embedding {embedding.shape}.")
+            
+            adata_merged = adata_merged[RNA_id]
+            adata_merged.obsm[f'train_{e}_{nn}_{dr}_{only_image}' if train else f'test_{e}_{nn}_{dr}_{only_image}'] = embedding
+            
+            sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
+            labels = adata_RNA_1.obs['cell_type'].tolist()
+            for res in [0.05,0.1,0.15,0.2,0.25,0.3]:
+                sc.tl.leiden(adata_RNA_1, resolution=res)
+                target_preds = adata_RNA_1.obs['leiden'].tolist()
+                nmi = np.round(normalized_mutual_info_score(labels, target_preds), 5)
+                ari = np.round(adjusted_rand_score(labels, target_preds), 5)    
+                n_cluster = len(list(set(target_preds)))
+                print('leiden(res=%f): ari = %.5f , nmi = %.5f, n_cluster = %d' % (res, ari, nmi, n_cluster), '.')
+
+            if not train:
+                query_neighbor, _ = knn_classifier(ref_embedding=adata_RNA_train.obsm[f'train_{e}_{nn}_{dr}_{only_image}'], query_embedding=embedding, ref_anndata=adata_RNA_train, column_name='cell_type', k=5)
+                adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_image}'] = query_neighbor
+                adata_merged.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_image}'] = query_neighbor
+                
+                cell_types_list = pd.unique(adata_merged.obs['cell_type']).tolist()
+
+                acc = accuracy_score(adata_merged.obs['cell_type'].to_list(), query_neighbor)
+                f1 = f1_score(adata_merged.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average=None)
+                f1_weighted = f1_score(adata_merged.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='weighted')
+                f1_macro = f1_score(adata_merged.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='weighted')
+                f1_median = np.median(f1)
+                
+                print(f"Per class {cell_types_list} F1 {f1}")
+                print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
+
+
+            sc.tl.leiden(adata_RNA_1, resolution=0.2)
+            sc.tl.umap(adata_RNA_1, min_dist=0.1)
+
+            adata_merged.obsm[f'train_umap_{e}_{nn}_{dr}_{only_image}' if train else f'test_umap_{e}_{nn}_{dr}_{only_image}'] = adata_RNA_1.obsm["X_umap"]
+            adata_merged.obs[f'train_leiden_{e}_{nn}_{dr}_{only_image}' if train else f'test_leiden_{e}_{nn}_{dr}_{only_image}'] = adata_RNA_1.obs["leiden"]
+
+            if not train:
+                color=['cell_type', f'pred_cell_type_{e}_{nn}_{dr}_{only_image}', 'leiden', 'batch']
+            else:
+                color=['cell_type', 'leiden', 'batch']
+
+            sc.set_figure_params(dpi=150)
+            sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light') # edges=True
+            plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_knn_concerto_{"train" if train else "test"}_{combine_omics}_oRNA{only_image}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
+
+    return adata_merged
+
 def read_data_prepared(data: str = "", save_path: str = ""):
     if data != 'spatial':
         raise Exception('[SPATIAL] Incorrect dataset name.')
@@ -151,5 +250,28 @@ def main():
                        combine_omics=combine_omics, 
                        model_type=model_type,
                        mask=mask)
+
+    if test:
+        # Test on train data
+        adata_merged = test_concerto(adata_RNA=adata_RNA, weight_path=weight_path, data=data, 
+                                     RNA_tf_path_test=RNA_tf_path, staining_tf_path=staining_tf_path, 
+                                     attention_t=attention_t, attention_s=attention_s, mask=mask,
+                                     batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                                     heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                                     save_path=save_path, train=True)
+        
+        filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+        save_merged_adata(adata_merged=adata_merged, filename=filename)
+
+        # Test on test data
+        adata_merged_test = test_concerto(adata_RNA=adata_RNA, weight_path=weight_path, data=data, 
+                                          RNA_tf_path_test=RNA_tf_path, staining_tf_path=staining_tf_path, 
+                                          attention_t=attention_t, attention_s=attention_s, mask=mask,
+                                          batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                                          heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                                          save_path=save_path, train=False, adata_RNA_train=adata_merged)
+
+        filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+        save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 main()

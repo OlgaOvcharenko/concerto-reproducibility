@@ -1747,11 +1747,11 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
-                radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
 
                 # TODO Add preprocessing of mask
                 batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
                 if super_parameters['mask'] == 1:
+                    radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
                     for im, r in enumerate(radius):
                         arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
                         batch_masks[im,:,:, 0] = np.add.outer(arr, arr) < r ** 2
@@ -1830,6 +1830,169 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
 
     print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["mask"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
     return print('finished')
+
+def concerto_test_spatial_multimodal(mult_feature_names, model_path: str, 
+                                     RNA_tf_path: str, staining_tf_path: str, 
+                                     n_cells_for_sample=None,super_parameters=None,
+                                     saved_weight_path=None, only_image=False):
+    if super_parameters is None:
+        super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5, 'drop_rate': 0.1, 'combine_omics': False}
+    
+    f = int(np.load(os.path.join(RNA_tf_path, 'vocab_size.npz'))['vocab size'])
+    vocab_size_RNA = int(f)
+
+    f = np.load(os.path.join(staining_tf_path, 'vocab_size.npz'))
+    vocab_size_staining = int(f['rows'])
+
+    batch_size = super_parameters['batch_size']
+    
+    encode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
+                                                  mult_feature_names=mult_feature_names,
+                                                  embedding_dims=128,
+                                                  include_attention=super_parameters['attention_t'],
+                                                  drop_rate=super_parameters['drop_rate'],
+                                                  head_1=super_parameters["heads"],
+                                                  head_2=super_parameters["heads"],
+                                                  head_3=super_parameters["heads"],
+                                                  combine_omics=super_parameters['combine_omics'],
+                                                  model_type=super_parameters['model_type'])
+
+
+    tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
+    train_source_list_RNA = []
+    train_source_list_staining = []
+    for i in tf_list_1:
+        train_source_list_RNA.append(os.path.join(RNA_tf_path, i))
+        train_source_list_staining.append(os.path.join(staining_tf_path, i))
+
+    if saved_weight_path is None:
+        weight_id_list = []
+        weight_list = [f for f in os.listdir(model_path) if f.endswith('h5')]
+        for id in weight_list:
+            id_1 = re.findall('.*epoch(.*).h.*', id)  # f1
+            weight_id_list.append(int(id_1[0]))
+        encode_network.load_weights(model_path + 'weight_encoder_epoch{}.h5'.format(max(weight_id_list)),
+                                    by_name=True)
+
+    else:
+        encode_network.load_weights(saved_weight_path, by_name=True)
+        print('load saved weight')
+
+    source_data_batch = []
+    source_data_feature = []
+    RNA_id_all = []
+    attention_output_RNA_all = []
+    attention_output_Protein_all = []
+    for RNA_file, staining_file in zip(train_source_list_RNA, train_source_list_staining):
+        train_db_RNA = create_classifier_spatial_RNA_dataset_multi([RNA_file],
+                                                           batch_size=super_parameters['batch_size'],
+                                                           is_training=False,
+                                                           data_augment=False,
+                                                           shuffle_size=10000
+                                                           )
+
+        train_db_staining = create_classifier_dataset_spatial_multi([staining_file],
+                                                            batch_size=super_parameters['batch_size'],
+                                                            is_training=False,
+                                                            shuffle_size=10000
+                                                            )
+
+
+
+        step = 0
+        for (source_features_RNA, source_values_RNA, _, _, _), \
+                (_, source_image_raw_staining, source_radius_staining) \
+                    in (zip(train_db_RNA, train_db_staining)):
+            if step == 0:
+                if super_parameters["combine_omics"]:
+                    # TODO
+                    raise Exception("Not implemented")
+                    # encode_output, attention_output = encode_network([[source_features_RNA,],
+                    #                         [source_values_RNA, source_image_raw_staining]], training=False)
+                    
+                    # break
+
+                else:
+                    encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA,],
+                                            [source_values_RNA, source_image_raw_staining]], training=False)
+
+                    if only_image:
+                        encode_output = encode_output2
+                    else:
+                        encode_output = tf.concat([encode_output2, encode_output1], axis=1)
+                    
+                    break
+
+        dim = encode_output.shape[1]
+        if n_cells_for_sample is None:            
+            feature_len = 1000000
+        else:            
+            n_cells_for_sample_1 = n_cells_for_sample//8
+            feature_len = n_cells_for_sample_1 // batch_size * batch_size
+        
+        source_data_feature_1 = np.zeros((feature_len, dim))
+        source_data_batch_1 = np.zeros((feature_len))
+        attention_output_RNA = np.zeros((feature_len, vocab_size_RNA, 1))
+        RNA_id = []
+        all_samples = 0
+        for (source_features_RNA, source_values_RNA, source_batch_RNA, source_id_RNA), \
+                (_, source_image_raw_staining, source_radius_staining) \
+                    in (zip(train_db_RNA, train_db_staining)):
+            if all_samples  >= feature_len:
+                print("Entered if break")
+                break
+
+            batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
+            if super_parameters['mask'] == 1:
+                radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
+                for im, r in enumerate(radius):
+                    arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
+                    batch_masks[im,:,:, 0] = np.add.outer(arr, arr) < r ** 2
+                    batch_masks[im,:,:, 1] = np.add.outer(arr, arr) < r ** 2
+                    batch_masks[im,:,:, 2] = np.add.outer(arr, arr) < r ** 2
+                    
+
+                batch_masks = tf.convert_to_tensor(batch_masks, dtype=tf.uint8)
+                source_image_raw_staining = tf.math.multiply(source_image_raw_staining, batch_masks)
+
+
+            if super_parameters["combine_omics"]:
+                raise Exception("Not implemented")
+                # if only_image:
+                #     encode_output, attention_output = encode_network([[source_features_RNA],
+                #                                                 [source_values_RNA]],
+                #                                                 training=False)
+                # else:
+                #     encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
+                #                                                     [source_values_RNA, source_values_protein]],
+                #                                                     training=False)
+
+            else:
+                encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA,],
+                                            [source_values_RNA, source_image_raw_staining]], training=False)
+
+                if only_image:
+                    encode_output = encode_output2
+                else:
+                    encode_output = tf.concat([encode_output2, encode_output1], axis=1)
+
+            encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
+            source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
+            source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
+            RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
+            attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
+            all_samples += len(source_id_RNA)
+
+        source_data_feature.extend(source_data_feature_1[:all_samples])
+        source_data_batch.extend(source_data_batch_1[:all_samples])
+        RNA_id_all.extend(RNA_id[:all_samples])
+        attention_output_RNA_all.extend(attention_output_RNA[:all_samples])
+
+    source_data_feature = np.array(source_data_feature).astype('float32')
+    source_data_batch = np.array(source_data_batch).astype('int32')
+    attention_weight = {'attention_output_RNA': attention_output_RNA_all,
+                        'attention_output_Protein': attention_output_Protein_all}
+    return source_data_feature, source_data_batch, RNA_id_all, attention_weight
 
 
 def concerto_train_multimodal_tt(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):

@@ -25,7 +25,7 @@ sdata = spatialdata_io.xenium(data_path)
 # align_matrix = np.genfromtxt(alignment_matrix_path, delimiter=",", dtype=float)
 
 adata_RNA = sdata['table']
-difference = list(set(adata_RNA.obs["cell_id"].tolist()).symmetric_difference(set(labels["id"].tolist())))
+difference = list(set(sdata['table'].obs["cell_id"].tolist()).symmetric_difference(set(labels["id"].tolist())))
 
 for val in difference:
     labels = labels._append({"id": val, "manual_cell_type": "NA"}, ignore_index = True)
@@ -36,8 +36,7 @@ labels = labels.reset_index()
 
 sdata["table"].obs["cell_type"] = labels["manual_cell_type"]
 
-print(sdata["table"])
-print(sdata["table"].obs["cell_type"])
+print(pd.unique(sdata["table"].obs['cell_type']).tolist())
 
 # times, times2, times3 = [], [], []
 
