@@ -299,7 +299,7 @@ def prepare_data_neurips_cite_together(train_idx, test_idx, adata_RNA, adata_Pro
     print("Made tf records.")
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
 
-def prepare_data_neurips_cite_together(train_idx, test_idx, adata_RNA, adata_Protein, train: bool = True, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = True, data: str = ''):
+def prepare_data_neurips_cite_raw_together(train_idx, test_idx, adata_RNA, adata_Protein, train: bool = True, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = True, data: str = ''):
     print("Read human data")
     print(f"Train={train} gex data shape {adata_RNA.shape}")
     print(f"Train={train} adt data shape {adata_Protein.shape}")
@@ -449,7 +449,7 @@ def read_data(data: str = "simulated", save_path: str = ""):
         train_idx = (adata_RNA.obs["batch"] != "s4d1") & (adata_RNA.obs["batch"] != "s4d8") & (adata_RNA.obs["batch"] != "s4d9")
         test_idx = (train_idx != 1)
 
-        RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test  = prepare_data_neurips_cite_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx, is_hvg_protein=False, is_hvg_RNA=True)
+        RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test  = prepare_data_neurips_cite_raw_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx, is_hvg_protein=False, is_hvg_RNA=True)
 
     elif data == "spatial":
         pass
