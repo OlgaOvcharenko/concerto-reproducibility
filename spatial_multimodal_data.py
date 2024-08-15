@@ -321,12 +321,24 @@ def read_data_spatial(data: str = "", save_path: str = ""):
     data_path="./Multimodal_pretraining/data/Xinium/Xenium_V1_humanLung_Cancer_FFPE_outs"
     alignment_matrix_path = "./Multimodal_pretraining/data/Xinium/Xenium_V1_humanLung_Cancer_FFPE_he_imagealignment.csv"
     he_path = "./Multimodal_pretraining/data/Xinium/Xenium_V1_humanLung_Cancer_FFPE_he_image.ome.tif"
+    labels_path = "./Multimodal_pretraining/data/Xinium/cell_types.csv"
 
     sdata = spatialdata_io.xenium(data_path)
-
     image = xenium_aligned_image(he_path, alignment_matrix_path)
     sdata['he_image'] = image
     align_matrix = np.genfromtxt(alignment_matrix_path, delimiter=",", dtype=float)
+
+    labels = pd.read_csv(labels_path, usecols=["id", "manual_cell_type"], sep=";")
+    difference = list(set(sdata["table"].obs["cell_id"].tolist()).symmetric_difference(set(labels["id"].tolist())))
+    for val in difference:
+        labels = labels._append({"id": val, "manual_cell_type": "NA"}, ignore_index = True)
+
+    labels = labels.set_index('id')
+    labels = labels.reindex(index=sdata["table"].obs["cell_id"])
+    labels = labels.reset_index()
+
+    sdata["table"].obs["cell_type"] = labels["manual_cell_type"]
+    print("Made labels")
 
     print("Read data")
 
@@ -358,13 +370,6 @@ def main():
 
     print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
 
-    # # Check num GPUs
-    # gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-    # print(f"\nAvailable GPUs: {gpus}\n")
-    # for gpu in gpus:
-    #     tf.config.experimental.set_memory_growth(gpu, True)
-
-    
     # Read data
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
