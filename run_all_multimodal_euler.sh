@@ -11,7 +11,7 @@ drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("16")
-data=("human")
+data=("human_cite")
 train=1
 test=1
 
