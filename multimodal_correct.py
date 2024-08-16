@@ -593,7 +593,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     adata_RNA_1.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}_{repeat}'] = query_neighbor
                     adata_merged.obs[f'pred_cell_type_{e}_{nn}_{dr}_{only_RNA}_{repeat}'] = query_neighbor
                     
-                    cell_types_list = pd.unique(adata_merged.obs['cell_type']).tolist()
+                    cell_types_list = pd.unique(adata_merged.obs['cell_type_l1']).tolist()
                     acc = accuracy_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor)
                     f1 = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, labels=cell_types_list, average=None)
                     f1_weighted = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, labels=cell_types_list, average='weighted')
