@@ -530,8 +530,8 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
     # Test
     nn = "encoder"
     dr = 0.0 # drop_rate
-    only_RNAs = [True, False] # if combine_omics == 0 else [False]
-    repeats = [0, 1] if not train else [1]
+    only_RNAs = [True, False] if combine_omics == 0 else [False]
+    repeats = [0] if not train else [0]
     for only_RNA in only_RNAs:
         for e in ep_vals: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
