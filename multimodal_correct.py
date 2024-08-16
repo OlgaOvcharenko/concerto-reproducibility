@@ -595,7 +595,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     acc = accuracy_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor)
                     f1 = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, labels=list(set(l2tol1.values())), average=None)
                     f1_weighted = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, labels=list(set(l2tol1.values())), average='weighted')
-                    f1_macro = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, labels=list(set(l2tol1.values())), average='weighted')
+                    f1_macro = f1_score(adata_merged.obs['cell_type_l1'].to_list(), query_neighbor, labels=list(set(l2tol1.values())), average='macro')
                     f1_median = np.median(f1)
 
                     accuracies.append(acc)
