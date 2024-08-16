@@ -94,8 +94,6 @@ test=1
 # lrs=("1e-3")
 # heads=("16")
 # data=("simulated")
-# model_type=("2")
-# combine_omics=0
 
 # for e in $epochs; do
 #     for lr in $lrs; do
@@ -122,6 +120,8 @@ epochs=("100")
 lrs=("1e-3")
 heads=("64")
 data=("simulated")
+model_type=("2")
+combine_omics=0
 
 
 for e in $epochs; do
