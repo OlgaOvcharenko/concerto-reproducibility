@@ -531,7 +531,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
     nn = "encoder"
     dr = 0.0 # drop_rate
     only_RNAs = [True, False] # if combine_omics == 0 else [False]
-    repeats = [0, 1, 2, 4, 5] if not train else [1]
+    repeats = [0, 1] if not train else [1]
     for only_RNA in only_RNAs:
         for e in ep_vals: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
@@ -621,6 +621,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     color=['cell_type_l1', 'leiden', 'batch']
 
                 sc.set_figure_params(dpi=150)
+                print(adata_RNA_1.obs["cell_type_l1"].tolist())
                 sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light') # edges=True
                 plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_knn_concerto_{"train" if train else "test"}_{combine_omics}_oGEX{only_RNA}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}_repeat{repeat}.png')
 
