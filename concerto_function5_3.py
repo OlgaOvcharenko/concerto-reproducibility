@@ -2955,7 +2955,10 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                                                                                    [source_values_RNA, source_values_protein]],
                                                              training=False)
                 if only_RNA:
-                    encode_output = encode_output1
+                    if super_parameters["data"] == "human":
+                        encode_output = encode_output2
+                    else:
+                        encode_output = encode_output1
                 else:
                     encode_output = tf.concat([encode_output1, encode_output2], axis=1)
 
