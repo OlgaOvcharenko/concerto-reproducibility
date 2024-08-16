@@ -148,7 +148,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                 acc = accuracy_score(adata_merged.obs['cell_type'].to_list(), query_neighbor)
                 f1 = f1_score(adata_merged.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average=None)
                 f1_weighted = f1_score(adata_merged.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='weighted')
-                f1_macro = f1_score(adata_merged.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='weighted')
+                f1_macro = f1_score(adata_merged.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='macro')
                 f1_median = np.median(f1)
                 
                 print(f"Per class {cell_types_list} F1 {f1}")
@@ -261,15 +261,15 @@ def main():
         filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
         save_merged_adata(adata_merged=adata_merged, filename=filename)
 
-        # Test on test data
-        adata_merged_test = test_concerto(adata_RNA=adata_RNA, weight_path=weight_path, data=data, 
-                                          RNA_tf_path_test=RNA_tf_path, staining_tf_path=staining_tf_path, 
-                                          attention_t=attention_t, attention_s=attention_s, mask=mask,
-                                          batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-                                          heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                                          save_path=save_path, train=False, adata_RNA_train=adata_merged)
+        # # Test on test data
+        # adata_merged_test = test_concerto(adata_RNA=adata_RNA, weight_path=weight_path, data=data, 
+        #                                   RNA_tf_path_test=RNA_tf_path, staining_tf_path=staining_tf_path, 
+        #                                   attention_t=attention_t, attention_s=attention_s, mask=mask,
+        #                                   batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+        #                                   heads=heads, combine_omics=combine_omics, model_type=model_type, 
+        #                                   save_path=save_path, train=False, adata_RNA_train=adata_merged)
 
-        filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-        save_merged_adata(adata_merged=adata_merged_test, filename=filename)
+        # filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+        # save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 main()
