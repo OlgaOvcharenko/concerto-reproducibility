@@ -2879,7 +2879,6 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
     attention_output_RNA_all = []
     attention_output_Protein_all = []
     for RNA_file, Protein_file in zip(train_source_list_RNA, train_source_list_Protein):
-        print("Big for loop")
         train_size = 0
         train_db_RNA = create_classifier_dataset_multi([RNA_file],
                                                        batch_size=batch_size,
@@ -2904,7 +2903,7 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                 if super_parameters["combine_omics"]:
                     encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
                                                                     [source_values_RNA, source_values_protein]],
-                                                                    training=False, only_RNA=only_RNA)
+                                                                    training=False)
                     break
 
                 else:
@@ -2912,7 +2911,8 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                                                                 [source_values_RNA, source_values_protein]],
                                                                 training=False)
                     if only_RNA:
-                        encode_output = encode_output1
+                        # FIXME back
+                        encode_output = encode_output2
                     else:
                         encode_output = tf.concat([encode_output1, encode_output2], axis=1)
                     break
