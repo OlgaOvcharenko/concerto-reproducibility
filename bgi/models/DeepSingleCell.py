@@ -100,43 +100,52 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         image_network = models.Sequential([
             layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(64, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            
+            BatchNormalization(),
+
             layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
             layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            BatchNormalization(),
 
             layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
             layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            BatchNormalization(),
 
             layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
             layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            BatchNormalization(),
             
             layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
             layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
             layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+            BatchNormalization(),
             layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
             layers.Flatten(),
-            Dropout(rate=drop_rate),
+            # Dropout(rate=drop_rate),
 
             Dense(4096, activation='relu'),
+            BatchNormalization(),
             Dense(2048, activation='relu'),
+            BatchNormalization(),
             Dense(head_1, activation='relu')
         ])
 
     else:
         image_network = models.Sequential([
             layers.Conv2D(32, (3, 3), activation='relu', padding='valid', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
+            BatchNormalization(),
             layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
             layers.Conv2D(64, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
+            BatchNormalization(),
             layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
             layers.Conv2D(128, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
             layers.Flatten(),
-            Dropout(rate=drop_rate),
+            # Dropout(rate=drop_rate),
             Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
         ])
 

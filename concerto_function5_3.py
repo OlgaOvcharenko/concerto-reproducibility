@@ -1661,7 +1661,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
     return print('finished')
 
 def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str, staining_tf_path: str, weight_path: str, super_parameters=None):
-    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_{super_parameters["mask"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
     set_seeds(0)   
@@ -2912,7 +2912,7 @@ def concerto_test_multimodal(mult_feature_names, model_path: str, RNA_tf_path: s
                                                                 training=False)
                     if only_RNA:
                         # FIXME back
-                        encode_output = encode_output2
+                        encode_output = encode_output1
                     else:
                         encode_output = tf.concat([encode_output1, encode_output2], axis=1)
                     break

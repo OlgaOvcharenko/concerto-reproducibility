@@ -605,7 +605,7 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     per_class_f1s.append(f1)
                     median_f1s.append(f1_median)
                     
-                    print(f"Per class {list(set(l2tol1.values()))} F1 {f1}")
+                    print(f"Per class {cell_types_list} F1 {f1}")
                     print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
 
 

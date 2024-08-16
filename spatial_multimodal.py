@@ -125,7 +125,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
 
             print(f"\nShape of the {train}_{e}_{nn}_{dr}_{only_image} embedding {embedding.shape}.")
             
-            adata_merged = adata_merged[RNA_id]
+            adata_merged = adata_RNA[RNA_id]
             adata_merged.obsm[f'train_{e}_{nn}_{dr}_{only_image}' if train else f'test_{e}_{nn}_{dr}_{only_image}'] = embedding
             
             sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
@@ -164,8 +164,9 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
             if not train:
                 color=['cell_type', f'pred_cell_type_{e}_{nn}_{dr}_{only_image}', 'leiden', 'batch']
             else:
-                color=['cell_type', 'leiden', 'batch']
-
+                color=['cell_type']
+            print(adata_RNA_1.obs['cell_type'].tolist())
+            print(adata_RNA.obs['cell_type'].tolist())
             sc.set_figure_params(dpi=150)
             sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light') # edges=True
             plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{mask}_{"train" if train else "test"}_{combine_omics}_oRNA{only_image}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
