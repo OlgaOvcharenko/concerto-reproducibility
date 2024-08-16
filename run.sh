@@ -9,45 +9,13 @@ copy_data(){
 }
 
 run_scib(){
-    nohup python metrics_cpu.py --data Multimodal_pretraining/data/simulated/$1
-    mv Multimodal_pretraining/plots/metrics/simulated/scib_results.svg Multimodal_pretraining/plots/metrics/simulated/$2
+    nohup python metrics_cpu.py --data Multimodal_pretraining/data/$1/$2
+    mv Multimodal_pretraining/plots/metrics/$1/scib_results.svg Multimodal_pretraining/plots/metrics/simulated/$3
 }
 
-
-copy_data simulated_train_1_mt_0_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_test_1_mt_0_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_train_0_mt_1_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_train_0_mt_2_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_train_0_mt_5_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_train_0_mt_3_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_train_0_mt_4_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_test_0_mt_1_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_test_0_mt_2_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_test_0_mt_5_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_test_0_mt_3_bs_64_200_0.001_0.1_False_True_16.h5ad
-copy_data simulated_test_0_mt_4_bs_64_200_0.001_0.1_False_True_16.h5ad
-
-wait
-
-run_plot 5 simulated_test_0_mt_5_16_plots.out
-run_plot 4 simulated_test_0_mt_4_16_plots.out
-run_plot 3 simulated_test_0_mt_3_16_plots.out
-run_plot 2 simulated_test_0_mt_2_16_plots.out
-run_plot 1 simulated_test_0_mt_1_16_plots.out
-
-wait
-
-run_scib simulated_train_1_mt_0_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_1_mt_0_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_test_1_mt_0_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_test_1_mt_0_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_train_0_mt_1_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_0_mt_1_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_train_0_mt_2_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_0_mt_2_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_train_0_mt_5_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_0_mt_5_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_train_0_mt_3_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_0_mt_3_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_train_0_mt_4_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_0_mt_4_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_test_0_mt_1_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_test_0_mt_1_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_test_0_mt_2_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_test_0_mt_2_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_test_0_mt_5_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_test_0_mt_5_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_test_0_mt_3_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_test_0_mt_3_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib simulated_test_0_mt_4_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_test_0_mt_4_bs_64_200_0.001_0.1_False_True_16.svg
+run_scib simulated simulated_train_0_mt_2_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_0_mt_2_bs_64_200_0.001_0.1_False_True_16.svg
+run_scib human human_train_0_mt_2_bs_64_150_0.0001_0.1_False_True_64.h5ad human_train_0_mt_2_bs_64_150_0.0001_0.1_False_True_64.svg
+run_scib human_cite human_cite_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.h5ad human_cite_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.svg
+run_scib human_cite_raw human_cite_raw_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.h5ad human_cite_raw_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.svg
 
 wait
