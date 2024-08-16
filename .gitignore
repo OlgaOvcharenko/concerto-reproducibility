@@ -42,4 +42,4 @@ Multimodal_pretraining/adata_cite_gex_test.h5ad
 Multimodal_pretraining/adata_cite_gex_train.h5ad
 Multimodal_pretraining/adata_cite_gex_unprep_test.h5ad
 Multimodal_pretraining/adata_cite_gex_unprep_train.h5ad
-
+Multimodal_pretraining/spatial_adata_RNA.h5ad
