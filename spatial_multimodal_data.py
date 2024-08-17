@@ -455,12 +455,11 @@ def read_data_spatial(data: str = "", save_path: str = ""):
 
     print("Read data")
     if data == 'spatial':    
-        RNA_tf_path, adata_RNA, staining_tf_path  = prepare_data_spatial(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
+        prepare_data_spatial(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
     
     elif data == 'spatial_split':
-        RNA_tf_path, adata_RNA, staining_tf_path  = prepare_data_spatial_split(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
-    
-    return RNA_tf_path, adata_RNA, staining_tf_path
+        prepare_data_spatial_split(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
+
 
 def save_merged_adata(adata_merged, filename):
     adata_merged.write(filename)

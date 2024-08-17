@@ -89,7 +89,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
     ep_vals.append(epoch)
 
     adata_merged = adata_RNA
-
+    print(ep_vals)
     # Test
     nn = "encoder"
     dr = 0.0 # drop_rate
@@ -118,14 +118,13 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                     saved_weight_path = saved_weight_path,
                     only_image=only_image)
             
-            print(adata_RNA)
-
             adata_RNA_1 = adata_RNA[RNA_id]
             adata_RNA_1.obsm['X_embedding'] = embedding
 
             print(f"\nShape of the {train}_{e}_{nn}_{dr}_{only_image} embedding {embedding.shape}.")
             
-            adata_merged = adata_RNA[RNA_id]
+            if e == 4:
+                adata_merged = adata_RNA[RNA_id]
             adata_merged.obsm[f'train_{e}_{nn}_{dr}_{only_image}' if train else f'test_{e}_{nn}_{dr}_{only_image}'] = embedding
             
             sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
@@ -162,13 +161,11 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
             adata_merged.obs[f'train_leiden_{e}_{nn}_{dr}_{only_image}' if train else f'test_leiden_{e}_{nn}_{dr}_{only_image}'] = adata_RNA_1.obs["leiden"]
 
             if not train:
-                color=['cell_type', f'pred_cell_type_{e}_{nn}_{dr}_{only_image}', 'leiden', 'batch']
+                color=['cell_type', f'pred_cell_type_{e}_{nn}_{dr}_{only_image}']
             else:
                 color=['cell_type']
-            print(adata_RNA_1.obs['cell_type'].tolist())
-            print(adata_RNA.obs['cell_type'].tolist())
             # sc.set_figure_params(dpi=150)
-            sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light') # edges=True
+            sc.pl.umap(adata_RNA_1, color=color, size=10, legend_fontweight='light') # edges=True
             plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{mask}_{"train" if train else "test"}_{combine_omics}_oRNA{only_image}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
 
     return adata_merged

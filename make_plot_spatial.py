@@ -95,7 +95,7 @@ def plot_train_only(ax, X_umap, y_train, name, labels, colormap="Paired"):
 
 def encode_train_y(y_train):
     y_train = y_train.to_frame()
-    y_train["cell_type_l1"] = y_train["cell_type_l1"].astype('str')
+    y_train["cell_type"] = y_train["cell_type"].astype('str')
 
     uniques = set()
     uniques.update(y_train["cell_type"].unique().tolist()) 
@@ -109,26 +109,26 @@ def encode_train_y(y_train):
 
 def encode_all_y(y_train, y_test, y_predict):
     y_train = y_train.to_frame()
-    y_train["cell_type_l1"] = y_train["cell_type_l1"].astype('str')
+    y_train["cell_type"] = y_train["cell_type"].astype('str')
 
     y_test = y_test.to_frame()
-    y_test["cell_type_l1"] = y_test["cell_type_l1"].astype('str')
+    y_test["cell_type"] = y_test["cell_type"].astype('str')
 
     y_predict = y_predict.to_frame()
-    y_predict.rename(columns={y_predict.columns[0]: "cell_type_l1"}, inplace=True)
-    y_predict["cell_type_l1"] = y_predict["cell_type_l1"].astype('str')
+    y_predict.rename(columns={y_predict.columns[0]: "cell_type"}, inplace=True)
+    y_predict["cell_type"] = y_predict["cell_type"].astype('str')
 
     uniques = set()
-    uniques.update(y_train["cell_type_l1"].unique().tolist()) 
-    uniques.update(y_test["cell_type_l1"].unique().tolist())
-    uniques.update(y_predict["cell_type_l1"].unique().tolist())
+    uniques.update(y_train["cell_type"].unique().tolist()) 
+    uniques.update(y_test["cell_type"].unique().tolist())
+    uniques.update(y_predict["cell_type"].unique().tolist())
 
     label_types = dict()
     for i, lbl in enumerate(uniques):
         label_types[i] = lbl
-        y_train.loc[y_train["cell_type_l1"]==lbl, "cell_type_l1"] = i
-        y_test.loc[y_test["cell_type_l1"]==lbl, "cell_type_l1"] = i
-        y_predict.loc[y_predict["cell_type_l1"]==lbl, "cell_type_l1"] = i
+        y_train.loc[y_train["cell_type"]==lbl, "cell_type"] = i
+        y_test.loc[y_test["cell_type"]==lbl, "cell_type"] = i
+        y_predict.loc[y_predict["cell_type"]==lbl, "cell_type"] = i
 
     return y_train, y_test, y_predict, label_types
 
@@ -205,25 +205,25 @@ def create_plot_qr(adata_merged_train, adata_merged_test,
     ax02 = fig.add_subplot(spec2[0, 2])
 
     # Train only
-    sc00, sc00_labels = plot_train_only(ax=ax00, X_umap=X_train_umap, y_train=y_train["cell_type_l1"], name="Reference", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
+    sc00, sc00_labels = plot_train_only(ax=ax00, X_umap=X_train_umap, y_train=y_train["cell_type"], name="Reference", labels=y_train["cell_type"].unique().tolist(), colormap="tab20b")
 
     # # Train + test
     # X_joint_umap = get_joint_umap(X_train, X_test)
     # ax01.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
-    # sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_test["cell_type_l1"], name="Query True Labels", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
+    # sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_test["cell_type"], name="Query True Labels", labels=y_train["cell_type"].unique().tolist(), colormap="tab20b")
 
     # # Train + pred
     # ax02.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
-    # sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_pred["cell_type_l1"], name="Query Prediction", labels=y_pred["cell_type_l1"].unique().tolist(), colormap="tab20b")
+    # sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_pred["cell_type"], name="Query Prediction", labels=y_pred["cell_type"].unique().tolist(), colormap="tab20b")
 
     # # Train + test
     # X_joint_umap = get_joint_umap(X_train, X_test)
-    # print(y_test["cell_type_l1"].shape)
-    # sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_test_umap, y_train=y_test["cell_type_l1"], name="Query True Labels", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
+    # print(y_test["cell_type"].shape)
+    # sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_test_umap, y_train=y_test["cell_type"], name="Query True Labels", labels=y_train["cell_type"].unique().tolist(), colormap="tab20b")
 
     # # Train + pred
-    # print(y_pred["cell_type_l1"].shape)
-    # sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_test_umap, y_train=y_pred["cell_type_l1"], name="Query Prediction", labels=y_pred["cell_type_l1"].unique().tolist(), colormap="tab20b")
+    # print(y_pred["cell_type"].shape)
+    # sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_test_umap, y_train=y_pred["cell_type"], name="Query Prediction", labels=y_pred["cell_type"].unique().tolist(), colormap="tab20b")
 
 
     arrows_dict = {}
@@ -293,10 +293,10 @@ def main():
         i = i * 2
     ep_vals.append(epoch)
 
-    only_RNAs = [True, False] if combine_omics == 0 else [False]
+    only_RNAs = [False, True] if combine_omics == 0 else [False]
     for only_RNA in only_RNAs:
         for dr in [0.0]:
-                for e in [64, epoch]: 
+                for e in [epoch]: 
                     print(adata_merged_train)
                     create_plot_qr(adata_merged_train=adata_merged_train, 
                                 adata_merged_test=None, # adata_merged_test, 
