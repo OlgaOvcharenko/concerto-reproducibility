@@ -95,7 +95,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
     dr = 0.0 # drop_rate
     only_images = [True, False] # if combine_omics == 0 else [False]
     for only_image in only_images:
-        for e in ep_vals: 
+        for e in [4, 8]: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
             
             embedding, _, RNA_id =  concerto_test_spatial_multimodal(
@@ -123,10 +123,12 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
 
             print(f"\nShape of the {train}_{e}_{nn}_{dr}_{only_image} embedding {embedding.shape}.")
             
+            print(adata_merged)
             if e == 4:
                 adata_merged = adata_RNA[RNA_id]
             adata_merged.obsm[f'train_{e}_{nn}_{dr}_{only_image}' if train else f'test_{e}_{nn}_{dr}_{only_image}'] = embedding
-            
+            print(adata_merged)
+
             sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
             labels = adata_RNA_1.obs['cell_type'].tolist()
             for res in [0.05,0.1,0.15,0.2,0.25,0.3]:
