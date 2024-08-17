@@ -88,7 +88,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
         i = i * 2
     ep_vals.append(epoch)
 
-    adata_merged = adata_RNA
+    adata_merged = adata_RNA.copy()
     print(ep_vals)
     # Test
     nn = "encoder"
@@ -118,7 +118,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                     saved_weight_path = saved_weight_path,
                     only_image=only_image)
             
-            adata_RNA_1 = adata_RNA[RNA_id]
+            adata_RNA_1 = adata_RNA[RNA_id].copy()
             adata_RNA_1.obsm['X_embedding'] = embedding
 
             print(f"\nShape of the {train}_{e}_{nn}_{dr}_{only_image} embedding {embedding.shape}.")
