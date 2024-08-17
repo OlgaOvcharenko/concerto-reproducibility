@@ -20,8 +20,8 @@ source "python_venv/bin/activate"
 # combine_omics=0
 
 epochs=("200")
-lrs=("1e-3")
-batch_sizes=("512")
+lrs=("1e-3 1e-5")
+batch_sizes=("512 1024")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
@@ -29,7 +29,7 @@ heads=("64")
 data=("spatial")
 train=1
 test=1
-mask=("0")
+mask=("0 1")
 
 model_type=("2")
 combine_omics=0
