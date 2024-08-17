@@ -330,7 +330,7 @@ def prepare_data_spatial_split(sdata, align_matrix, save_path: str = '', is_hvg_
         adata_RNA.obs_names.values,
         test_size=0.2,
         stratify=adata_RNA.obs["cell_type"],
-        shuffle=False,
+        shuffle=True,
         random_state=42,
     )
     adata_RNA_test = adata_RNA[test_idx, :]
