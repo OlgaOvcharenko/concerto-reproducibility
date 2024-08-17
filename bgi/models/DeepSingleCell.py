@@ -146,7 +146,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
             layers.Conv2D(128, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
             layers.Flatten(),
-            # Dropout(rate=drop_rate),
+            Dropout(rate=drop_rate),
             Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
         ])
         print(inputs)
