@@ -174,9 +174,6 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
     return adata_merged
 
 def read_data_prepared(data: str = "", save_path: str = ""):
-    if data != 'spatial':
-        raise Exception('[SPATIAL] Incorrect dataset name.')
-    
     print("Read data")
     print("Read spatial data.")
     adata_RNA = sc.read_h5ad(save_path + f'spatial_adata_RNA.h5ad')
@@ -186,6 +183,22 @@ def read_data_prepared(data: str = "", save_path: str = ""):
     staining_tf_path = save_path + path_file + 'spatial_staining_tf/'
     
     return RNA_tf_path, adata_RNA, staining_tf_path
+
+def read_data_split_prepared(data: str = "", save_path: str = ""):
+    print("Read spatial data.")
+
+    adata_RNA = sc.read_h5ad(save_path + f'train_spatial_adata_RNA.h5ad')
+    adata_RNA_test = sc.read_h5ad(save_path + f'test_spatial_adata_RNA.h5ad')
+    
+    path_file = 'tfrecord/'
+    RNA_tf_path = save_path + path_file + 'train_spatial_RNA_tf/'
+    RNA_tf_path_test = save_path + path_file + 'test_spatial_RNA_tf/'
+
+    staining_tf_path = save_path + path_file + 'train_spatial_staining_tf'
+    staining_tf_path_test = save_path + path_file + 'test_spatial_staining_tf'
+    
+    return RNA_tf_path, adata_RNA, staining_tf_path, RNA_tf_path_test, adata_RNA_test, staining_tf_path_test
+
 
 def save_merged_adata(adata_merged, filename):
     adata_merged.write(filename)
@@ -230,7 +243,10 @@ def main():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    RNA_tf_path, adata_RNA, staining_tf_path = read_data_prepared(data=data, save_path=save_path)
+    if data == 'spatial':
+        RNA_tf_path, adata_RNA, staining_tf_path = read_data_prepared(data=data, save_path=save_path)
+    elif data == 'spatial_split':
+        RNA_tf_path, adata_RNA, staining_tf_path, RNA_tf_path_test, adata_RNA_test, staining_tf_path_test = read_data_split_prepared(data=data, save_path=save_path)
 
     # Train
     weight_path = save_path + 'weight/'
@@ -262,15 +278,16 @@ def main():
         filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
         save_merged_adata(adata_merged=adata_merged, filename=filename)
 
-        # # Test on test data
-        # adata_merged_test = test_concerto(adata_RNA=adata_RNA, weight_path=weight_path, data=data, 
-        #                                   RNA_tf_path_test=RNA_tf_path, staining_tf_path=staining_tf_path, 
-        #                                   attention_t=attention_t, attention_s=attention_s, mask=mask,
-        #                                   batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-        #                                   heads=heads, combine_omics=combine_omics, model_type=model_type, 
-        #                                   save_path=save_path, train=False, adata_RNA_train=adata_merged)
+        if data == "spatial_split":
+            # Test on test data
+            adata_merged_test = test_concerto(adata_RNA=adata_RNA_test, weight_path=weight_path, data=data, 
+                                            RNA_tf_path_test=RNA_tf_path_test, staining_tf_path=staining_tf_path_test, 
+                                            attention_t=attention_t, attention_s=attention_s, mask=mask,
+                                            batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                                            heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                                            save_path=save_path, train=False, adata_RNA_train=adata_merged)
 
-        # filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-        # save_merged_adata(adata_merged=adata_merged_test, filename=filename)
+            filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+            save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 main()
