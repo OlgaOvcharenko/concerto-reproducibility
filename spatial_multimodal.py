@@ -82,20 +82,20 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                   heads: int, combine_omics: int, model_type: int, mask: int,
                   save_path: str, train: bool = False, adata_RNA_train = None):
     ep_vals = []
-    i = 4
+    i = 64 # i = 4
     while i < epoch:
         ep_vals.append(i)
         i = i * 2
     ep_vals.append(epoch)
 
     adata_merged = adata_RNA.copy()
-    print(ep_vals)
+
     # Test
     nn = "encoder"
     dr = 0.0 # drop_rate
-    only_images = [True] # [True, False] # if combine_omics == 0 else [False]
+    only_images = [True, False] # if combine_omics == 0 else [False]
     for only_image in only_images:
-        for e in [4, 8]: 
+        for e in ep_vals: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
             
             embedding, _, RNA_id =  concerto_test_spatial_multimodal(
@@ -277,16 +277,16 @@ def main():
         filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
         save_merged_adata(adata_merged=adata_merged, filename=filename)
 
-        # if data == "spatial_split":
-        #     # Test on test data
-        #     adata_merged_test = test_concerto(adata_RNA=adata_RNA_test, weight_path=weight_path, data=data, 
-        #                                     RNA_tf_path_test=RNA_tf_path_test, staining_tf_path=staining_tf_path_test, 
-        #                                     attention_t=attention_t, attention_s=attention_s, mask=mask,
-        #                                     batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-        #                                     heads=heads, combine_omics=combine_omics, model_type=model_type, 
-        #                                     save_path=save_path, train=False, adata_RNA_train=adata_merged)
+        if data == "spatial_split":
+            # Test on test data
+            adata_merged_test = test_concerto(adata_RNA=adata_RNA_test, weight_path=weight_path, data=data, 
+                                            RNA_tf_path_test=RNA_tf_path_test, staining_tf_path=staining_tf_path_test, 
+                                            attention_t=attention_t, attention_s=attention_s, mask=mask,
+                                            batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                                            heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                                            save_path=save_path, train=False, adata_RNA_train=adata_merged)
 
-        #     filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-        #     save_merged_adata(adata_merged=adata_merged_test, filename=filename)
+            filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+            save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 main()
