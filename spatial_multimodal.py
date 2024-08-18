@@ -82,7 +82,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                   heads: int, combine_omics: int, model_type: int, mask: int,
                   save_path: str, train: bool = False, adata_RNA_train = None):
     ep_vals = []
-    i = 64 # i = 4
+    i = 32 # i = 4
     while i < epoch:
         ep_vals.append(i)
         i = i * 2
