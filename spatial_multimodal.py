@@ -95,7 +95,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
     dr = 0.0 # drop_rate
     only_images = [True, False] # if combine_omics == 0 else [False]
     for only_image in only_images:
-        for e in ep_vals: 
+        for e in [200]: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
             
             embedding, _, RNA_id =  concerto_test_spatial_multimodal(
