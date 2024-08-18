@@ -114,8 +114,9 @@ def make_legend_arrow(legend, orig_handle, xdescent, ydescent, width, height, fo
     return p
 
 def plot_train_only(ax, X_umap, y_train, name, labels, colormap="Paired"):
-    print(len(labels))
     colormap = matplotlib.colormaps[colormap].colors
+    if len(labels) < 11:
+        colormap = matplotlib.colormaps["Paired"].colors
     if len(labels) > 21:
         colormap = list(matplotlib.colormaps["tab20"].colors) 
         colormap.extend(list(matplotlib.colormaps["tab20b"].colors))
@@ -215,15 +216,15 @@ def create_plot_qr(adata_merged_train, adata_merged_test,
                 batch_size:int, epoch: int, lr: float, drop_rate: float, 
                 heads: int, combine_omics: int, model_type: int, only_RNA: bool):
     X_train = adata_merged_train.obsm[f'train_{epoch}_encoder_{drop_rate}_{only_RNA}']
-    X_test = adata_merged_test.obsm[f'test_{epoch}_encoder_{drop_rate}_{only_RNA}_1']
+    X_test = adata_merged_test.obsm[f'test_{epoch}_encoder_{drop_rate}_{only_RNA}_0']
 
     X_train_umap = adata_merged_train.obsm[f'train_umap_{epoch}_encoder_{drop_rate}_{only_RNA}']
     X_train_leiden = adata_merged_train.obs[f'train_leiden_{epoch}_encoder_{drop_rate}_{only_RNA}']
-    X_test_umap = adata_merged_test.obsm[f'test_umap_{epoch}_encoder_{drop_rate}_{only_RNA}_1']
+    X_test_umap = adata_merged_test.obsm[f'test_umap_{epoch}_encoder_{drop_rate}_{only_RNA}_0']
 
     y_train = adata_merged_train.obs['cell_type_l1']
     y_test = adata_merged_test.obs['cell_type_l1']
-    y_pred = adata_merged_test.obs[f'pred_cell_type_{epoch}_encoder_{drop_rate}_{only_RNA}_1']
+    y_pred = adata_merged_test.obs[f'pred_cell_type_{epoch}_encoder_{drop_rate}_{only_RNA}_0']
     y_train, y_test, y_pred, label_types = encode_all_y(y_train=y_train, y_test=y_test, y_predict=y_pred)
 
     # y_train_batch = adata_merged_train.obs['batch']
@@ -247,25 +248,25 @@ def create_plot_qr(adata_merged_train, adata_merged_test,
     # Train only
     sc00, sc00_labels = plot_train_only(ax=ax00, X_umap=X_train_umap, y_train=y_train["cell_type_l1"], name="Reference", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
 
-    # Train + test
-    X_joint_umap = get_joint_umap(X_train, X_test)
-    ax01.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
-    sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_test["cell_type_l1"], name="Query True Labels", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
-
-    # Train + pred
-    ax02.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
-    sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_pred["cell_type_l1"], name="Query Prediction", labels=y_pred["cell_type_l1"].unique().tolist(), colormap="tab20b")
-
     # # Train + test
     # X_joint_umap = get_joint_umap(X_train, X_test)
-    # print(X_test_umap.shape)
-    # print(y_test["cell_type_l1"].shape)
-    # sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_test_umap, y_train=y_test["cell_type_l1"], name="Query True Labels", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
+    # ax01.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
+    # sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_test["cell_type_l1"], name="Query True Labels", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
 
     # # Train + pred
+    # ax02.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
+    # sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_pred["cell_type_l1"], name="Query Prediction", labels=y_pred["cell_type_l1"].unique().tolist(), colormap="tab20b")
+
+    # Train + test
+    X_joint_umap = get_joint_umap(X_train, X_test)
     # print(X_test_umap.shape)
-    # print(y_pred["cell_type_l1"].shape)
-    # sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_test_umap, y_train=y_pred["cell_type_l1"], name="Query Prediction", labels=y_pred["cell_type_l1"].unique().tolist(), colormap="tab20b")
+    print(y_test["cell_type_l1"].shape)
+    sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_test_umap, y_train=y_test["cell_type_l1"], name="Query True Labels", labels=y_train["cell_type_l1"].unique().tolist(), colormap="tab20b")
+
+    # Train + pred
+    # print(X_test_umap.shape)
+    print(y_pred["cell_type_l1"].shape)
+    sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_test_umap, y_train=y_pred["cell_type_l1"], name="Query Prediction", labels=y_pred["cell_type_l1"].unique().tolist(), colormap="tab20b")
 
 
     # # Batch train + test
@@ -312,15 +313,15 @@ def create_plot_bc(adata_merged_train, adata_merged_test,
                 batch_size:int, epoch: int, lr: float, drop_rate: float, 
                 heads: int, combine_omics: int, model_type: int, only_RNA: bool):
     X_train = adata_merged_train.obsm[f'train_{epoch}_encoder_{drop_rate}_{only_RNA}']
-    X_test = adata_merged_test.obsm[f'test_{epoch}_encoder_{drop_rate}_{only_RNA}_1']
+    X_test = adata_merged_test.obsm[f'test_{epoch}_encoder_{drop_rate}_{only_RNA}_0']
 
     X_train_umap = adata_merged_train.obsm[f'train_umap_{epoch}_encoder_{drop_rate}_{only_RNA}']
     X_train_leiden = adata_merged_train.obs[f'train_leiden_{epoch}_encoder_{drop_rate}_{only_RNA}']
-    X_test_umap = adata_merged_test.obsm[f'test_umap_{epoch}_encoder_{drop_rate}_{only_RNA}_1']
+    X_test_umap = adata_merged_test.obsm[f'test_umap_{epoch}_encoder_{drop_rate}_{only_RNA}_0']
 
     y_train = adata_merged_train.obs['cell_type_l1']
     y_test = adata_merged_test.obs['cell_type_l1']
-    y_pred = adata_merged_test.obs[f'pred_cell_type_{epoch}_encoder_{drop_rate}_{only_RNA}_1']
+    y_pred = adata_merged_test.obs[f'pred_cell_type_{epoch}_encoder_{drop_rate}_{only_RNA}_0']
     y_train, y_test, y_pred, label_types = encode_all_y(y_train=y_train, y_test=y_test, y_predict=y_pred)
 
     y_train_batch = adata_merged_train.obs['batch']

@@ -1698,7 +1698,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
     decode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
                                                   mult_feature_names=mult_feature_names,
                                                   embedding_dims=128,
-                                                  include_attention=True,
+                                                  include_attention=False,
                                                   drop_rate=super_parameters['drop_rate'],
                                                   head_1=super_parameters["heads"],
                                                   head_2=super_parameters["heads"],
@@ -1779,9 +1779,9 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                             loss = clip_loss(zt_1, zt_2, temperature)
 
                         elif super_parameters["model_type"] == 2:
+                            res_dec = decode_network([source_values_RNA, source_image_raw_staining], training=True)
                             res_en = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=True)
-                            res_dec = decode_network([source_values_RNA, source_image_raw_staining], training=True)
                             zt_1, zt_2 = res_en[0], res_en[1]
                             zs_1, zs_2 = res_dec[0], res_dec[1]
 
@@ -1969,9 +1969,6 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
             else:
                 encode_output1, encode_output2 = encode_network([[source_features_RNA,],
                                             [source_values_RNA, source_image_raw_staining]], training=False)
-                print("Image")
-                tf.print(encode_output2, summarize=-1)
-                print(tf.reduce_sum(encode_output2))
 
                 if only_image:
                     encode_output = encode_output2

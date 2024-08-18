@@ -87,6 +87,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         x_value_inputs.append(image_value_input)
 
         inputs.append(x_value_inputs)
+        print(inputs)
 
     dropout0 = Dropout(rate=drop_rate)(features[0])
     output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
@@ -145,10 +146,10 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
             layers.Conv2D(128, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
             layers.Flatten(),
-            # Dropout(rate=drop_rate),
+            Dropout(rate=drop_rate),
             Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
         ])
-
+        print(inputs)
 
     output1 = image_network(image_value_input)
 

@@ -11,7 +11,7 @@ drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("16")
-data=("spatial")
+data=("spatial_split")
 train=0
 test=0
 
