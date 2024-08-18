@@ -179,16 +179,16 @@ def create_plot_qr(adata_merged_train, adata_merged_test,
                 batch_size:int, epoch: int, lr: float, drop_rate: float, 
                 heads: int, combine_omics: int, model_type: int, only_RNA: bool):
     X_train = adata_merged_train.obsm[f'train_{epoch}_encoder_{drop_rate}_{only_RNA}']
-    # X_test = adata_merged_test.obsm[f'test_{epoch}_encoder_{drop_rate}_{only_RNA}']
+    X_test = adata_merged_test.obsm[f'test_{epoch}_encoder_{drop_rate}_{only_RNA}']
 
     X_train_umap = adata_merged_train.obsm[f'train_umap_{epoch}_encoder_{drop_rate}_{only_RNA}']
-    # X_test_umap = adata_merged_test.obsm[f'test_umap_{epoch}_encoder_{drop_rate}_{only_RNA}']
+    X_test_umap = adata_merged_test.obsm[f'test_umap_{epoch}_encoder_{drop_rate}_{only_RNA}']
 
     y_train = adata_merged_train.obs['cell_type']
-    # y_test = adata_merged_test.obs['cell_type']
-    # y_pred = adata_merged_test.obs[f'pred_cell_type_{epoch}_encoder_{drop_rate}_{only_RNA}']
-    # y_train, y_test, y_pred, label_types = encode_all_y(y_train=y_train, y_test=y_test, y_predict=y_pred)
-    y_train, label_types = encode_train_y(y_train=y_train)
+    y_test = adata_merged_test.obs['cell_type']
+    y_pred = adata_merged_test.obs[f'pred_cell_type_{epoch}_encoder_{drop_rate}_{only_RNA}']
+    y_train, y_test, y_pred, label_types = encode_all_y(y_train=y_train, y_test=y_test, y_predict=y_pred)
+    # y_train, label_types = encode_train_y(y_train=y_train)
 
     fig = plt.figure(
         constrained_layout=True,
@@ -207,14 +207,14 @@ def create_plot_qr(adata_merged_train, adata_merged_test,
     # Train only
     sc00, sc00_labels = plot_train_only(ax=ax00, X_umap=X_train_umap, y_train=y_train["cell_type"], name="Reference", labels=y_train["cell_type"].unique().tolist(), colormap="tab20b")
 
-    # # Train + test
-    # X_joint_umap = get_joint_umap(X_train, X_test)
-    # ax01.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
-    # sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_test["cell_type"], name="Query True Labels", labels=y_train["cell_type"].unique().tolist(), colormap="tab20b")
+    # Train + test
+    X_joint_umap = get_joint_umap(X_train, X_test)
+    ax01.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
+    sc01, sc01_labels = plot_train_only(ax=ax01, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_test["cell_type"], name="Query True Labels", labels=y_train["cell_type"].unique().tolist(), colormap="tab20b")
 
-    # # Train + pred
-    # ax02.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
-    # sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_pred["cell_type"], name="Query Prediction", labels=y_pred["cell_type"].unique().tolist(), colormap="tab20b")
+    # Train + pred
+    ax02.scatter(X_joint_umap[0:X_train.shape[0], 0], X_joint_umap[0:X_train.shape[0], 1], marker=".", c="gray", alpha=0.3, s=1)
+    sc02, sc02_labels = plot_train_only(ax=ax02, X_umap=X_joint_umap[X_train.shape[0]:, :], y_train=y_pred["cell_type"], name="Query Prediction", labels=y_pred["cell_type"].unique().tolist(), colormap="tab20b")
 
     # # Train + test
     # X_joint_umap = get_joint_umap(X_train, X_test)
@@ -229,10 +229,10 @@ def create_plot_qr(adata_merged_train, adata_merged_test,
     arrows_dict = {}
     for i, val in enumerate(sc00_labels):
         arrows_dict[label_types[val]] = sc00[i]
-    # for i, val in enumerate(sc01_labels):
-    #     arrows_dict[label_types[val]] = sc01[i]
-    # for i, val in enumerate(sc02_labels):
-    #     arrows_dict[label_types[val]] = sc02[i]
+    for i, val in enumerate(sc01_labels):
+        arrows_dict[label_types[val]] = sc01[i]
+    for i, val in enumerate(sc02_labels):
+        arrows_dict[label_types[val]] = sc02[i]
 
     dict_vals = list(arrows_dict.values())
     dict_keys = list(arrows_dict.keys())
@@ -280,11 +280,11 @@ def main():
     # Multimodal_pretraining/data/spatial/spatial_0_train_0_mt_1_bs_512_200_0.001_0.1_False_True_64.h5ad
 
     filename_train = f'./Multimodal_pretraining/data/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
-    # filename_test = f'./Multimodal_pretraining/data/{data}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+    filename_test = f'./Multimodal_pretraining/data/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
 
 
     adata_merged_train = sc.read_h5ad(filename_train)
-    # adata_merged_test = sc.read_h5ad(filename_test)
+    adata_merged_test = sc.read_h5ad(filename_test)
 
     ep_vals = [4]
     i = 4
@@ -293,13 +293,13 @@ def main():
         i = i * 2
     ep_vals.append(epoch)
 
-    only_RNAs = [False, True] if combine_omics == 0 else [False]
+    only_RNAs = [True] if combine_omics == 0 else [False]
     for only_RNA in only_RNAs:
         for dr in [0.0]:
                 for e in [epoch]: 
                     print(adata_merged_train)
                     create_plot_qr(adata_merged_train=adata_merged_train, 
-                                adata_merged_test=None, # adata_merged_test, 
+                                adata_merged_test=adata_merged_test, 
                                 data=data, attention_t=attention_t, attention_s=attention_s,
                                 batch_size=batch_size, epoch=e, lr=lr, drop_rate=dr, 
                                 heads=heads, combine_omics=combine_omics, model_type=model_type,
