@@ -124,7 +124,8 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
             print(f"\nShape of the {train}_{e}_{nn}_{dr}_{only_image} embedding {embedding.shape}.")
             
             print(adata_merged)
-            adata_merged = adata_RNA[RNA_id]
+            if e == 200 and only_image:
+                adata_merged = adata_RNA[RNA_id]
             adata_merged.obsm[f'train_{e}_{nn}_{dr}_{only_image}' if train else f'test_{e}_{nn}_{dr}_{only_image}'] = embedding
             print(adata_merged)
 
