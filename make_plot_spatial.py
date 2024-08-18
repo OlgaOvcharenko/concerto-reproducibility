@@ -293,7 +293,7 @@ def main():
         i = i * 2
     ep_vals.append(epoch)
 
-    only_RNAs = [False, True] if combine_omics == 0 else [False]
+    only_RNAs = [True] if combine_omics == 0 else [False]
     for only_RNA in only_RNAs:
         for dr in [0.0]:
                 for e in [epoch]: 

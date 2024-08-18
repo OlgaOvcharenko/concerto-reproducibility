@@ -93,7 +93,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
     # Test
     nn = "encoder"
     dr = 0.0 # drop_rate
-    only_images = [True] # if combine_omics == 0 else [False]
+    only_images = [False] # if combine_omics == 0 else [False]
     for only_image in only_images:
         for e in [200]: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
@@ -274,7 +274,7 @@ def main():
                                      heads=heads, combine_omics=combine_omics, model_type=model_type, 
                                      save_path=save_path, train=True)
         
-        filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_only_image.h5ad'
+        filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_both.h5ad'
         save_merged_adata(adata_merged=adata_merged, filename=filename)
 
         if data == "spatial_split":
@@ -286,7 +286,7 @@ def main():
                                             heads=heads, combine_omics=combine_omics, model_type=model_type, 
                                             save_path=save_path, train=False, adata_RNA_train=adata_merged)
 
-            filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_only_image.h5ad'
+            filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_both.h5ad'
             save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
 main()
