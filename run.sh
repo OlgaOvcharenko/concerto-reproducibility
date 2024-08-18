@@ -13,9 +13,9 @@ run_scib(){
     mv Multimodal_pretraining/plots/metrics/$1/scib_results.svg Multimodal_pretraining/plots/metrics/simulated/$3
 }
 
-run_scib simulated simulated_train_0_mt_2_bs_64_200_0.001_0.1_False_True_16.h5ad simulated_train_0_mt_2_bs_64_200_0.001_0.1_False_True_16.svg
-run_scib human human_train_0_mt_2_bs_64_150_0.0001_0.1_False_True_64.h5ad human_train_0_mt_2_bs_64_150_0.0001_0.1_False_True_64.svg
-run_scib human_cite human_cite_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.h5ad human_cite_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.svg
-run_scib human_cite_raw human_cite_raw_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.h5ad human_cite_raw_train_0_mt_2_bs_64_100_0.0001_0.1_False_True_16.svg
+run_scib human human_train_1_mt_0_bs_64_150_0.0001_0.1_False_True_64.h5ad human_train_1_mt_0_bs_64_150_0.0001_0.1_False_True_64.svg
+run_scib human human_cite_train_1_mt_0_bs_64_100_0.0001_0.1_False_True_16.h5ad human_cite_train_1_mt_0_bs_64_100_0.0001_0.1_False_True_16.svg
+run_scib human human_cite_raw_train_1_mt_0_bs_64_100_0.0001_0.1_False_True_16.h5ad human_cite_raw_train_1_mt_0_bs_64_100_0.0001_0.1_False_True_16.svg
+run_scib human human_train_1_mt_0_bs_64_100_0.001_0.1_False_True_16.h5ad human_train_1_mt_0_bs_64_100_0.001_0.1_False_True_16.svg
 
 wait
