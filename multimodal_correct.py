@@ -67,8 +67,7 @@ l2tol1 = {
     'G/M prog': 'G/M prog',
     'G/M prog': 'G/M prog',
     'HSC': 'HSC',
-    'MK/E prog'          : 'MK/E prog',           
-    'ILC'                : 'ILC',                 
+    'MK/E prog'          : 'MK/E prog',            
     'ID2-hi myeloid prog': 'ID2-hi myeloid prog' 
 }
 

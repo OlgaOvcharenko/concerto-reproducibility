@@ -301,7 +301,11 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
 
             # 向量 * 特征值
             sparse_value = tf.expand_dims(value_input, 2, name='{}-Expend-Dims'.format(name))
+            print("Before")
+            print(sparse_value)
             sparse_value = BatchNormalization(name='{}-BN-1'.format(name))(sparse_value)
+            print("After")
+            print(sparse_value)
             x = tf.multiply(embedding, sparse_value, name='{}-Multiply'.format(name))
             # x = BatchNormalization(name='{}-BN-2'.format(name))(x)
 
