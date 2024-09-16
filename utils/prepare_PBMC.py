@@ -5,6 +5,8 @@ import pandas as pd
 import scipy
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils import issparse
+
+from concerto_function5_3 import concerto_make_tfrecord
 sys.path.append("../")
 import numpy as np
 import scanpy as sc
@@ -33,14 +35,15 @@ l2tol1 = {
  'cDC1': 'DC',
  'cDC2': 'DC',
  'pDC': 'DC',
-  'ASDC':'DC',
+ 'ASDC':'DC',
  'B intermediate': 'B',
  'B memory': 'B',
  'B naive': 'B',
  'Plasmablast': 'B',
  'Eryth': 'other',
  'HSPC': 'other',
- 'Platelet': 'other'
+ 'Platelet': 'other',
+ 'Doublet': 'other'
 }
 
 def preprocess_rna(
@@ -79,15 +82,40 @@ def preprocess_rna(
     print('Processed dataset shape: {}'.format(adata.shape))
     return adata, cells_subset
 
+def preprocess_protein(
+        adata,
+        min_features: int = 600,
+        min_cells: int = 3,
+        target_sum: int = 10000,
+        n_top_features=2000,  # or gene list
+        chunk_size: int = 20000,
+        is_hvg = True,
+        batch_key = 'batch',
+        log=True
+):
+    if min_features is None: min_features = 600
+    if n_top_features is None: n_top_features = 40000
+
+    if not issparse(adata.X):
+        adata.X = scipy.sparse.csr_matrix(adata.X)
+
+    adata = adata[:, [gene for gene in adata.var_names
+                      if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
+    
+    sc.pp.normalize_total(adata, target_sum=target_sum)
+    sc.pp.log1p(adata)
+
+    print('Processed dataset shape: {}'.format(adata.shape))
+    return adata
+
 def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
     print("Read PBMC data.")
     print(f"RNA data shape {adata_RNA.shape}")
     print(f"Protein data shape {adata_Protein.shape}")
-    print(f"Protein data {adata_Protein.X}")
 
     # Create PCA for benchmarking
-    adata_RNA, cells_subset = preprocess_rna(adata_RNA,min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
-    adata_Protein = adata_Protein[cells_subset, :]
+    adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocess_protein(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
 
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
@@ -108,30 +136,55 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, sa
     adata_RNA_test.write_h5ad(save_path + f'adata_RNA_test.h5ad')
     adata_Protein_test.write_h5ad(save_path + f'adata_Protein_test.h5ad')
 
-    print("Saved adata.")
+    path_file = 'tfrecord_train/'
+    RNA_tf_path = save_path + path_file + 'RNA_tf/'
+    Protein_tf_path = save_path + path_file + 'Protein_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    path_file = 'tfrecord_test/'
+    RNA_tf_path_test = save_path + path_file + 'RNA_tf/'
+    Protein_tf_path_test = save_path + path_file + 'Protein_tf/'
+    RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path_test, batch_col_name = 'batch')
+    Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path_test, batch_col_name = 'batch')
+
+    print("Saved adata and tf.")
 
 
 def prepare_data_PBMC_full(adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
     print("Read PBMC data.")
     print(f"RNA data shape {adata_RNA.shape}")
     print(f"Protein data shape {adata_Protein.shape}")
-    print(f"Protein data {adata_Protein.X}")
-
+    
     # Create PCA for benchmarking
     adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
     sc.tl.pca(adata_merged_tmp)
 
-    adata_RNA, cells_subset = preprocess_rna(adata_RNA,min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
-    adata_Protein = adata_Protein[cells_subset, :]
+    adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocess_protein(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
 
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
+    print(adata_RNA.obs['cell_type_l1'].value_counts())
     
+    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    adata_RNA = adata_RNA[ix, :]
+    adata_Protein = adata_Protein[ix, :]
+
+    print(adata_RNA)
+
     # Add PCA after preprocessing for benchmarking
     adata_RNA.write_h5ad(save_path + f'adata_RNA_full.h5ad')
     adata_Protein.write_h5ad(save_path + f'adata_Protein_full.h5ad')
 
-    print("Saved adata.")
+
+    path_file = 'tfrecord_full/'
+    RNA_tf_path = save_path + path_file + 'RNA_tf/'
+    Protein_tf_path = save_path + path_file + 'Protein_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    print("Saved adata and tf.")
 
 def read_data(save_path: str = ""):
     path = './Multimodal_pretraining/data/multi_gene_l2.loom'
@@ -140,12 +193,12 @@ def read_data(save_path: str = ""):
     path = './Multimodal_pretraining/data/multi_protein_l2.loom'
     adata_Protein = sc.read(path) #cell_type batch
 
-    train_idx = (adata_RNA.obs["batch"] != "P2") & (adata_RNA.obs["batch"] != "P5") & (adata_RNA.obs["batch"] != "P8")
+    train_idx = (adata_RNA.obs["batch"] != "P3") & (adata_RNA.obs["batch"] != "P5") & (adata_RNA.obs["batch"] != "P8")
     test_idx = (train_idx != 1)
 
     prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
     prepare_data_PBMC_full(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path)
-
+    
 def main():
     # Read data
     save_path = './Multimodal_pretraining/'

@@ -398,17 +398,10 @@ def read_data(data: str = "simulated", save_path: str = ""):
         path = './Multimodal_pretraining/data/multi_protein_l2.loom'
         adata_Protein = sc.read(path) #cell_type batch
 
-        train_idx = (adata_RNA.obs["batch"] != "P2") & (adata_RNA.obs["batch"] != "P5") & (adata_RNA.obs["batch"] != "P8")
+        train_idx = (adata_RNA.obs["batch"] != "P3") & (adata_RNA.obs["batch"] != "P5") & (adata_RNA.obs["batch"] != "P8")
         test_idx = (train_idx != 1)
-
-        # TODO Remove cell type B from reference
+        
         RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test  = prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
-
-        # # ['ASDC' 'B intermediate' 'B memory' 'B naive' 'CD14 Mono' 'CD16 Mono'
-        # # 'CD4 CTL' 'CD4 Naive' 'CD4 Proliferating' 'CD4 TCM' 'CD4 TEM' 'CD8 Naive'
-        # # 'CD8 Proliferating' 'CD8 TCM' 'CD8 TEM' 'Doublet' 'Eryth' 'HSPC' 'ILC'
-        # # 'MAIT' 'NK' 'NK Proliferating' 'NK_CD56bright' 'Plasmablast' 'Platelet'
-        # # 'Treg' 'cDC1' 'cDC2' 'dnT' 'gdT' 'pDC']
 
     elif data == "human":
         adata_merged_tmp = sc.read_h5ad("./Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
@@ -416,16 +409,8 @@ def read_data(data: str = "simulated", save_path: str = ""):
         adata_RNA = adata_merged_tmp[:, 13431:] #adata_adt_atac
         adata_Protein = adata_merged_tmp[:, 0:13431] # adata_adt_gex
 
-        # ['s1d1' 's1d2' 's1d3' 's2d1' 's2d4' 's2d5' 's3d10' 's3d3' 's3d6' 's3d7' 's4d1' 's4d8' 's4d9']
-
         train_idx = (adata_RNA.obs["batch"] != "s4d1") & (adata_RNA.obs["batch"] != "s4d8") & (adata_RNA.obs["batch"] != "s4d9")
         test_idx = (train_idx != 1)
-
-        # ['B1 B' 'CD14+ Mono' 'CD16+ Mono' 'CD4+ T activated' 'CD4+ T naive'
-        # 'CD8+ T' 'CD8+ T naive' 'Erythroblast' 'G/M prog' 'HSC'
-        # 'ID2-hi myeloid prog' 'ILC' 'Lymph prog' 'MK/E prog' 'NK' 'Naive CD20+ B'
-        # 'Normoblast' 'Plasma cell' 'Proerythroblast' 'Transitional B' 'cDC2'
-        # 'pDC']
 
         RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test  = prepare_data_neurips_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
 
@@ -621,7 +606,6 @@ def test_concerto(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: s
                     color=['cell_type_l1', 'leiden', 'batch']
 
                 sc.set_figure_params(dpi=150)
-                print(adata_RNA_1.obs["cell_type_l1"].tolist())
                 sc.pl.umap(adata_RNA_1, color=color, legend_fontsize ='xx-small', size=5, legend_fontweight='light') # edges=True
                 plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_knn_concerto_{"train" if train else "test"}_{combine_omics}_oGEX{only_RNA}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}_repeat{repeat}.png')
 
