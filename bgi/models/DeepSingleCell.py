@@ -650,8 +650,8 @@ def multi_embedding_attention_transfer_explainability_modalities(supvised_train:
 
     if combine_omics:
         if model_type == 0:
-            dropout0 = Dropout(rate=drop_rate)(feature[0])
-            dropout1 = Dropout(rate=drop_rate)(feature[1])
+            dropout0 = Dropout(rate=drop_rate)(features[0])
+            dropout1 = Dropout(rate=drop_rate)(features[1])
             output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
             output1 = Dense(head_1, name='projection-1', activation='relu')(dropout1)
         

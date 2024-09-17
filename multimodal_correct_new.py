@@ -417,7 +417,7 @@ def main():
                         heads=heads, combine_omics=combine_omics, model_type=model_type, 
                         save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA, repeat=repeat)
                 
-                filename = f'./Multimodal_pretraining/data/{data}/{data}_bc_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+                filename = f'./Multimodal_pretraining/data/{data}/{data}_bc_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
                 save_merged_adata(adata_merged=adata_merged, filename=filename)
 
             else:
@@ -429,7 +429,7 @@ def main():
                         heads=heads, combine_omics=combine_omics, model_type=model_type, 
                         save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA, repeat=repeat)
                 
-                filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+                filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
                 save_merged_adata(adata_merged=adata_merged, filename=filename)
 
                 # Test on test data
@@ -439,7 +439,7 @@ def main():
                         heads=heads, combine_omics=combine_omics, model_type=model_type, 
                         save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test, adata_merged_train=adata_merged, repeat=repeat)
 
-                filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+                filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
                 save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
                 # Model prediction
