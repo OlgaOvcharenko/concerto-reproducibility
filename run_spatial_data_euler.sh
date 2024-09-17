@@ -2,7 +2,7 @@
 
 #SBATCH -o logs_cpu/log-%j.out
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=12
 #SBATCH --time=02:00:00
 #SBATCH --mem-per-cpu=2GB
 #SBATCH --mail-type=END,FAIL

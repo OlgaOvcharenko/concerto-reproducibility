@@ -3108,11 +3108,12 @@ def concerto_test_multimodal_modalities(mult_feature_names, model_path: str, RNA
         attention_output_Protein_all.extend(attention_output_Protein[:all_samples])
 
     source_data_feature = np.array(source_data_feature).astype('float32')
+    source_data_feature2 = np.array(source_data_feature2).astype('float32')
     source_data_batch = np.array(source_data_batch).astype('int32')
     attention_weight = {'attention_output_RNA': attention_output_RNA_all,
                         'attention_output_Protein': attention_output_Protein_all}
     #np.savez_compressed('./multi_attention.npz', **attention_weight)
-    return source_data_feature, source_data_batch, RNA_id_all, attention_weight
+    return source_data_feature, source_data_feature2, source_data_batch, RNA_id_all, attention_weight
 
 
 def concerto_test_multimodal_project(model_path: str, RNA_tf_path: str, Protein_tf_path: str, super_parameters=None,saved_weight_path = None):
