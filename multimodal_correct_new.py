@@ -295,7 +295,7 @@ def test_concerto_mp(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
         adata_Protein = sc.read(save_path + f'adata_ADT_{"train" if train else "test"}.h5ad')
     
     if not train:
-        nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}'])
+        nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}_{repeat}'])
         indices = nbrs.kneighbors(embedding, return_distance=False)
         
         adata_Protein_train = sc.read(save_path + f'adata_ADT_train.h5ad')
