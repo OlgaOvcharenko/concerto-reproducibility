@@ -243,7 +243,7 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
 
 
 def read_data(save_path: str = ""):
-    path = 'Multimodal_pretraining/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad'
+    path = 'Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad'
 
     adata_merged_tmp = sc.read_h5ad(path)
     adata_RNA = adata_merged_tmp[:, 0:13953] # gex
