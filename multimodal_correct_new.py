@@ -51,11 +51,11 @@ def get_args():
 
 def prepare_data_PBMC_together(train: bool = True, save_path: str = ''):
     print("Read PBMC data.")
-    adata_RNA = adata_RNA.read_h5ad(save_path + f'adata_RNA_train.h5ad')
-    adata_Protein = adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_RNA_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_Protein_train.h5ad')
 
-    adata_RNA_test = adata_RNA.read_h5ad(save_path + f'adata_RNA_test.h5ad')
-    adata_Protein_test = adata_Protein.write_h5ad(save_path + f'adata_Protein_test.h5ad')
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_RNA_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_Protein_test.h5ad')
 
     print(f"RNA data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"Protein data shape {adata_Protein.shape}, test {adata_Protein_test.shape}")
@@ -82,8 +82,8 @@ def prepare_data_PBMC_together(train: bool = True, save_path: str = ''):
 
 def prepare_data_PBMC_full(train: bool = True, save_path: str = ''):
     print("Read PBMC data.")
-    adata_RNA = adata_RNA.read_h5ad(save_path + f'adata_RNA_full.h5ad')
-    adata_Protein = adata_Protein.write_h5ad(save_path + f'adata_Protein_full.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_RNA_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_Protein_full.h5ad')
 
     print(f"RNA data shape train {adata_RNA.shape}")
     print(f"Protein data shape {adata_Protein.shape}")
@@ -102,8 +102,8 @@ def prepare_data_PBMC_full(train: bool = True, save_path: str = ''):
 
 def prepare_data_neurips_cite_full(train: bool = True, save_path: str = ''):
     print("Read human data")
-    adata_RNA = adata_RNA.read_h5ad(save_path + f'adata_GEX_full.h5ad')
-    adata_Protein = adata_Protein.read_h5ad(save_path + f'adata_ADT_full.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_full.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}")
     print(f"ADT data shape train {adata_Protein.shape}")
@@ -121,11 +121,11 @@ def prepare_data_neurips_cite_full(train: bool = True, save_path: str = ''):
 
 def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
     print("Read human data")
-    adata_RNA = adata_RNA.read_h5ad(save_path + f'adata_GEX_train.h5ad')
-    adata_Protein = adata_Protein.read_h5ad(save_path + f'adata_ADT_train.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_train.h5ad')
 
-    adata_RNA_test = adata_RNA.read_h5ad(save_path + f'adata_GEX_test.h5ad')
-    adata_Protein_test = adata_Protein.read_h5ad(save_path + f'adata_ADT_test.h5ad')
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_test.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
