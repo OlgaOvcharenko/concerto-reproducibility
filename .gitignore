@@ -48,3 +48,6 @@ Multimodal_pretraining/train_spatial_adata_RNA.h5ad
 
 Multimodal_pretraining/adata_Protein_full.h5ad
 Multimodal_pretraining/adata_RNA_full.h5ad
+
+Multimodal_pretraining/adata_neurips_ADT_full.h5ad
+Multimodal_pretraining/adata_neurips_GEX_full.h5ad

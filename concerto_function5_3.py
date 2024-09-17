@@ -3023,7 +3023,7 @@ def concerto_test_multimodal_modalities(mult_feature_names, model_path: str, RNA
         print('load saved weight')
 
     source_data_batch = []
-    source_data_feature = []
+    source_data_feature, source_data_feature2 = [], []
     RNA_id_all = []
     attention_output_RNA_all = []
     attention_output_Protein_all = []
@@ -3065,6 +3065,7 @@ def concerto_test_multimodal_modalities(mult_feature_names, model_path: str, RNA
             feature_len = n_cells_for_sample_1 // batch_size * batch_size
         
         source_data_feature_1 = np.zeros((feature_len, dim))
+        source_data_feature_2 = np.zeros((feature_len, dim))
         source_data_batch_1 = np.zeros((feature_len))
         attention_output_RNA = np.zeros((feature_len, vocab_size_RNA, 1))
         attention_output_Protein = np.zeros((feature_len, vocab_size_Protein, 1))
@@ -3081,29 +3082,17 @@ def concerto_test_multimodal_modalities(mult_feature_names, model_path: str, RNA
                 break
 
             if super_parameters["combine_omics"]:
-                if only_RNA:
-                    encode_output, attention_output = encode_network([[source_features_RNA],
-                                                                [source_values_RNA]],
-                                                                training=False)
-                else:
-                    encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
-                                                                    [source_values_RNA, source_values_protein]],
-                                                                    training=False)
-
-            else:
                 encode_output1, encode_output2, attention_output = encode_network([[source_features_RNA, source_features_protein], 
                                                                                    [source_values_RNA, source_values_protein]],
                                                              training=False)
-                if only_RNA:
-                    if super_parameters["data"] == "human":
-                        encode_output = encode_output2
-                    else:
-                        encode_output = encode_output1
-                else:
-                    encode_output = tf.concat([encode_output1, encode_output2], axis=1)
 
-            encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
-            source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
+            else:
+                raise Exception("Invalid arguments")
+
+            encode_output1 = tf.nn.l2_normalize(encode_output1, axis=-1)
+            source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output1
+            encode_output2 = tf.nn.l2_normalize(encode_output2, axis=-1)
+            source_data_feature_2[all_samples:all_samples + len(source_id_RNA), :] = encode_output2
             source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
             RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
             attention_output_RNA[all_samples:all_samples + len(source_id_RNA), :, :] = attention_output[0]
@@ -3112,6 +3101,7 @@ def concerto_test_multimodal_modalities(mult_feature_names, model_path: str, RNA
             # print('all_samples num:{}'.format(all_samples))
 
         source_data_feature.extend(source_data_feature_1[:all_samples])
+        source_data_feature2.extend(source_data_feature_2[:all_samples])
         source_data_batch.extend(source_data_batch_1[:all_samples])
         RNA_id_all.extend(RNA_id[:all_samples])
         attention_output_RNA_all.extend(attention_output_RNA[:all_samples])
