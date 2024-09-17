@@ -3057,7 +3057,7 @@ def concerto_test_multimodal_modalities(mult_feature_names, model_path: str, RNA
                 else:
                     raise Exception("Invalid arguments")
 
-        dim = encode_output.shape[1]
+        dim = encode_output1.shape[1]
         if n_cells_for_sample is None:            
             feature_len = 1000000
         else:            
