@@ -102,8 +102,8 @@ def prepare_data_PBMC_full(train: bool = True, save_path: str = ''):
 
 def prepare_data_neurips_cite_full(train: bool = True, save_path: str = ''):
     print("Read human data")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_full.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_full.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_neurips_GEX_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ADT_full.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}")
     print(f"ADT data shape train {adata_Protein.shape}")
@@ -346,7 +346,7 @@ def test_concerto_bc(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
     if data == "simulated":
         adata_RNA = sc.read(save_path + f'adata_RNA_full.h5ad')
     elif data == 'human_cite':
-        adata_RNA = sc.read(save_path + f'adata_GEX_full.h5ad')
+        adata_RNA = sc.read(save_path + f'adata_neurips_GEX_full.h5ad')
     adata_RNA_1 = adata_RNA[RNA_id]
     adata_RNA_1.obsm['X_embedding'] = embedding
 
