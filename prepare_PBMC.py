@@ -119,16 +119,20 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, sa
 
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
-    
-    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
-    adata_RNA = adata_RNA[ix, :]
-    adata_Protein = adata_Protein[ix, :]
 
     adata_RNA_test = adata_RNA[test_idx, :]
     adata_Protein_test = adata_Protein[test_idx, :]
 
     adata_RNA = adata_RNA[train_idx, :]
     adata_Protein = adata_Protein[train_idx, :]
+
+    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    adata_RNA = adata_RNA[ix, :]
+    adata_Protein = adata_Protein[ix, :]
+
+    ix = (adata_RNA_test.obs['cell_type_l1'] != 'other') & (adata_RNA_test.obs['cell_type_l1'] != 'other T')
+    adata_RNA_test = adata_RNA_test[ix, :]
+    adata_Protein_test = adata_Protein_test[ix, :]
 
     adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
     adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
