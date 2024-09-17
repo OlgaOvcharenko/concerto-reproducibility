@@ -11,12 +11,7 @@ sys.path.append("../")
 import numpy as np
 import scanpy as sc
 import anndata as ad
-import matplotlib.pyplot as plt
-from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score
 import tensorflow as tf
-from sklearn.metrics import confusion_matrix
-from sklearn.decomposition import KernelPCA
-import psutil
 import spatialdata
 import spatialdata_io
 from spatialdata_io.readers.xenium import xenium_aligned_image
