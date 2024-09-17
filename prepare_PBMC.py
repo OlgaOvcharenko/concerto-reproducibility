@@ -120,15 +120,15 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, sa
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
     
+    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    adata_RNA = adata_RNA[ix, :]
+    adata_Protein = adata_Protein[ix, :]
+
     adata_RNA_test = adata_RNA[test_idx, :]
     adata_Protein_test = adata_Protein[test_idx, :]
 
     adata_RNA = adata_RNA[train_idx, :]
     adata_Protein = adata_Protein[train_idx, :]
-
-    cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
-    adata_RNA = adata_RNA[cell_ix, :]
-    adata_Protein = adata_Protein[cell_ix, :]
 
     adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
     adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
@@ -165,13 +165,13 @@ def prepare_data_PBMC_full(adata_RNA, adata_Protein, save_path: str = '', is_hvg
 
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
-    print(adata_RNA.obs['cell_type_l1'].value_counts())
+    # print(adata_RNA.obs['cell_type_l1'].value_counts())
     
     ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
     adata_RNA = adata_RNA[ix, :]
     adata_Protein = adata_Protein[ix, :]
 
-    print(adata_RNA)
+    # print(adata_RNA)
 
     # Add PCA after preprocessing for benchmarking
     adata_RNA.write_h5ad(save_path + f'adata_RNA_full.h5ad')

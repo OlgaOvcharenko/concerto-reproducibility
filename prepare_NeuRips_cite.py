@@ -6,6 +6,8 @@ import pandas as pd
 import scipy
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils import issparse
+
+from concerto_function5_3 import concerto_make_tfrecord
 sys.path.append("../")
 import numpy as np
 import scanpy as sc
@@ -170,29 +172,84 @@ def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
     
-    print(adata_RNA.obs['cell_type_l1'].value_counts())
-    adata_RNA.obsm["X_umap"] = adata_RNA.obsm["GEX_X_umap"] 
-    sc.pl.umap(adata_RNA, color=["cell_type_l1"], legend_fontweight='light') 
-    plt.savefig("tmp.png")
+    # print(adata_RNA.obs['cell_type_l1'].value_counts())
+    # adata_RNA.obsm["X_umap"] = adata_RNA.obsm["GEX_X_umap"] 
+    # sc.pl.umap(adata_RNA, color=["cell_type_l1"], legend_fontweight='light') 
+    # plt.savefig("tmp.png")
 
     ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
     adata_RNA = adata_RNA[ix, :]
     adata_Protein = adata_Protein[ix, :]
 
     # Add PCA after preprocessing for benchmarking
-    adata_RNA.write_h5ad(save_path + f'data/data/adata_neurips_GEX_full.h5ad')
-    adata_Protein.write_h5ad(save_path + f'data/data/adata_neurips_ADT_full.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_neurips_GEX_full.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_neurips_ADT_full.h5ad')
 
-    print("Saved adata.")
+    path_file = 'tfrecord_full/'
+    RNA_tf_path = save_path + path_file + 'GEX_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    print("Saved adata and tf.")
+
+def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
+    print("Read PBMC data.")
+    print(f"RNA data shape {adata_RNA.shape}")
+    print(f"Protein data shape {adata_Protein.shape}")
+
+    adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged_tmp)
+
+    adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocess_protein(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+
+    adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
+    adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
+
+    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    adata_RNA = adata_RNA[ix, :]
+    adata_Protein = adata_Protein[ix, :]
+    
+    adata_RNA_test = adata_RNA[test_idx, :]
+    adata_Protein_test = adata_Protein[test_idx, :]
+
+    adata_RNA = adata_RNA[train_idx, :]
+    adata_Protein = adata_Protein[train_idx, :]
+
+    adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
+
+    adata_RNA_test.write_h5ad(save_path + f'adata_RNA_test.h5ad')
+    adata_Protein_test.write_h5ad(save_path + f'adata_Protein_test.h5ad')
+
+    path_file = 'tfrecord_train/'
+    RNA_tf_path = save_path + path_file + 'GEX_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    path_file = 'tfrecord_test/'
+    RNA_tf_path_test = save_path + path_file + 'GEX_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path_test, batch_col_name = 'batch')
+    Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path_test, batch_col_name = 'batch')
+
+    print("Saved adata and tf.")
+
 
 def read_data(save_path: str = ""):
-    path = 'Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad'
+    path = 'Multimodal_pretraining/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad'
 
     adata_merged_tmp = sc.read_h5ad(path)
     adata_RNA = adata_merged_tmp[:, 0:13953] # gex
     adata_RNA.X = adata_RNA.layers["counts"]
     adata_Protein = adata_merged_tmp[:, 13953:] # adt
     
+    train_idx = (adata_RNA.obs["batch"] != "s4d1") & (adata_RNA.obs["batch"] != "s4d8") & (adata_RNA.obs["batch"] != "s4d9")
+    test_idx = (train_idx != 1)
+
+    prepare_data_neurips_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
     prepare_data_neurips_full(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path)
 
 def main():
