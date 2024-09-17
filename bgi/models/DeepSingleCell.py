@@ -571,6 +571,107 @@ def multi_embedding_attention_transfer_explainability(supvised_train: bool = Fal
         return tf.keras.Model(inputs=inputs, outputs=[output0, output1, weight_output_all])
 
 
+def multi_embedding_attention_transfer_explainability_modalities(supvised_train: bool = False,
+                                    scan_train: bool = False,
+                                    multi_max_features: list = [40000],
+                                    mult_feature_names: list = ['Gene'],
+                                    embedding_dims=128,
+                                    num_classes=5,
+                                    activation='softmax',
+                                    head_1=128,
+                                    head_2=128,
+                                    head_3=128,
+                                    drop_rate=0.05,
+                                    include_attention: bool = False,
+                                    use_bias=True,
+                                    combine_omics: bool = True,
+                                    model_type: int = 0,
+                                    only_RNA: bool = False
+                                    ):
+    assert len(multi_max_features) == len(mult_feature_names)
+
+    # 特征索引
+    x_feature_inputs = []
+    # 特征值
+    x_value_inputs = []
+    # 特征向量
+    embeddings = []
+    features = []
+    weight_output_all = []
+    if include_attention == True:
+        for max_length, name in zip(multi_max_features, mult_feature_names):
+            # 输入
+            feature_input = Input(shape=(None,), name='Input-{}-Feature'.format(name))
+            value_input = Input(shape=(None,), name='Input-{}-Value'.format(name), dtype='float')
+            x_feature_inputs.append(feature_input)
+            x_value_inputs.append(value_input)
+
+            # 向量
+            embedding = Embedding(max_length, embedding_dims, input_length=None, name='{}-Embedding'.format(name))(
+                feature_input)
+
+            # 向量 * 特征值
+            sparse_value = tf.expand_dims(value_input, 2, name='{}-Expend-Dims'.format(name))
+            sparse_value = BatchNormalization(name='{}-BN-1'.format(name))(sparse_value)
+            x = tf.multiply(embedding, sparse_value, name='{}-Multiply'.format(name))
+            # x = BatchNormalization(name='{}-BN-2'.format(name))(x)
+
+            # # Attention
+            weight_output,a = AttentionWithContext()(x)
+            x = K.tanh(K.sum(weight_output, axis=1))
+
+            x = BatchNormalization(name='{}-BN-3'.format(name))(x)
+
+            features.append(x)
+            weight_output_all.append(a)
+        inputs = []
+        inputs.append(x_feature_inputs)
+        inputs.append(x_value_inputs)
+
+    else:
+        for max_length, name in zip(multi_max_features, mult_feature_names):
+            # 输入
+
+            value_input = Input(shape=(max_length,), name='Input-{}-Value'.format(name), dtype='float')
+
+            x_value_inputs.append(value_input)
+
+            # 向量 * 特征值
+            sparse_value = BatchNormalization(name='{}-BN-1'.format(name))(value_input)
+
+            x = Dense(head_1, name='{}-projection-0'.format(name), activation='relu')(sparse_value)
+
+
+            x = BatchNormalization(name='{}-BN-3'.format(name))(x)
+
+            features.append(x)
+        inputs = []
+        inputs.append(x_value_inputs)
+
+    if combine_omics:
+        if model_type == 0:
+            dropout0 = Dropout(rate=drop_rate)(feature[0])
+            dropout1 = Dropout(rate=drop_rate)(feature[1])
+            output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
+            output1 = Dense(head_1, name='projection-1', activation='relu')(dropout1)
+        
+            return tf.keras.Model(inputs=inputs, outputs=[output0, output1, weight_output_all])
+        else:
+            feature = features[0]
+            dropout = Dropout(rate=drop_rate)(feature)
+            output = Dense(head_1, name='projection-1', activation='relu')(dropout)
+            
+            return tf.keras.Model(inputs=inputs, outputs=[output, weight_output_all])
+    
+    else:
+        dropout0 = Dropout(rate=drop_rate)(features[0])
+        dropout1 = Dropout(rate=drop_rate)(features[1])
+
+        output0 = Dense(head_1, name='projection-0', activation='relu')(dropout0)
+        output1 = Dense(head_1, name='projection-1', activation='relu')(dropout1)
+
+        return tf.keras.Model(inputs=inputs, outputs=[output0, output1, weight_output_all])
+
 
 class EncoderHead(tf.keras.Model):
 
