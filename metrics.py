@@ -1,8 +1,4 @@
 import argparse
-import os
-import torch
-import numpy as np
-import pandas as pd
 from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
 import scanpy as sc
 from sklearn.preprocessing import MinMaxScaler
