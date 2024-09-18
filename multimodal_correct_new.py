@@ -442,6 +442,7 @@ def main():
 
         if test:
             if task == 0:
+                print(f"repeat {repeat}")
                 adata_merged = test_concerto_bc(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
                         attention_t=attention_t, attention_s=attention_s,
                         batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 

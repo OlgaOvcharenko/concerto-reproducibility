@@ -14,10 +14,10 @@ test=1
 
 epochs=("3")
 lrs=("1e-3")
-data=("simulated")
+data=("simulated human_cite")
 model_type=("0")
 combine_omics=1
-tasks=("1")
+tasks=("0")
 # tasks=("0 1")
 
 
