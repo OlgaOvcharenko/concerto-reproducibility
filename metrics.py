@@ -1,50 +1,27 @@
 import argparse
 import os
-import sys
-sys.path.append("../")
+import torch
 import numpy as np
+import pandas as pd
+from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
 import scanpy as sc
-import anndata as ad
+from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
-from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
-
-from scib_metrics.benchmark import Benchmarker, BioConservation
-import faiss
-from scib_metrics.nearest_neighbors import NeighborsResults
-
-import time
-
-def faiss_hnsw_nn(X: np.ndarray, k: int):
-    """Gpu HNSW nearest neighbor search using faiss.
-
-    See https://github.com/nmslib/hnswlib/blob/master/ALGO_PARAMS.md
-    for index param details.
-    """
-    X = np.ascontiguousarray(X, dtype=np.float32)
-    res = faiss.StandardGpuResources()
-    M = 32
-    index = faiss.IndexHNSWFlat(X.shape[1], M, faiss.METRIC_L2)
-    gpu_index = faiss.index_cpu_to_gpu(res, 0, index)
-    gpu_index.add(X)
-    distances, indices = gpu_index.search(X, k)
-    del index
-    del gpu_index
-    # distances are squared
-    return NeighborsResults(indices=indices, distances=np.sqrt(distances))
 
 
-def faiss_brute_force_nn(X: np.ndarray, k: int):
-    """Gpu brute force nearest neighbor search using faiss."""
-    X = np.ascontiguousarray(X, dtype=np.float32)
-    res = faiss.StandardGpuResources()
-    index = faiss.IndexFlatL2(X.shape[1])
-    gpu_index = faiss.index_cpu_to_gpu(res, 0, index)
-    gpu_index.add(X)
-    distances, indices = gpu_index.search(X, k)
-    del index
-    del gpu_index
-    # distances are squared
-    return NeighborsResults(indices=indices, distances=np.sqrt(distances))
+_BIO_METRICS = BioConservation(isolated_labels=True, 
+                               nmi_ari_cluster_labels_leiden=True, 
+                               nmi_ari_cluster_labels_kmeans=False, 
+                               silhouette_label=True, 
+                               clisi_knn=True
+                               )
+_BATCH_METRICS = BatchCorrection(graph_connectivity=True, 
+                                 kbet_per_label=True, 
+                                 ilisi_knn=True, 
+                                 pcr_comparison=True, 
+                                 silhouette_batch=True
+                                 )
+
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -56,43 +33,40 @@ def get_args():
     return args
 
 
+def evaluate_model(adata, batch_key="batch", cell_type_label="cell_type_l1"):
+    names_obs = list(adata.obsm.keys())
+    names_obs.remove("X_pca")
+    names_obs.remove("Unintegrated_HVG_only")
+    
+    bm = Benchmarker(
+                adata,
+                batch_key=batch_key,
+                label_key=cell_type_label,
+                embedding_obsm_keys=names_obs,
+                bio_conservation_metrics=_BIO_METRICS,
+                batch_correction_metrics=_BATCH_METRICS,
+                n_jobs=4,
+            )
+    bm.benchmark()
+    a = bm.get_results(False, True)
+    results = a[:1].astype(float).round(4)
+    return results
+
 args = get_args()
 data = args.data
 
 print("Read adata")
-adata_merged = sc.read_h5ad(data)
-print(adata_merged)
+adata = None
+for repeat in range(0, 5):
+    file_repeat = data.split(".")[0][:-1] + f"{repeat}.h5ad"
+    if repeat == 0:
+        adata = sc.read_h5ad(file_repeat) 
+    else:
+        tmp = sc.read_h5ad(file_repeat) 
+        names_obs = list(tmp.obsm.keys())
+        names_obs.remove("X_pca")
+        names_obs.remove("Unintegrated_HVG_only")
+        adata.obsm[f"Embedding_{repeat}"] = tmp.obsm[names_obs[0]]
 
-
-print("Start metrics")
-names_obs = list(adata_merged.obsm.keys())
-names_obs.remove("X_pca")
-biocons = BioConservation(isolated_labels=True, nmi_ari_cluster_labels_leiden=True, nmi_ari_cluster_labels_kmeans=False)
-
-start = time.time()
-bm = Benchmarker(
-    adata_merged,
-    batch_key="batch",
-    label_key="cell_type",
-    embedding_obsm_keys=names_obs,
-    bio_conservation_metrics=biocons,
-    n_jobs=-1,
-)
-
-bm.prepare(neighbor_computer=faiss_brute_force_nn)
-bm.benchmark()
-end = time.time()
-print(f"Time: {int((end - start) / 60)} min {int((end - start) % 60)} sec")
-
-df = bm.get_results(min_max_scale=False)
-print(df)
-df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data.split("/")[-1][:-5]}_metrics.csv')
-
-# bm.plot_results_table(save_dir=f'./Multimodal_pretraining/plots/metrics/')
-# df.to_csv(f'./Multimodal_pretraining/plots/metrics/{data[:-5]}')
-
-dir = f"{data[:-5]}"
-# data.split("/")[-1][:-5]
-if not os.path.exists(dir):
-    os.makedirs(dir, exist_ok=True)
-bm.plot_results_table(save_dir='./Multimodal_pretraining/plots/metrics/')
+df = evaluate_model(adata=adata)
+df.to_csv(f'./Multimodal_pretraining/results/{data.split("/")[-1][:-5].split("_")[0]}/{data.split("/")[-1][:-5]}_metrics_True.csv')

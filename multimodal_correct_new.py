@@ -253,15 +253,17 @@ def test_concerto_qr(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
         print(f"Per class {cell_types_list} F1 {f1}")
         print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
 
+        return adata_merged, acc, f1_median, f1_macro, f1_weighted
 
         # Missing modality prediction
     return adata_merged
 
-def test_concerto_mp(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: str, Protein_tf_path_test: str, data: str, 
-                   attention_t: bool, attention_s: bool,
-                   batch_size:int, epoch: int, lr: float, drop_rate: float, 
-                   heads: int, combine_omics: int, model_type: int, 
-                   save_path: str, train: bool = False, adata_merged_train = None, repeat: int = 0):
+def test_concerto_mp(weight_path: str, RNA_tf_path: str, Protein_tf_path: str,
+                     RNA_tf_path_test: str, Protein_tf_path_test: str, data: str, 
+                     attention_t: bool, attention_s: bool,
+                     batch_size:int, epoch: int, lr: float, drop_rate: float, 
+                     heads: int, combine_omics: int, model_type: int, 
+                     save_path: str, repeat: int = 0):
     # Test
     nn = "encoder"
     dr = 0.0 # drop_rate
@@ -269,6 +271,27 @@ def test_concerto_mp(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
     e = epoch
     
     saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
+    
+    embedding_train, embedding2_train, _, RNA_id_train, _ =  concerto_test_multimodal_modalities(
+            ['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'] if data == 'human' else ["GEX", "ADT"],
+            weight_path, 
+            RNA_tf_path,
+            Protein_tf_path,
+            n_cells_for_sample=None,
+            super_parameters={
+                'batch_size': batch_size, 
+                'epoch_pretrain': e, 'lr': lr, 
+                'drop_rate': dr, 
+                'attention_t': attention_t, 
+                'attention_s': attention_s, 
+                'heads': heads,
+                'combine_omics': combine_omics,
+                'model_type': model_type,
+                'data' : data
+            }, 
+            saved_weight_path = saved_weight_path,
+            only_RNA=only_RNA)
+    
     embedding, embedding2, _, RNA_id, _ =  concerto_test_multimodal_modalities(
             ['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'] if data == 'human' else ["GEX", "ADT"],
             weight_path, 
@@ -290,25 +313,32 @@ def test_concerto_mp(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
             only_RNA=only_RNA)
     
     if data == "simulated":
-        adata_Protein = sc.read(save_path + f'adata_Protein_{"train" if train else "test"}.h5ad')
+        adata_Protein = sc.read(save_path + f'adata_Protein_test.h5ad')
+        adata_Protein_train = sc.read(save_path + f'adata_Protein_train.h5ad')
     elif data == 'human_cite':
-        adata_Protein = sc.read(save_path + f'adata_ADT_{"train" if train else "test"}.h5ad')
-    
-    if not train:
-        nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(adata_merged_train.obsm[f'train_{e}_{nn}_{dr}_{only_RNA}_{repeat}'])
-        indices = nbrs.kneighbors(embedding, return_distance=False)
-        
+        adata_Protein = sc.read(save_path + f'adata_ADT_test.h5ad')
         adata_Protein_train = sc.read(save_path + f'adata_ADT_train.h5ad')
-        val_new_protein = np.array(adata_Protein_train.X.todense())[indices].mean(axis=1)
-        tmp = adata_Protein.X.todense()
+    
+    nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(embedding_train)
+    indices = nbrs.kneighbors(embedding, return_distance=False)
 
-        pearsons = []
-        for true_protein, pred_protein in zip(tmp, val_new_protein):
-            pearsons.append(np.corrcoef(pred_protein, true_protein)[0, 1])
+    print(indices.shape)
+    print(adata_Protein_train.shape)
 
-        print(f'Pearson {np.mean(pearsons)}')
+    # slice acc to embedding
+    adata_Protein = adata_Protein[RNA_id]
+    adata_Protein_train = adata_Protein_train[RNA_id_train]
 
-    return adata_merged
+    val_new_protein = np.array(adata_Protein_train.X.todense())[indices].mean(axis=1)
+    tmp = adata_Protein.X.todense()
+
+    pearsons = []
+    for true_protein, pred_protein in zip(tmp, val_new_protein):
+        pearsons.append(np.corrcoef(pred_protein, true_protein)[0, 1])
+
+    print(f'Pearson {repeat}: {np.mean(pearsons)}')
+
+    return np.mean(pearsons)
 
 def test_concerto_bc(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test: str, Protein_tf_path_test: str, data: str, 
                      attention_t: bool, attention_s: bool, batch_size:int, epoch: int, lr: float, drop_rate: float, 
@@ -393,7 +423,8 @@ def main():
     save_path = './Multimodal_pretraining/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-
+    
+    res_df = pd.DataFrame(columns=["accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
     for repeat in range(0, 5):
         if task == 0:
             RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA = read_data(data=data, save_path=save_path, task=task)
@@ -433,7 +464,7 @@ def main():
                 save_merged_adata(adata_merged=adata_merged, filename=filename)
 
                 # Test on test data
-                adata_merged_test = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
+                adata_merged_test, acc, f1_median, f1_macro, f1_weighted = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
                         attention_t=attention_t, attention_s=attention_s,
                         batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                         heads=heads, combine_omics=combine_omics, model_type=model_type, 
@@ -443,12 +474,18 @@ def main():
                 save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
                 # Model prediction
-                test_concerto_mp(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
-                        attention_t=attention_t, attention_s=attention_s,
-                        batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-                        heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                        save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test, adata_merged_train=adata_merged, repeat=repeat)
-
+                pearson = test_concerto_mp(weight_path=weight_path, data=data, 
+                                 RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, 
+                                 RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, 
+                                 attention_t=attention_t, attention_s=attention_s,
+                                 batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                                 heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                                 save_path=save_path, repeat=repeat)
+                
+                res_df.loc[repeat] = [acc, f1_median, f1_macro, f1_weighted, pearson]
+    
+    if task != 0:
+        res_df.to_csv(f'./Multimodal_pretraining/results/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv')
 
 main()
 # test_r()
