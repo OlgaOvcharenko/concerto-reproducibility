@@ -58,7 +58,7 @@ data = args.data
 print("Read adata")
 adata = None
 for repeat in range(0, 5):
-    file_repeat = data.split(".")[0][:-1] + f"{repeat}.h5ad"
+    file_repeat = data.split(".h5ad")[0][:-1] + f"{repeat}.h5ad"
     if repeat == 0:
         adata = sc.read_h5ad(file_repeat) 
     else:
