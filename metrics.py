@@ -31,7 +31,9 @@ def get_args():
 
 def evaluate_model(adata, batch_key="batch", cell_type_label="cell_type_l1"):
     names_obs = list(adata.obsm.keys())
-    
+    names_obs.remove("X_pca")
+    names_obs.remove("Unintegrated_HVG_only")
+    print(names_obs)
     bm = Benchmarker(
                 adata,
                 batch_key=batch_key,
@@ -61,8 +63,7 @@ for repeat in range(0, 5):
         names_obs = list(tmp.obsm.keys())
         names_obs.remove("X_pca")
         names_obs.remove("Unintegrated_HVG_only")
-        print(names_obs)
         adata.obsm[f"Embedding_{repeat}"] = tmp.obsm[names_obs[0]]
-print(adata)
-# df = evaluate_model(adata=adata)
+# print(adata)
+df = evaluate_model(adata=adata)
 # df.to_csv(f'./Multimodal_pretraining/results/{data.split("/")[-1][:-5].split("_")[0]}/{data.split("/")[-1][:-5]}_metrics_True.csv')
