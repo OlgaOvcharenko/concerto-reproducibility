@@ -45,7 +45,9 @@ def evaluate_model(adata, batch_key="batch", cell_type_label="cell_type_l1"):
             )
     bm.benchmark()
     a = bm.get_results(False, True)
-    results = a[:1].astype(float).round(4)
+    print(a)
+    results = a.round(decimals=4)
+    # results = a[:1].astype(float).round(4)
     return results
 
 args = get_args()
@@ -64,6 +66,6 @@ for repeat in range(0, 5):
         names_obs.remove("X_pca")
         names_obs.remove("Unintegrated_HVG_only")
         adata.obsm[f"Embedding_{repeat}"] = tmp.obsm[names_obs[0]]
-# print(adata)
+
 df = evaluate_model(adata=adata)
-# df.to_csv(f'./Multimodal_pretraining/results/{data.split("/")[-1][:-5].split("_")[0]}/{data.split("/")[-1][:-5]}_metrics_True.csv')
+df.to_csv(f'./Multimodal_pretraining/results/{data.split("/")[-1][:-5].split("_")[0]}/{data.split("/")[-1][:-5]}_metrics_True.csv')
