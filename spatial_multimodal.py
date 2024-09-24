@@ -254,6 +254,7 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
             adata_RNA_1 = adata_RNA[RNA_id].copy()
             adata_RNA_1.obsm['X_embedding'] = embedding
             sc.pp.neighbors(adata_RNA_1, use_rep="X_embedding", metric="cosine")
+            sc.tl.umap(adata_RNA_1, min_dist=0.1)
             sc.pl.umap(adata_RNA_1, color=['cell_type'], size=10, legend_fontweight='light') # edges=True
             plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{mask}_train_{combine_omics}_oRNA{only_image}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
 
@@ -261,6 +262,7 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
             adata_RNA_1_test.obsm['X_embedding'] = embedding_test
             adata_RNA_1.obs[f'pred_cell_type'] = query_neighbor
             sc.pp.neighbors(adata_RNA_1_test, use_rep="X_embedding", metric="cosine")
+            sc.tl.umap(adata_RNA_1_test, min_dist=0.1)
             sc.pl.umap(adata_RNA_1_test, color=['cell_type', 'pred_cell_type'], size=10, legend_fontweight='light') # edges=True
             plt.savefig(f'./Multimodal_pretraining/plots/{data}/{data}_{mask}_test_{combine_omics}_oRNA{only_image}_mt_{model_type}_bs_{batch_size}_{nn}_{e}_{lr}_{drop_rate}_{dr}_{attention_s}_{attention_t}_{heads}.png')
 
