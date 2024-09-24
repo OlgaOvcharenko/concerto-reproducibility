@@ -260,7 +260,7 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
 
             adata_RNA_1_test = adata_RNA_test[RNA_id_test].copy()
             adata_RNA_1_test.obsm['X_embedding'] = embedding_test
-            adata_RNA_1.obs[f'pred_cell_type'] = query_neighbor
+            adata_RNA_1_test.obs[f'pred_cell_type'] = query_neighbor
             sc.pp.neighbors(adata_RNA_1_test, use_rep="X_embedding", metric="cosine")
             sc.tl.umap(adata_RNA_1_test, min_dist=0.1)
             sc.pl.umap(adata_RNA_1_test, color=['cell_type', 'pred_cell_type'], size=10, legend_fontweight='light') # edges=True
