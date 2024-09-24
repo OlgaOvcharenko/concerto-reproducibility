@@ -188,8 +188,8 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
     dr = 0.0 # drop_rate
     only_images = [False, True]
 
-    i = 0
-    res_df = pd.DataFrame(columns=["epoch", "onlyImage", "accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
+    r_i = 0
+    res_df = pd.DataFrame(columns=["epoch", "onlyImage", "accuracy", "f1_median", "f1_macro", "f1_weighted"])
     for only_image in only_images:
         for e in ep_vals: 
             saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
@@ -247,8 +247,8 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
             print(f"Per class {cell_types_list} F1 {f1}")
             print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
             
-            res_df.loc[i] = [e, only_image, acc, f1_median, f1_macro, f1_weighted]
-            i += 1
+            res_df.loc[r_i] = [e, only_image, acc, f1_median, f1_macro, f1_weighted]
+            r_i += 1
 
             # Add plot train and test
             adata_RNA_1 = adata_RNA[RNA_id].copy()
