@@ -383,7 +383,7 @@ def main():
             # filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_both.h5ad'
             # save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
-            res_df = test_concerto_full(adata_RNA-adata_RNA, adata_RNA_test=adata_RNA_test, weight_path=weight_path, data=data, 
+            res_df = test_concerto_full(adata_RNA=adata_RNA, adata_RNA_test=adata_RNA_test, weight_path=weight_path, data=data, 
                                         RNA_tf_path=RNA_tf_path, staining_tf_path=staining_tf_path_test, 
                                         RNA_tf_path_test=RNA_tf_path_test, staining_tf_path_test=staining_tf_path_test, 
                                         attention_t=attention_t, attention_s=attention_s, mask=mask,

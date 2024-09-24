@@ -12,7 +12,7 @@ attention_t=("1")
 attention_s=("0")
 heads=("128")
 data=("spatial_split")
-train=1
+train=0
 test=1
 mask=("0")
 
