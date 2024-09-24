@@ -238,10 +238,10 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
             
             cell_types_list = pd.unique(adata_RNA.obs['cell_type']).tolist()
 
-            acc = accuracy_score(adata_RNA.obs['cell_type'].to_list(), query_neighbor)
-            f1 = f1_score(adata_RNA.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average=None)
-            f1_weighted = f1_score(adata_RNA.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='weighted')
-            f1_macro = f1_score(adata_RNA.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='macro')
+            acc = accuracy_score(adata_RNA_test.obs['cell_type'].to_list(), query_neighbor)
+            f1 = f1_score(adata_RNA_test.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average=None)
+            f1_weighted = f1_score(adata_RNA_test.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='weighted')
+            f1_macro = f1_score(adata_RNA_test.obs['cell_type'].to_list(), query_neighbor, labels=cell_types_list, average='macro')
             f1_median = np.median(f1)
             
             print(f"Per class {cell_types_list} F1 {f1}")
