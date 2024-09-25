@@ -71,6 +71,8 @@ def get_args():
     
     parser.add_argument('--mask', type= int, required=True,
                         help='0/1')
+    parser.add_argument('--model_type_image', type= int, required=True,
+                        help='0 VGG+CNN, 1 EfficientNetB4+B7')
 
     args = parser.parse_args()
     return args
@@ -78,7 +80,7 @@ def get_args():
 def train_concerto(weight_path: str, RNA_tf_path: str, staining_tf_path: str, data: str, 
                    attention_t: bool, attention_s: bool,
                    batch_size:int, epoch: int, lr: float, drop_rate: float, 
-                   heads: int, combine_omics: int, model_type: int, mask: bool):
+                   heads: int, combine_omics: int, model_type: int, mask: bool, model_type_image: int = 0):
     # Train
     concerto_train_spatial_multimodal(['RNA','staining'], 
                                       RNA_tf_path, 
@@ -94,7 +96,8 @@ def train_concerto(weight_path: str, RNA_tf_path: str, staining_tf_path: str, da
                                           'heads': heads,
                                           'combine_omics': combine_omics,
                                           'model_type': model_type,
-                                          'mask': mask
+                                          'mask': mask,
+                                          'model_type_image': model_type_image,
                                           })
 
     print("Trained.")
@@ -104,7 +107,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                   attention_t: bool, attention_s: bool,
                   batch_size:int, epoch: int, lr: float, drop_rate: float, 
                   heads: int, combine_omics: int, model_type: int, mask: int,
-                  save_path: str, train: bool = False, adata_RNA_train = None):
+                  save_path: str, train: bool = False, adata_RNA_train = None, model_type_image: int = 0):
     ep_vals = []
     i = 32 # i = 4
     while i < epoch:
@@ -137,7 +140,8 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
                         'heads': heads,
                         'combine_omics': combine_omics,
                         'model_type': model_type,
-                        'mask': mask
+                        'mask': mask,
+                        'model_type_image': model_type_image,
                     }, 
                     saved_weight_path = saved_weight_path,
                     only_image=only_image)
@@ -200,7 +204,8 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
                   RNA_tf_path_test: str, staining_tf_path_test: str, 
                   attention_t: bool, attention_s: bool,
                   batch_size:int, epoch: int, lr: float, drop_rate: float, 
-                  heads: int, combine_omics: int, model_type: int, mask: int, cell_labels: str):
+                  heads: int, combine_omics: int, model_type: int, mask: int, 
+                  cell_labels: str, model_type_image: int = 0):
     ep_vals = []
     i = 4
     while i < epoch:
@@ -233,7 +238,8 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
                         'heads': heads,
                         'combine_omics': combine_omics,
                         'model_type': model_type,
-                        'mask': mask
+                        'mask': mask,
+                        'model_type_image': model_type_image
                     }, 
                     saved_weight_path = saved_weight_path,
                     only_image=only_image)
@@ -253,7 +259,8 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
                         'heads': heads,
                         'combine_omics': combine_omics,
                         'model_type': model_type,
-                        'mask': mask
+                        'mask': mask,
+                        'model_type_image': model_type_image
                     }, 
                     saved_weight_path = saved_weight_path,
                     only_image=only_image)
@@ -359,6 +366,7 @@ def main():
     test = args.test
     combine_omics = args.combine_omics
     mask = args.mask
+    model_type_image = args.model_type_image
     cell_labels = 'cell_type_l1'
 
     print(f"Multimodal correction: epoch {epoch}, model type {model_type}, lr {lr}, batch_size {batch_size}, drop_rate {drop_rate}, attention_t {attention_t}, attention_s {attention_s}, heads {heads}.")
@@ -402,7 +410,8 @@ def main():
                        heads=heads, 
                        combine_omics=combine_omics, 
                        model_type=model_type,
-                       mask=mask)
+                       mask=mask,
+                       model_type_image=model_type_image)
 
     if test:
         if data == "spatial_split":
@@ -411,8 +420,8 @@ def main():
                                         RNA_tf_path_test=RNA_tf_path_test, staining_tf_path_test=staining_tf_path_test, 
                                         attention_t=attention_t, attention_s=attention_s, mask=mask,
                                         batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-                                        heads=heads, combine_omics=combine_omics, model_type=model_type, cell_labels=cell_labels) 
-            filename = f'./Multimodal_pretraining/data/{data}/qr_{mask}_{combine_omics}_mt_{model_type}_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv'
+                                        heads=heads, combine_omics=combine_omics, model_type=model_type, cell_labels=cell_labels, model_type_image=model_type_image) 
+            filename = f'./Multimodal_pretraining/results/{data}/qr_{mask}_{combine_omics}_mt_{model_type}_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv'
             res_df.to_csv(filename)
         
         else:
@@ -422,9 +431,9 @@ def main():
                                         attention_t=attention_t, attention_s=attention_s, mask=mask,
                                         batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                                         heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                                        save_path=save_path, train=True)
+                                        save_path=save_path, train=True, model_type_image=model_type_image)
             
-            filename = f'./Multimodal_pretraining/data/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_both.h5ad'
+            filename = f'./Multimodal_pretraining/results/{data}/{data}_{mask}_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_both.h5ad'
             save_merged_adata(adata_merged=adata_merged, filename=filename)
 
 main()

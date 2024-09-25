@@ -28,7 +28,7 @@ adata_RNA = sdata['table']
 difference = list(set(sdata['table'].obs["cell_id"].tolist()).symmetric_difference(set(labels["id"].tolist())))
 
 for val in difference:
-    labels = labels._append({"id": val, "manual_cell_type": "NA"}, ignore_index = True)
+    labels = labels._append({"id": val, "manual_cell_type": "other"}, ignore_index = True)
 
 labels = labels.set_index('id')
 labels = labels.reindex(index=sdata["table"].obs["cell_id"])
