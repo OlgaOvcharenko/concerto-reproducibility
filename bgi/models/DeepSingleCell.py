@@ -10,6 +10,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras import models, layers
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers, losses, metrics, datasets
+from tensorflow.keras.applications import EfficientNetB4, EfficientNetB7
 from bgi.layers.attention import AttentionWithContext
 
 class CausalSelfAttention(tf.keras.layers.Layer):
@@ -138,7 +139,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             output1 = image_network(image_value_input)
         else:
             # EfficientNet B7
-            image_network = tf.keras.applications.EfficientNetB7(
+            image_network = EfficientNetB7(
                 include_top=True,
                 weights='imagenet',
             )
@@ -165,7 +166,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             output1 = image_network(image_value_input)
         else:
             # EfficientNet B4
-            image_network = tf.keras.applications.EfficientNetB4(
+            image_network = EfficientNetB4(
                 include_top=True,
                 weights='imagenet',
             )
