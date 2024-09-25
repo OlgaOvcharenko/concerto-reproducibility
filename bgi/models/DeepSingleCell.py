@@ -35,7 +35,6 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                                  head_3=128,
                                  drop_rate=0.05,
                                  include_attention: bool = False,
-                                 combine_omics: bool = True,
                                  model_type: int = 0
                                  ):
     assert len(multi_max_features) == len(mult_feature_names)
@@ -97,61 +96,86 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
     max_length, name = multi_max_features[1], mult_feature_names[1]
     
     if include_attention:
-        # VGG16
-        image_network = models.Sequential([
-            layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(64, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            BatchNormalization(),
+        if model_type == 0:
+            # VGG16
+            image_network = models.Sequential([
+                layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(64, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                BatchNormalization(),
 
-            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-            layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            BatchNormalization(),
+                layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+                layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(128, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                BatchNormalization(),
 
-            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-            layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            BatchNormalization(),
+                layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+                layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(256, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                BatchNormalization(),
 
-            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            BatchNormalization(),
-            
-            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
-            BatchNormalization(),
-            layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
-            layers.Flatten(),
-            Dropout(rate=drop_rate),
+                layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+                layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                BatchNormalization(),
+                
+                layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+                layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                layers.Conv2D(512, (3, 3), activation='relu', padding='same', data_format="channels_last", strides=(2, 2)),
+                BatchNormalization(),
+                layers.MaxPooling2D(pool_size=(2, 2), padding='same'),
+                layers.Flatten(),
+                Dropout(rate=drop_rate),
 
-            Dense(4096, activation='relu'),
-            BatchNormalization(),
-            Dense(2048, activation='relu'),
-            BatchNormalization(),
-            Dense(head_1, activation='relu')
-        ])
+                Dense(4096, activation='relu'),
+                BatchNormalization(),
+                Dense(2048, activation='relu'),
+                BatchNormalization(),
+                Dense(head_1, activation='relu')
+            ])
+            output1 = image_network(image_value_input)
+        else:
+            # EfficientNet B7
+            image_network = tf.keras.applications.EfficientNetB7(
+                include_top=True,
+                weights='imagenet',
+            )
+            print(image_network)
+            print(image_network.summary())
+            exit()
+            output1 = image_network.get_layer('').output
 
     else:
-        image_network = models.Sequential([
-            layers.Conv2D(32, (3, 3), activation='relu', padding='valid', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
-            BatchNormalization(),
-            layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
-            layers.Conv2D(64, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
-            BatchNormalization(),
-            layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
-            layers.Conv2D(128, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
-            layers.Flatten(),
-            Dropout(rate=drop_rate),
-            Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
-        ])
-        print(inputs)
-
-    output1 = image_network(image_value_input)
+        if model_type == 0:
+            # CNNs
+            image_network = models.Sequential([
+                layers.Conv2D(32, (3, 3), activation='relu', padding='valid', input_shape=(max_length, max_length, 3), data_format="channels_last", strides=(2, 2)),
+                BatchNormalization(),
+                layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
+                layers.Conv2D(64, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
+                BatchNormalization(),
+                layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
+                layers.Conv2D(128, (3, 3), activation='relu', padding='valid', data_format="channels_last", strides=(2, 2)),
+                layers.Flatten(),
+                Dropout(rate=drop_rate),
+                Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
+            ])
+            output1 = image_network(image_value_input)
+        else:
+            # EfficientNet B4
+            image_network = tf.keras.applications.EfficientNetB4(
+                include_top=True,
+                weights='imagenet',
+            )
+            print(image_network)
+            print(image_network.summary())
+            exit()
+            output1 = image_network.get_layer('').output
+            
+            # base_model = VGG19(weights='imagenet')
+            # model = Model(inputs=base_model.input, outputs=base_model.get_layer('block4_pool').output)
 
     return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
 

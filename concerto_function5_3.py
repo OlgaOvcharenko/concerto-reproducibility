@@ -529,7 +529,7 @@ def concerto_train_ref(ref_tf_path:str, weight_path:str, super_parameters=None):
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'batch_corr_simulated_{super_parameters["epoch"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
-    set_seeds(0)
+    set_seeds(np.random.randint(0, 10))
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
@@ -1210,7 +1210,7 @@ def concerto_test_inter_supervised(model_path: str, ref_tf_path: str, tissue_id:
 
 # query
 def concerto_train_query(ref_model_path:str,ref_tf_path:str,query_tf_path:str, weight_path:str, super_parameters=None):
-    set_seeds(0)
+    set_seeds(np.random.randint(0, 10))
     if super_parameters is None:
         super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5}
     #dirname = os.getcwd()
@@ -1445,7 +1445,7 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
-    set_seeds(0)   
+    set_seeds(np.random.randint(0, 10))   
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
@@ -1664,7 +1664,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_{super_parameters["mask"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
-    set_seeds(0)   
+    set_seeds(np.random.randint(0, 10))   
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
@@ -2008,7 +2008,7 @@ def concerto_train_multimodal_tt(mult_feature_names:list, RNA_tf_path: str, Prot
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
-    set_seeds(0)   
+    set_seeds(np.random.randint(0, 10))   
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
@@ -2123,7 +2123,7 @@ def concerto_train_multimodal_ss(mult_feature_names:list, RNA_tf_path: str, Prot
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'multi_{super_parameters["data"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
-    set_seeds(0)   
+    set_seeds(np.random.randint(0, 10))   
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     if super_parameters is None:
@@ -2234,7 +2234,7 @@ def concerto_train_multimodal_ss(mult_feature_names:list, RNA_tf_path: str, Prot
 
 
 def concerto_test_1set_attention(model_path:str, ref_tf_path:str, super_parameters=None, n_cells_for_ref=5000):
-    set_seeds(0)
+    set_seeds(np.random.randint(0, 10))
     
     if super_parameters is None:
             super_parameters = {'batch_size': 32, 'epoch': 1, 'lr': 1e-5}
