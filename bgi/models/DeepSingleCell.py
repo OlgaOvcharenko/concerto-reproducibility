@@ -10,7 +10,8 @@ import tensorflow.keras.backend as K
 from tensorflow.keras import models, layers
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers, losses, metrics, datasets
-from tensorflow.keras.applications import EfficientNetB4, EfficientNetB7
+# from tensorflow.keras.applications import EfficientNetB4, EfficientNetB7
+from keras.applications.efficientnet import EfficientNetB4, EfficientNetB7
 from bgi.layers.attention import AttentionWithContext
 
 class CausalSelfAttention(tf.keras.layers.Layer):
