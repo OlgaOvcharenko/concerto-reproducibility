@@ -1880,9 +1880,8 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
     source_data_batch = []
     source_data_feature = []
+    source_data_feature_2 = []
     RNA_id_all = []
-    attention_output_RNA_all = []
-    attention_output_Protein_all = []
     for RNA_file, staining_file in zip(train_source_list_RNA, train_source_list_staining):
         train_db_RNA = create_classifier_spatial_RNA_dataset_multi([RNA_file],
                                                            batch_size=super_parameters['batch_size'],
@@ -1917,9 +1916,9 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                                             [source_values_RNA, source_image_raw_staining]], training=False)
 
                     if only_image:
-                        encode_output = encode_output2
+                        encode_output = encode_output1
                     else:
-                        encode_output = tf.concat([encode_output2, encode_output1], axis=1)
+                        encode_output = tf.concat([encode_output1, encode_output2], axis=1)
                     
                     break
 
@@ -1932,6 +1931,9 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         
         source_data_feature_1 = np.zeros((feature_len, dim))
         source_data_batch_1 = np.zeros((feature_len))
+
+        source_data_feature_1_2 = np.zeros((feature_len, dim))
+
         RNA_id = []
         all_samples = 0
         for (source_features_RNA, source_values_RNA, source_batch_RNA, source_id_RNA, _), \
@@ -1971,23 +1973,35 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                                             [source_values_RNA, source_image_raw_staining]], training=False)
 
                 if only_image:
-                    encode_output = encode_output2
+                    encode_output = encode_output1
                 else:
                     encode_output = tf.concat([encode_output1, encode_output2], axis=1)
 
             encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
             source_data_feature_1[all_samples:all_samples + len(source_id_RNA), :] = encode_output
             source_data_batch_1[all_samples:all_samples + len(source_id_RNA)] = source_batch_RNA
+
+            if only_image:
+                encode_output2 = tf.nn.l2_normalize(encode_output2, axis=-1)
+                source_data_feature_1_2[all_samples:all_samples + len(source_id_RNA), :] = encode_output2
+
             RNA_id.extend(list(source_id_RNA.numpy().astype('U')))
             all_samples += len(source_id_RNA)
 
         source_data_feature.extend(source_data_feature_1[:all_samples])
         source_data_batch.extend(source_data_batch_1[:all_samples])
+        if only_image:
+            source_data_feature_2.extend(source_data_feature_1_2[:all_samples])
         RNA_id_all.extend(RNA_id[:all_samples])
 
     source_data_feature = np.array(source_data_feature).astype('float32')
+    if only_image:
+        source_data_feature_2 = np.array(source_data_feature_2).astype('float32')
     source_data_batch = np.array(source_data_batch).astype('int32')
-    return source_data_feature, source_data_batch, RNA_id_all
+    if only_image:
+        return source_data_feature, source_data_feature_2, source_data_batch, RNA_id_all
+    else:    
+        return source_data_feature, source_data_batch, RNA_id_all
 
 
 def concerto_train_multimodal_tt(mult_feature_names:list, RNA_tf_path: str, Protein_tf_path: str, weight_path: str, super_parameters=None):
