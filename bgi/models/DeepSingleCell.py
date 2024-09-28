@@ -146,7 +146,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 weights=None # 'imagenet',
             )
             image_network = models.Sequential([
-                base_model.layers[:-1],
+                models.Sequential(base_model.layers[:-1]),
                 layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
                 layers.Flatten(),
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
@@ -179,7 +179,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 weights=None # 'imagenet',
             )
             image_network = models.Sequential([
-                base_model.layers[:-1],
+                models.Sequential(base_model.layers[:-1]),
                 layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
                 layers.Flatten(),
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
