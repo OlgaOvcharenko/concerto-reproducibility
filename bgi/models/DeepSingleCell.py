@@ -145,15 +145,16 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 include_top=False,
                 weights=None # 'model_weights/efficientnetb7.h5',
             )
-            x = base_model.layers[-1].output
+            base_model._layers.pop()
             
             image_network = models.Sequential([
+                base_model,
                 layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
                 layers.Flatten(),
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
             ])
-            
-            output1 = image_network(x)
+            print(image_network.summary())
+            output1 = image_network(image_value_input)
 
     else:
         if model_type == 0:
@@ -176,17 +177,18 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             base_model = EfficientNetB4(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=False,
-                weights=None # 'model_weights/efficientnetb4.h5 ',
+                weights=None # 'model_weights/efficientnetb7.h5',
             )
-            x = base_model.layers[-1].output
+            base_model._layers.pop()
             
             image_network = models.Sequential([
+                base_model,
                 layers.MaxPooling2D(pool_size=(2, 2), padding='valid'),
                 layers.Flatten(),
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
             ])
-
-            output1 = image_network(x)
+            print(image_network.summary())
+            output1 = image_network(image_value_input)
 
     return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
 
