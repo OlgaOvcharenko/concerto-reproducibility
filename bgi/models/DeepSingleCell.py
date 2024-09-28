@@ -140,12 +140,13 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             output1 = image_network(image_value_input)
         else:
             # EfficientNet B7
-            base_model = EfficientNetB7(
+            base_model2 = EfficientNetB7(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=False,
                 weights=None # 'model_weights/efficientnetb7.h5',
             )
-            base_model._layers.pop()
+            base_model2.layers.pop()
+            base_model = Model(base_model2.input, base_model2.layers[-1].output)
             
             image_network = models.Sequential([
                 base_model,
@@ -174,12 +175,13 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             output1 = image_network(image_value_input)
         else:
             # EfficientNet B4
-            base_model = EfficientNetB4(
+            base_model2 = EfficientNetB4(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=False,
-                weights=None # 'model_weights/efficientnetb7.h5',
+                weights=None # 'model_weights/efficientnetb4.h5',
             )
-            base_model._layers.pop()
+            base_model2.layers.pop()
+            base_model = Model(base_model2.input, base_model2.layers[-1].output)
             
             image_network = models.Sequential([
                 base_model,
