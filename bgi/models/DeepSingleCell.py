@@ -145,9 +145,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 include_top=True,
                 weights=None # 'imagenet',
             )
-            # print(image_network)
-            # print(image_network.summary())
-            # exit()
+            print(image_network.summary())
             output1 = image_network(image_value_input)
 
     else:
@@ -173,9 +171,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 include_top=True,
                 weights=None # 'imagenet',
             )
-            # print(image_network)
-            # print(image_network.summary())
-            # exit()
+            print(image_network.summary())
             output1 = image_network(image_value_input)
             
             # base_model = VGG19(weights='imagenet')
