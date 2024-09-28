@@ -141,6 +141,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         else:
             # EfficientNet B7
             image_network = EfficientNetB7(
+                input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=True,
                 weights=None # 'imagenet',
             )
@@ -168,6 +169,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         else:
             # EfficientNet B4
             image_network = EfficientNetB4(
+                input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=True,
                 weights=None # 'imagenet',
             )
