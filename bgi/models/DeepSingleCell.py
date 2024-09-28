@@ -145,6 +145,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 include_top=False,
                 weights='model_weights/efficientnetb7.h5',
             )
+            base_model2.build()
             base_model2.layers.pop()
             base_model = Model(base_model2.input, base_model2.layers[-1].output)
             
@@ -180,6 +181,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 include_top=False,
                 weights='model_weights/efficientnetb4.h5',
             )
+            base_model2.build()
             base_model2.layers.pop()
             base_model = Model(base_model2.input, base_model2.layers[-1].output)
             
