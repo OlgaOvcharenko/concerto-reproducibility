@@ -1852,9 +1852,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                                                   head_1=super_parameters["heads"],
                                                   head_2=super_parameters["heads"],
                                                   head_3=super_parameters["heads"],
-                                                  combine_omics=super_parameters['combine_omics'],
-                                                  model_type=super_parameters['model_type'])
-
+                                                  model_type=super_parameters['model_type_image'])
 
     tf_list_1 = [f for f in os.listdir(os.path.join(RNA_tf_path)) if 'tfrecord' in f]
     train_source_list_RNA = []
