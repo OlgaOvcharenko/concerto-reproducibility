@@ -57,3 +57,6 @@ Multimodal_pretraining/adata_ADT_test.h5ad
 Multimodal_pretraining/adata_ADT_train.h5ad
 Multimodal_pretraining/adata_GEX_test.h5ad
 Multimodal_pretraining/adata_GEX_train.h5ad
+
+model_weights
+
