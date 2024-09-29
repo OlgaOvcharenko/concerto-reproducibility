@@ -201,7 +201,7 @@ def main():
     # Train
     weight_path = save_path + 'weight/'
     if train:
-        rna, embedding = train_scvi()
+        rna, embedding = train_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein)
     print("Trained.")
 
     if test:
