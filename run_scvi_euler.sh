@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -o logs/log-%j-multimodal.out
+#SBATCH -o logs/log-%j-scvi-multimodal.out
 #SBATCH --time=08:00:00
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=12G
@@ -13,6 +13,6 @@ module load stack/.2024-04-silent stack/2024-04
 module load gcc/8.5.0
 module --ignore_cache load python/3.9.18
 
-source "python_venv/bin/activate"
+conda activate venv
 
 python3 scVI_multimodal.py

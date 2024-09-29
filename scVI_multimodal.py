@@ -1,5 +1,4 @@
 import argparse
-import tempfile
 
 import anndata as ad
 import matplotlib.pyplot as plt
@@ -16,7 +15,6 @@ import sys
 import pandas as pd
 sys.path.append("../")
 import numpy as np
-import anndata as ad
 import matplotlib.pyplot as plt
 
 def get_args():
@@ -160,7 +158,6 @@ def train_scvi(adata_RNA, adata_Protein):
     sc.set_figure_params(figsize=(6, 6), frameon=False)
     sns.set_theme()
     torch.set_float32_matmul_precision("high")
-    save_dir = tempfile.TemporaryDirectory()
 
     sc.set_figure_params(figsize=(6, 6), frameon=False)
     sns.set_theme()
