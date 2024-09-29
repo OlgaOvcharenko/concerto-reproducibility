@@ -25,26 +25,10 @@ def get_args():
 
     parser.add_argument('--epoch', type=int, required=True,
                         help='Number of epochs')
-    parser.add_argument('--lr', type= float, required=True,
-                        help='learning rate')
-    parser.add_argument('--batch_size', type= int, required=True,
-                        help='batch size')
-    parser.add_argument('--drop_rate', type= float, required=True,
-                        help='dropout rate')
-    parser.add_argument('--heads', type= int, required=True,
-                        help='heads for NNs')
-    parser.add_argument('--attention_t', type= int, required=True,
-                        help='to use attention with teacher')
-    parser.add_argument('--attention_s', type= int, required=True,
-                        help='to use attention with student')
     parser.add_argument('--train', type= int, required=True,
                         help='to train or just inference')
     parser.add_argument('--test', type= int, required=True,
                         help='inference')
-    parser.add_argument('--model_type', type= int, required=True,
-                        help='1 for simple TT, else 4 together')
-    parser.add_argument('--combine_omics', type= int, required=True,
-                        help='0/1')
     parser.add_argument('--task', type= int, required=True,
                         help='0-bc, 1-qr+mp')
 
@@ -191,19 +175,11 @@ def main():
     args = get_args()
     data = args.data
     epoch = args.epoch
-    lr = args.lr
-    batch_size= args.batch_size
-    drop_rate= args.drop_rate
-    attention_t = True if args.attention_t == 1 else False
-    attention_s = True if args.attention_s == 1 else False 
-    heads = args.heads
     train = args.train 
-    model_type = args.model_type
     test = args.test
-    combine_omics = args.combine_omics
     task = args.task
 
-    print(f"sc-VI: epoch {epoch}, lr {lr}, batch_size {batch_size}, task {task}.")
+    print(f"sc-VI: epoch {epoch}, task {task}.")
     
     # Read data
     save_path = './Multimodal_pretraining/'
@@ -230,7 +206,7 @@ def main():
 
     if test:
         if task == 0:
-            filename = f'./Multimodal_pretraining/data/{data}/{data}_bc_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+            filename = f'./Multimodal_pretraining/data/{data}/{data}_bs_{epoch}.h5ad'
             save_merged_adata(adata_merged=rna, filename=filename)
 
         else:

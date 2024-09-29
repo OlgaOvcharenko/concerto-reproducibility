@@ -15,4 +15,4 @@ module --ignore_cache load python/3.9.18
 
 conda activate venv
 
-python3 scVI_multimodal.py
+python3 scVI_multimodal.py --data simulated --epoch 100 --task 0 --train 1 --test 1
