@@ -1,149 +1,276 @@
-import gzip
-import os
+import argparse
 import tempfile
-from pathlib import Path
 
-import numpy as np
-from concerto_function5_3 import preprocessing_changed_rna
-import pooch
+import anndata as ad
+import matplotlib.pyplot as plt
+import mudata as md
+import muon
 import scanpy as sc
 import scvi
 import seaborn as sns
 import torch
+
+import os
+import sys
+
+import pandas as pd
+sys.path.append("../")
+import numpy as np
 import anndata as ad
+import matplotlib.pyplot as plt
 
+def get_args():
+    parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
 
-def prepare_data_PBMC(adata_RNA, adata_Protein, train: bool = True, is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
+    parser.add_argument('--data', type=str, required=True,
+                        help='Dataset (Simulated/Not)')
+
+    parser.add_argument('--epoch', type=int, required=True,
+                        help='Number of epochs')
+    parser.add_argument('--lr', type= float, required=True,
+                        help='learning rate')
+    parser.add_argument('--batch_size', type= int, required=True,
+                        help='batch size')
+    parser.add_argument('--drop_rate', type= float, required=True,
+                        help='dropout rate')
+    parser.add_argument('--heads', type= int, required=True,
+                        help='heads for NNs')
+    parser.add_argument('--attention_t', type= int, required=True,
+                        help='to use attention with teacher')
+    parser.add_argument('--attention_s', type= int, required=True,
+                        help='to use attention with student')
+    parser.add_argument('--train', type= int, required=True,
+                        help='to train or just inference')
+    parser.add_argument('--test', type= int, required=True,
+                        help='inference')
+    parser.add_argument('--model_type', type= int, required=True,
+                        help='1 for simple TT, else 4 together')
+    parser.add_argument('--combine_omics', type= int, required=True,
+                        help='0/1')
+    parser.add_argument('--task', type= int, required=True,
+                        help='0-bc, 1-qr+mp')
+
+    args = parser.parse_args()
+    return args
+
+def prepare_data_PBMC_together(train: bool = True, save_path: str = ''):
     print("Read PBMC data.")
-    print(f"Train={train} RNA data shape {adata_RNA.shape}")
-    print(f"Train={train} Protein data shape {adata_Protein.shape}")
+    adata_RNA = sc.read_h5ad(save_path + f'adata_RNA_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_Protein_train.h5ad')
 
-    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features=0, is_hvg=is_hvg_RNA, batch_key='batch')
-    adata_Protein = preprocessing_changed_rna(adata_Protein, min_features=0, is_hvg=is_hvg_protein, batch_key='batch')
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_RNA_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_Protein_test.h5ad')
+
+    print(f"RNA data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
+    print(f"Protein data shape {adata_Protein.shape}, test {adata_Protein_test.shape}")
+
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+
+    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
+    sc.tl.pca(adata_merged_test)
+    adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
     
+    adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test
+
+def prepare_data_PBMC_full(train: bool = True, save_path: str = ''):
+    print("Read PBMC data.")
+    adata_RNA = sc.read_h5ad(save_path + f'adata_RNA_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_Protein_full.h5ad')
+
+    print(f"RNA data shape train {adata_RNA.shape}")
+    print(f"Protein data shape {adata_Protein.shape}")
+
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+    
+    print("Preprocessed data.")
+    return adata_merged, adata_RNA, adata_Protein
+
+def prepare_data_neurips_cite_full(train: bool = True, save_path: str = ''):
+    print("Read human data")
+    adata_RNA = sc.read_h5ad(save_path + f'adata_neurips_GEX_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ADT_full.h5ad')
+
+    print(f"GEX data shape train {adata_RNA.shape}")
+    print(f"ADT data shape train {adata_Protein.shape}")
+
     # Add PCA after preprocessing for benchmarking
     adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+
+    return adata_merged, adata_RNA, adata_Protein
+
+def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
+    print("Read human data")
+    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_train.h5ad')
+
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_test.h5ad')
+
+    print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
+    print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
+
+    # Add PCA after preprocessing for benchmarking
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+
+    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
+    sc.tl.pca(adata_merged_test)
+    adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
+
+    print("Saved adata.")
+    return adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test
+
+
+def read_data(data: str = "simulated", save_path: str = "", task=0):
+    if data == "simulated":
+        if task == 0:
+            adata_merged, adata_RNA, adata_Protein = prepare_data_PBMC_full(train=True, save_path=save_path)
+        else:
+            adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test = prepare_data_PBMC_together(train=True, save_path=save_path)
     
-    return adata_merged
+    elif data == "human_cite":
+        if task == 0:
+            adata_merged, adata_RNA, adata_Protein = prepare_data_neurips_cite_full(train=True, save_path=save_path)
+        else:
+            adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test = prepare_data_neurips_cite_together(train=True, save_path=save_path)
+    
+    if task == 0:
+        return adata_merged, adata_RNA, adata_Protein
+    else:
+        return adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test
 
+def save_merged_adata(adata_merged, filename):
+    adata_merged.write(filename)
 
-# Settings
-scvi.settings.seed = 0
-print("Last run with scvi-tools version:", scvi.__version__)
+    print(adata_merged)
+    print(f"Saved adata all at {filename}")
 
-sc.set_figure_params(figsize=(6, 6), frameon=False)
-sns.set_theme()
-torch.set_float32_matmul_precision("high")
-save_dir = tempfile.TemporaryDirectory()
+def train_scvi(adata_RNA, adata_Protein):
+    # Settings
+    scvi.settings.seed = 0
+    print("Last run with scvi-tools version:", scvi.__version__)
 
-# Data
+    sc.set_figure_params(figsize=(6, 6), frameon=False)
+    sns.set_theme()
+    torch.set_float32_matmul_precision("high")
+    save_dir = tempfile.TemporaryDirectory()
 
-path = './Multimodal_pretraining/data/multi_gene_l2.loom'
-adata_RNA = sc.read(path)
-path = './Multimodal_pretraining/data/multi_protein_l2.loom'
-adata_Protein = sc.read(path) 
+    sc.set_figure_params(figsize=(6, 6), frameon=False)
+    sns.set_theme()
+    torch.set_float32_matmul_precision("high")
 
-train_idx = (adata_RNA.obs["batch"] != "P6") & (adata_RNA.obs["batch"] != "P7") & (adata_RNA.obs["batch"] != "P8")
-test_idx = (train_idx != 1)
+    mdata = md.MuData({"rna": adata_RNA, "protein": adata_Protein})
+    scvi.model.TOTALVI.setup_mudata(
+        mdata,
+        rna_layer="counts",
+        protein_layer=None,
+        batch_key="batch",
+        modalities={
+            "rna_layer": "rna",
+            "protein_layer": "protein",
+        },
+    )
 
-adata_RNA_test = adata_RNA[test_idx, :]
-adata_Protein_test = adata_Protein[test_idx, :]
+    model = scvi.model.TOTALVI(mdata)
+    model.train()
 
-adata_RNA = adata_RNA[train_idx, :]
-adata_Protein = adata_Protein[train_idx, :]
+    # arbitrarily store latent in rna modality
+    rna = mdata.mod["rna_subset"]
+    protein = mdata.mod["protein"]
+    TOTALVI_LATENT_KEY = "X_totalVI"
+    embedding = model.get_latent_representation()
+    rna.obsm[TOTALVI_LATENT_KEY] = embedding
+    return rna, embedding
 
-# TODO Remove cell type B from reference
-cell_ix = (adata_RNA.obs["cell_type"] != "B intermediate") & (adata_RNA.obs["cell_type"] != "B memory") & (adata_RNA.obs["cell_type"] != "B naive") & (adata_RNA.obs["cell_type"] != "Plasmablast")
-adata_RNA = adata_RNA[cell_ix, :]
-adata_Protein = adata_Protein[cell_ix, :]
+def main():
+    # Parse args
+    args = get_args()
+    data = args.data
+    epoch = args.epoch
+    lr = args.lr
+    batch_size= args.batch_size
+    drop_rate= args.drop_rate
+    attention_t = True if args.attention_t == 1 else False
+    attention_s = True if args.attention_s == 1 else False 
+    heads = args.heads
+    train = args.train 
+    model_type = args.model_type
+    test = args.test
+    combine_omics = args.combine_omics
+    task = args.task
 
-save_path = './Multimodal_pretraining/'
-adata_merged = prepare_data_PBMC(adata_RNA=adata_RNA, adata_Protein=adata_Protein, train=True, save_path=save_path, is_hvg_protein=True)
-adata_merged_test = prepare_data_PBMC(adata_RNA=adata_RNA_test, adata_Protein=adata_Protein_test, train=False, save_path=save_path, is_hvg_protein=True)
+    print(f"sc-VI: epoch {epoch}, lr {lr}, batch_size {batch_size}, task {task}.")
+    
+    # Read data
+    save_path = './Multimodal_pretraining/'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    
+    res_df = pd.DataFrame(columns=["accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
+    
+    if task == 0:
+        adata_merged, adata_RNA, adata_Protein = read_data(data=data, save_path=save_path, task=task)
+    elif task == 1:
+        adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test = read_data(data=data, save_path=save_path, task=task)
+        adata_RNA_test.obs_names_make_unique()
+        adata_Protein_test.obs_names_make_unique()
 
+    adata_RNA.obs_names_make_unique()
+    adata_Protein.obs_names_make_unique()
 
-l2tol1 = {
-    'CD8 Naive': 'CD8 T',
-    'CD8 Proliferating': 'CD8 T',
-    'CD8 TCM': 'CD8 T',
-    'CD8 TEM': 'CD8 T',
-    'CD8+ T': 'CD8 T',
-    'CD8+ T naive': 'CD8 T',
-    'CD4 CTL': 'CD4 T',
-    'CD4 Naive': 'CD4 T',
-    'CD4 Proliferating': 'CD4 T',
-    'CD4 TCM': 'CD4 T',
-    'CD4 TEM': 'CD4 T',
-    'CD4+ T activated': 'CD4 T',
-    'CD4+ T naive': 'CD4 T',
-    'CD14+ Mono': 'CD14 T',
-    'CD16+ Mono': 'CD16 T',
-    'Treg': 'CD4 T',
-    'NK': 'NK',
-    'NK Proliferating': 'NK',
-    'NK_CD56bright': 'NK',
-    'dnT': 'other T',
-    'gdT': 'other T',
-    'ILC': 'other T',
-    'MAIT': 'other T',
-    'CD14 Mono': 'Monocytes',
-    'CD16 Mono': 'Monocytes',
-    'cDC1': 'DC',
-    'cDC2': 'DC',
-    'pDC': 'DC',
-    'ASDC':'DC',
-    'B intermediate': 'B',
-    'B memory': 'B',
-    'B naive': 'B',
-    'B1 B': 'B',
-    'Plasmablast': 'B',
-    'Eryth': 'other',
-    'HSPC': 'other',
-    'Platelet': 'other'
-}
+    # Train
+    weight_path = save_path + 'weight/'
+    if train:
+        rna, embedding = train_scvi()
+    print("Trained.")
 
-# if data == 'simulated':
-adata_merged.obs['cell_type_l1'] = adata_merged.obs['cell_type'].map(l2tol1)
-adata_merged_test.obs['cell_type_l1'] = adata_merged_test.obs['cell_type'].map(l2tol1)
+    if test:
+        if task == 0:
+            filename = f'./Multimodal_pretraining/data/{data}/{data}_bc_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+            save_merged_adata(adata_merged=rna, filename=filename)
 
-adata_merged.var_names_make_unique()
-adata_merged_test.var_names_make_unique()
+        else:
+            pass
+            # # Query-to-reference
+            # # Test on train data
+            # adata_merged = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
+            #         attention_t=attention_t, attention_s=attention_s,
+            #         batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+            #         heads=heads, combine_omics=combine_omics, model_type=model_type, 
+            #         save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA, repeat=repeat)
+            
+            # filename = f'./Multimodal_pretraining/results/sc-vi_{data}_qr_train_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+            # save_merged_adata(adata_merged=adata_merged, filename=filename)
 
-# scvi.model.TOTALVI.setup_anndata(
-#     adata_merged, batch_key="batch", protein_expression_obsm_key="protein_expression"
-# )
+            # # Test on test data
+            # adata_merged_test, acc, f1_median, f1_macro, f1_weighted = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
+            #         attention_t=attention_t, attention_s=attention_s,
+            #         batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+            #         heads=heads, combine_omics=combine_omics, model_type=model_type, 
+            #         save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test, adata_merged_train=adata_merged, repeat=repeat)
 
-model = scvi.model.TOTALVI(adata_merged, latent_distribution="normal", n_layers_decoder=2)
-model.train()
+            # filename = f'./Multimodal_pretraining/results/sc-vi_{data}_qr_test_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.h5ad'
+            # save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
-TOTALVI_LATENT_KEY = "X_totalVI"
-PROTEIN_FG_KEY = "protein_fg_prob"
+            # # Model prediction
+            # pearson = test_concerto_mp(weight_path=weight_path, data=data, 
+            #                     RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, 
+            #                     RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, 
+            #                     attention_t=attention_t, attention_s=attention_s,
+            #                     batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+            #                     heads=heads, combine_omics=combine_omics, model_type=model_type, 
+            #                     save_path=save_path, repeat=repeat)
+            
+            # res_df.loc[repeat] = [acc, f1_median, f1_macro, f1_weighted, pearson]
 
-adata_merged.obsm[TOTALVI_LATENT_KEY] = model.get_latent_representation()
-adata_merged.obsm[PROTEIN_FG_KEY] = model.get_protein_foreground_probability(transform_batch="PBMC10k")
+    # if task != 0:
+    #     res_df.to_csv(f'./Multimodal_pretraining/results/sc-vi_{data}_qr_train_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv')
 
-rna, protein = model.get_normalized_expression(
-    transform_batch="PBMC10k", n_samples=25, return_mean=True
-)
-
-_, protein_means = model.get_normalized_expression(
-    n_samples=25,
-    transform_batch="PBMC10k",
-    include_protein_background=True,
-    sample_protein_mixing=False,
-    return_mean=True,
-)
-
-TOTALVI_CLUSTERS_KEY = "leiden_totalVI"
-
-sc.pp.neighbors(adata_merged, use_rep=TOTALVI_LATENT_KEY)
-sc.tl.umap(adata_merged, min_dist=0.4)
-sc.tl.leiden(adata_merged, key_added=TOTALVI_CLUSTERS_KEY)
-
-perm_inds = np.random.permutation(len(adata_merged))
-sc.pl.umap(
-    adata_merged[perm_inds],
-    color=[TOTALVI_CLUSTERS_KEY, "batch", "cell_type_l1"],
-    ncols=1,
-    frameon=False,
-)
+main()
