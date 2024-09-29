@@ -4,9 +4,9 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-epochs=("200")
+epochs=("64")
 lrs=("1e-5")
-batch_sizes=("64")
+batch_sizes=("128")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
