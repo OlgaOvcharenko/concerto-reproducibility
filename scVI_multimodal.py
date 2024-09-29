@@ -3,7 +3,6 @@ import argparse
 import anndata as ad
 import matplotlib.pyplot as plt
 import mudata as md
-import muon
 import scanpy as sc
 import scvi
 import seaborn as sns
