@@ -24,14 +24,14 @@ from matplotlib import rcParams
 
 # # from scib_metrics.benchmark import Benchmarker
 
-adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
-print(adata_gex)
+# adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
+# print(adata_gex)
 
-print(adata_gex.X)
-print(adata_gex.var["feature_types"])
-print(adata_gex.var["feature_types"].value_counts())
-print(adata_gex.layers["counts"])
-print(adata_gex.obs["batch"])
+# print(adata_gex.X)
+# print(adata_gex.var["feature_types"])
+# print(adata_gex.var["feature_types"].value_counts())
+# print(adata_gex.layers["counts"])
+# print(adata_gex.obs["batch"])
 
 # adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
 # print(adata_adt.var["feature_types"])
@@ -85,10 +85,10 @@ print(adata_gex.obs["batch"])
 # # # print(adata_adt_rna.X)
 
 
-# path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
-# adata_RNA = sc.read(path)
+path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
+adata_RNA = sc.read(path)
 
-# print(adata_RNA)
+print(adata_RNA)
 
 # path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
 # adata_Protein = sc.read(path) #cell_type batch
