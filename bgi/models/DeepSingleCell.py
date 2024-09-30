@@ -2,15 +2,12 @@ import tensorflow as tf
 from tensorflow.keras.models import Model  # layers, Sequential, optimizers, losses, metrics, datasets
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Embedding, Input
-from tensorflow.keras.layers import GlobalAveragePooling1D,Dropout
-from tensorflow.keras.layers import concatenate
+from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Add
 import tensorflow.keras.backend as K
 from tensorflow.keras import models, layers
-from tensorflow.keras import regularizers
-from tensorflow.keras import optimizers, losses, metrics, datasets
-from tensorflow.keras.applications import EfficientNetB4, EfficientNetB7, EfficientNetB2
+from tensorflow.keras.applications import EfficientNetB2, EfficientNetB0
 # from keras.applications.efficientnet import EfficientNetB4, EfficientNetB7
 from bgi.layers.attention import AttentionWithContext
 
@@ -140,10 +137,10 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             output1 = image_network(image_value_input)
         else:
             # EfficientNet B7
-            base_model2 = EfficientNetB4(
+            base_model2 = EfficientNetB2(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=False,
-                weights='model_weights/efficientnetb4_notop.h5',
+                weights='model_weights/efficientnetb2_notop.h5',
             )
             base_model2.build(input_shape=(multi_max_features[1], multi_max_features[1], 3))
             base_model2.layers.pop()
@@ -176,10 +173,10 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             output1 = image_network(image_value_input)
         else:
             # EfficientNet B4
-            base_model2 = EfficientNetB2(
+            base_model2 = EfficientNetB0(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=False,
-                weights='model_weights/efficientnetb2_notop.h5',
+                weights='model_weights/efficientnetb0_notop.h5',
             )
             base_model2.build(input_shape=(multi_max_features[1], multi_max_features[1], 3))
             base_model2.layers.pop()
