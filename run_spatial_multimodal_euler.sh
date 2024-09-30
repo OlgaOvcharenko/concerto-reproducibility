@@ -3,9 +3,9 @@
 #SBATCH -o logs/log-%j-multimodal.out
 #SBATCH --nodes=1
 #SBATCH --gpus=1
-#SBATCH --time=05:00:00
+#SBATCH --time=24:00:00
 #SBATCH --gres=gpumem:21G
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=12
 #SBATCH --mem-per-cpu=12G
 #SBATCH --mail-type=END,FAIL
 
