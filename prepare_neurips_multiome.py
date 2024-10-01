@@ -12,7 +12,7 @@ sys.path.append("../")
 import numpy as np
 import scanpy as sc
 import anndata as ad
-import episcanpy.api as epi
+import episcanpy as epi
 
 l2tol1 = {
 'CD8+ T': 'CD8 T',
