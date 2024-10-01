@@ -12,87 +12,31 @@ sys.path.append("../")
 import numpy as np
 import scanpy as sc
 import anndata as ad
+import episcanpy.api as epi
 
 l2tol1 = {
-    'CD8 Naive': 'CD8 T',
-    'CD8 Proliferating': 'CD8 T',
-    'CD8 TCM': 'CD8 T',
-    'CD8 TEM': 'CD8 T',
-    'CD8+ T': 'CD8 T',
-    'CD8+ T CD57+ CD45RO+': 'CD8 T',
-    'CD8+ T naive': 'CD8 T',
-    'CD4 CTL': 'CD4 T',
-    'CD4 Naive': 'CD4 T',
-    'CD4 Proliferating': 'CD4 T',
-    'CD4 TCM': 'CD4 T',
-    'CD4 TEM': 'CD4 T',
-    'CD4+ T activated': 'CD4 T',
-    'CD4+ T naive': 'CD4 T',
-    'CD8+ T CD57+ CD45RA+': 'CD8 T',
-    'CD8+ T TIGIT+ CD45RO+': 'CD8 T',
-    'CD4+ T activated integrinB7+': 'CD4 T',   
-    'CD8+ T TIGIT+ CD45RA+': 'CD8 T', 
-    'CD8+ T CD49f+': 'CD8 T', 
-    'CD8+ T CD69+ CD45RA+': 'CD8 T',
-    'CD8+ T CD69+ CD45RO+': 'CD8 T',
-    'Naive CD20+ B IGKC+': 'B',
-    'Naive CD20+ B IGKC-': 'B',
-    'CD14+ Mono': 'Monocytes',
-    'CD16+ Mono': 'Monocytes',
-    'Treg': 'CD4 T',
-    'NK': 'NK',
-    'NK Proliferating': 'NK',
-    'NK_CD56bright': 'NK',
-    'NK CD158e1+': 'NK',
-    'CD14 Mono': 'Monocytes',
-    'CD16 Mono': 'Monocytes',
-    'cDC1': 'DC',
-    'cDC2': 'DC',
-    'pDC': 'DC',
-    'ASDC':'DC',
-    'B intermediate': 'B',
-    'B memory': 'B',
-    'B naive': 'B',
-    'B1 B': 'B',
-    'B1 B IGKC+': 'B',
-    'B1 B IGKC-': 'B',
-    'Plasmablast': 'B',
-    'Plasma cell': 'B',
-    'Transitional B': 'B',
-    'Naive CD20+ B': 'B',
-    'Eryth': 'other',
-    'HSPC': 'other',
-    'Platelet': 'other',
-    'Doublet': 'other',
-    'Erythroblast': 'Erythrocytes',
-    'Proerythroblast': 'Erythrocytes',
-    'Normoblast': 'Erythrocytes',
-    'HSC': 'HSC', 
-
-    'Lymph prog': 'Lymph prog',
-    'G/M prog': 'G/M prog',
-    'MK/E prog': 'MK/E prog',  
-
-    'Reticulocyte': 'Erythrocytes',
-    'Plasma cell IGKC+': 'B', #'Plasma cells',
-    'Plasma cell IGKC-': 'B', #'Plasma cells',
-
-    # FIXME
-    'CD4+ T CD314+ CD45RA+': 'CD4 T',
-    'CD8+ T naive CD127+ CD26- CD101-': 'CD8 T', 
-
-    'gdT': 'other T',
-    'gdT CD158b+':'other T',
-    'T reg': 'other T',
-    'gdT TCRVD2+': 'other T',                     
-    'MAIT': 'other T', 
-    'dnT': 'other',
-    'ID2-hi myeloid prog': 'other',
-    'ILC1': 'other',      
-    'ILC': 'other',    
-    'Plasmablast IGKC+': 'other',
-    'Plasmablast IGKC-': 'other',     
-    'T prog cycling': 'other',
+'CD8+ T': 'CD8 T',
+'CD8+ T naive': 'CD8 T',
+'CD4+ T activated': 'CD4 T',
+'CD4+ T naive': 'CD4 T',
+'CD14+ Mono': 'Monocytes',
+'CD16+ Mono': 'Monocytes',
+'NK': 'NK',
+'cDC2': 'DC',
+'pDC': 'DC',
+'B1 B': 'B',
+'Plasma cell': 'B', #'Plasma cells',
+'Transitional B': 'B',
+'Naive CD20+ B': 'B',
+'Erythroblast': 'Erythrocytes',
+'Proerythroblast': 'Erythrocytes',
+'Normoblast': 'Erythrocytes',
+'HSC': 'HSC', 
+'Lymph prog': 'Lymph prog',
+'G/M prog': 'G/M prog',
+'MK/E prog': 'MK/E prog',  
+'ID2-hi myeloid prog': 'other',
+'ILC': 'other',    
 }
 
 def preprocess_rna(
@@ -118,9 +62,6 @@ def preprocess_rna(
     cells_subset, _ = sc.pp.filter_cells(adata, min_genes=min_features, inplace=False)
     adata = adata[cells_subset, :]
 
-    # print(cells_subset)
-    # print(adata)
-
     sc.pp.filter_genes(adata, min_cells=min_cells)
     sc.pp.normalize_total(adata, target_sum=target_sum)
     sc.pp.log1p(adata)
@@ -131,10 +72,10 @@ def preprocess_rna(
     print('Processed dataset shape: {}'.format(adata.shape))
     return adata, cells_subset
 
-def preprocess_protein(
+def preprocess_atac(
         adata,
         min_features: int = 600,
-        min_cells: int = 3,
+        min_cells: int = 5,
         target_sum: int = 10000,
         n_top_features=2000,  # or gene list
         chunk_size: int = 20000,
@@ -151,11 +92,28 @@ def preprocess_protein(
     adata = adata[:, [gene for gene in adata.var_names
                       if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
     
-    sc.pp.normalize_total(adata, target_sum=target_sum)
-    sc.pp.log1p(adata)
+    cells_subset, _ = epi.pp.filter_cells(adata, min_features=min_features)
+    adata = adata[cells_subset, :]
+
+    epi.pp.filter_features(adata, min_cells=min_cells)
+
+    # create a new AnnData containing only the most variable features
+    nb_feature_selected = 120000
+    adata.raw = adata
+    adata = epi.pp.select_var_feature(adata,
+                                    nb_features=nb_feature_selected,
+                                    show=False,
+                                    copy=True)
+    
+    epi.pp.normalize_total(adata)
+    epi.pp.log1p(adata)
+    
+    # save the current version of the matrix (normalised) in a layer of the Anndata.
+    adata.layers['normalised'] = adata.X.copy()
+    print(adata)
 
     print('Processed dataset shape: {}'.format(adata.shape))
-    return adata
+    return adata, cells_subset
 
 def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
     print("Read PBMC data.")
@@ -167,7 +125,9 @@ def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_
     sc.tl.pca(adata_merged_tmp)
 
     adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
-    adata_Protein = preprocess_protein(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein, cells_subset = preprocess_atac(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+
+    adata_RNA = adata_RNA[cells_subset, :]
 
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
@@ -182,12 +142,12 @@ def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_
     adata_Protein = adata_Protein[ix, :]
 
     # Add PCA after preprocessing for benchmarking
-    adata_RNA.write_h5ad(save_path + f'adata_neurips_GEX_full.h5ad')
-    adata_Protein.write_h5ad(save_path + f'adata_neurips_ADT_full.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_neurips_GEX_multiome_full.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_neurips_ATAC_multiome_full.h5ad')
 
     path_file = 'tfrecord_full/'
-    RNA_tf_path = save_path + path_file + 'GEX_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
     RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
     Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
 
@@ -202,8 +162,10 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     sc.tl.pca(adata_merged_tmp)
 
     adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
-    adata_Protein = preprocess_protein(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein, cells_subset = preprocess_atac(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
 
+    adata_RNA = adata_RNA[cells_subset, :]
+    
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
     
@@ -221,11 +183,11 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     adata_RNA_test = adata_RNA_test[ix, :]
     adata_Protein_test = adata_Protein_test[ix, :]
 
-    adata_RNA.write_h5ad(save_path + f'adata_GEX_train.h5ad')
-    adata_Protein.write_h5ad(save_path + f'adata_ADT_train.h5ad')
+    adata_RNA.write_h5ad(save_path + f'adata_GEX_multiome_train.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_ATAC_multiome_train.h5ad')
 
-    adata_RNA_test.write_h5ad(save_path + f'adata_GEX_test.h5ad')
-    adata_Protein_test.write_h5ad(save_path + f'adata_ADT_test.h5ad')
+    adata_RNA_test.write_h5ad(save_path + f'adata_GEX_multiome_test.h5ad')
+    adata_Protein_test.write_h5ad(save_path + f'adata_ATAC_multiome_test.h5ad')
 
     path_file = 'tfrecord_train/'
     RNA_tf_path = save_path + path_file + 'GEX_tf/'
@@ -234,8 +196,8 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
 
     path_file = 'tfrecord_test/'
-    RNA_tf_path_test = save_path + path_file + 'GEX_tf/'
-    Protein_tf_path_test = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path_test = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ATAC_multiome_tf/'
     RNA_tf_path_test = concerto_make_tfrecord(adata_RNA_test,tf_path = RNA_tf_path_test, batch_col_name = 'batch')
     Protein_tf_path_test = concerto_make_tfrecord(adata_Protein_test,tf_path = Protein_tf_path_test, batch_col_name = 'batch')
 
@@ -243,12 +205,12 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
 
 
 def read_data(save_path: str = ""):
-    path = 'Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad'
+    path = 'Multimodal_pretraining/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad'
 
     adata_merged_tmp = sc.read_h5ad(path)
-    adata_RNA = adata_merged_tmp[:, 0:13953] # gex
+    adata_RNA = adata_merged_tmp[:, 0:13431] # gex
     adata_RNA.X = adata_RNA.layers["counts"]
-    adata_Protein = adata_merged_tmp[:, 13953:] # adt
+    adata_Protein = adata_merged_tmp[:, 13431:] # atac
     
     train_idx = (adata_RNA.obs["batch"] != "s4d1") & (adata_RNA.obs["batch"] != "s4d8") & (adata_RNA.obs["batch"] != "s4d9")
     test_idx = (train_idx != 1)
