@@ -88,11 +88,8 @@ def preprocess_atac(
 
     if not issparse(adata.X):
         adata.X = scipy.sparse.csr_matrix(adata.X)
-
-    adata = adata[:, [gene for gene in adata.var_names
-                      if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
     
-    cells_subset, _ = epi.pp.filter_cells(adata, min_features=min_features)
+    cells_subset, _ = epi.pp.filter_cells(adata, min_features=min_features, inplace=False)
     adata = adata[cells_subset, :]
 
     epi.pp.filter_features(adata, min_cells=min_cells)
@@ -165,7 +162,7 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     adata_Protein, cells_subset = preprocess_atac(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
 
     adata_RNA = adata_RNA[cells_subset, :]
-    
+
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
     
