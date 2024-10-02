@@ -60,3 +60,11 @@ Multimodal_pretraining/adata_GEX_train.h5ad
 
 model_weights
 
+Multimodal_pretraining/adata_ATAC_multiome_test.h5ad
+Multimodal_pretraining/adata_ATAC_multiome_train.h5ad
+Multimodal_pretraining/adata_GEX_multiome_test.h5ad
+Multimodal_pretraining/adata_GEX_multiome_train.h5ad
+Multimodal_pretraining/adata_Protein_raw_full.h5ad
+Multimodal_pretraining/adata_neurips_ATAC_multiome_full.h5ad
+Multimodal_pretraining/adata_neurips_GEX_multiome_full.h5ad
+
