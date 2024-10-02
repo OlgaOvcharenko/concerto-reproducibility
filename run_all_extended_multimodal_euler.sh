@@ -15,8 +15,8 @@ test=1
 epochs=("10")
 lrs=("1e-3")
 data=("human_cite human_multiome")
-model_type=("0")
-combine_omics=1
+model_type=("1 2 5")
+combine_omics=0
 tasks=("0 1")
 
 
