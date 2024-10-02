@@ -119,13 +119,32 @@ def prepare_data_neurips_cite_full(train: bool = True, save_path: str = ''):
 
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA
 
+def prepare_data_neurips_multiome_full(train: bool = True, save_path: str = ''):
+    print("Read human data")
+    adata_RNA = sc.read_h5ad(save_path + f'adata_neurips_GEX_multiome_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ADT_multiome_full.h5ad')
+
+    print(f"GEX data shape train {adata_RNA.shape}")
+    print(f"ADT data shape train {adata_Protein.shape}")
+
+    # Add PCA after preprocessing for benchmarking
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+
+    path_file = 'tfrecord_full/'
+    RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
+
+    return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA
+
 def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
     print("Read human data")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_train.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_multiome_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_multiome_train.h5ad')
 
-    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_test.h5ad')
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_multiome_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_multiome_test.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
@@ -142,13 +161,45 @@ def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
     print("Saved adata.")
 
     path_file = 'tfrecord_train/'
-    RNA_tf_path = save_path + path_file + 'GEX_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
 
     path_file = 'tfrecord_test/'
-    RNA_tf_path_test = save_path + path_file + 'GEX_tf/'
-    Protein_tf_path_test = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path_test = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ADT_multiome_tf/'
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
+
+def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = ''):
+    print("Read human data")
+    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_multiome_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_multiome_train.h5ad')
+
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_multiome_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_multiome_test.h5ad')
+
+    print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
+    print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
+
+    # Add PCA after preprocessing for benchmarking
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged)
+    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
+
+    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
+    sc.tl.pca(adata_merged_test)
+    adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
+
+    print("Saved adata.")
+
+    path_file = 'tfrecord_train/'
+    RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
+
+    path_file = 'tfrecord_test/'
+    RNA_tf_path_test = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ADT_multiome_tf/'
+    return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
+
 
 def read_data(data: str = "simulated", save_path: str = "", task=0):
     if data == "simulated":
@@ -162,6 +213,12 @@ def read_data(data: str = "simulated", save_path: str = "", task=0):
             RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA = prepare_data_neurips_cite_full(train=True, save_path=save_path)
         else:
             RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test = prepare_data_neurips_cite_together(train=True, save_path=save_path)
+    
+    elif data == "human_multiome":
+        if task == 0:
+            RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA = prepare_data_neurips_multiome_full(train=True, save_path=save_path)
+        else:
+            RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test = prepare_data_neurips_multiome_together(train=True, save_path=save_path)
     
     if task == 0:
         return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA
@@ -232,6 +289,8 @@ def test_concerto_qr(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
         adata_RNA = sc.read(save_path + f'adata_RNA_{"train" if train else "test"}.h5ad')
     elif data == 'human_cite':
         adata_RNA = sc.read(save_path + f'adata_GEX_{"train" if train else "test"}.h5ad')
+    elif data == 'human_multiome':
+        adata_RNA = sc.read(save_path + f'adata_GEX_multiome_{"train" if train else "test"}.h5ad')
     
     adata_RNA_1 = adata_RNA[RNA_id]
     adata_RNA_1.obsm['X_embedding'] = embedding
@@ -318,6 +377,9 @@ def test_concerto_mp(weight_path: str, RNA_tf_path: str, Protein_tf_path: str,
     elif data == 'human_cite':
         adata_Protein = sc.read(save_path + f'adata_ADT_test.h5ad')
         adata_Protein_train = sc.read(save_path + f'adata_ADT_train.h5ad')
+    elif data == 'human_multiome':
+        adata_Protein = sc.read(save_path + f'adata_ADT_multiome_test.h5ad')
+        adata_Protein_train = sc.read(save_path + f'adata_ADT_multiome_train.h5ad')
     
     nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(embedding_train)
     indices = nbrs.kneighbors(embedding, return_distance=False)
@@ -377,6 +439,8 @@ def test_concerto_bc(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
         adata_RNA = sc.read(save_path + f'adata_RNA_full.h5ad')
     elif data == 'human_cite':
         adata_RNA = sc.read(save_path + f'adata_neurips_GEX_full.h5ad')
+    elif data == 'human_multiome':
+        adata_RNA = sc.read(save_path + f'adata_neurips_GEX_multiome_full.h5ad')
     adata_RNA_1 = adata_RNA[RNA_id]
     adata_RNA_1.obsm['X_embedding'] = embedding
 
