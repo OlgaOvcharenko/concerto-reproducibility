@@ -8,17 +8,16 @@ batch_sizes=("64")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("128")
+heads=("64")
 train=1
 test=1
 
-epochs=("3")
+epochs=("10")
 lrs=("1e-3")
-data=("human_cite")
+data=("human_cite human_multiome")
 model_type=("0")
 combine_omics=1
-tasks=("1")
-# tasks=("0 1")
+tasks=("0 1")
 
 
 for e in $epochs; do
