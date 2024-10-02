@@ -489,7 +489,7 @@ def main():
         os.makedirs(save_path)
     
     res_df = pd.DataFrame(columns=["accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
-    for repeat in range(0, 5):
+    for repeat in range(0, 1):
         if task == 0:
             RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA = read_data(data=data, save_path=save_path, task=task)
         elif task == 1:
@@ -538,19 +538,19 @@ def main():
                 filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
                 save_merged_adata(adata_merged=adata_merged_test, filename=filename)
 
-                # Model prediction
-                pearson = test_concerto_mp(weight_path=weight_path, data=data, 
-                                 RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, 
-                                 RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, 
-                                 attention_t=attention_t, attention_s=attention_s,
-                                 batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-                                 heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                                 save_path=save_path, repeat=repeat)
+                # # Model prediction
+                # pearson = test_concerto_mp(weight_path=weight_path, data=data, 
+                #                  RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, 
+                #                  RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, 
+                #                  attention_t=attention_t, attention_s=attention_s,
+                #                  batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                #                  heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                #                  save_path=save_path, repeat=repeat)
                 
-                res_df.loc[repeat] = [acc, f1_median, f1_macro, f1_weighted, pearson]
+                res_df.loc[repeat] = [acc, f1_median, f1_macro, f1_weighted, 0.0]
     
     if task != 0:
-        res_df.to_csv(f'./Multimodal_pretraining/results/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv')
+        res_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv')
 
 main()
 # test_r()

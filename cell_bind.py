@@ -105,6 +105,9 @@ def train_cellbind(data, weight_path,
                    batch_size, epoch, lr, drop_rate, 
                    heads, combine_omics, model_type):
     if attention_t == True and attention_s == False:
+        GEX_network = create_single_cell_network()
+        ADT_network = ...
+        ATAC_network = ...
         concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'] if data == 'human' else ["GEX", "ADT"],
                                 RNA_tf_path, 
                                 Protein_tf_path, 
