@@ -145,7 +145,7 @@ def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_
 
     path_file = 'tfrecord_full/'
     RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ATAC_multiome_tf/'
     RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
     Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
 
@@ -188,8 +188,8 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     adata_Protein_test.write_h5ad(save_path + f'adata_ATAC_multiome_test.h5ad')
 
     path_file = 'tfrecord_train/'
-    RNA_tf_path = save_path + path_file + 'GEX_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ATAC_multiome_tf/'
     RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
     Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
 
