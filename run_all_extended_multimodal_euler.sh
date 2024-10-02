@@ -12,7 +12,7 @@ heads=("64")
 train=1
 test=1
 
-epochs=("10")
+epochs=("100")
 lrs=("1e-3")
 data=("human_cite human_multiome")
 model_type=("1 2 5")

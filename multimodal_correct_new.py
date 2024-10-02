@@ -488,7 +488,7 @@ def main():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     
-    res_df = pd.DataFrame(columns=["accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
+    res_df = pd.DataFrame(columns=["epoch", "accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
     for repeat in range(0, 1):
         if task == 0:
             RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA = read_data(data=data, save_path=save_path, task=task)
@@ -519,35 +519,42 @@ def main():
             else:
                 # Query-to-reference
                 # Test on train data
-                adata_merged = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
-                        attention_t=attention_t, attention_s=attention_s,
-                        batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-                        heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                        save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA, repeat=repeat)
-                
-                filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
-                save_merged_adata(adata_merged=adata_merged, filename=filename)
+                i, ep_vals = 8, []
+                while i < epoch:
+                    ep_vals.append(i)
+                    i = i * 2
+                ep_vals.append(epoch)
 
-                # Test on test data
-                adata_merged_test, acc, f1_median, f1_macro, f1_weighted = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
-                        attention_t=attention_t, attention_s=attention_s,
-                        batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-                        heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                        save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test, adata_merged_train=adata_merged, repeat=repeat)
+                for e in ep_vals:
+                    adata_merged = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
+                            attention_t=attention_t, attention_s=attention_s,
+                            batch_size=batch_size, epoch=e, lr=lr, drop_rate=drop_rate, 
+                            heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                            save_path=save_path, train=True, adata_merged=adata_merged, adata_RNA=adata_RNA, repeat=repeat)
+                    
+                    filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
+                    save_merged_adata(adata_merged=adata_merged, filename=filename)
 
-                filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
-                save_merged_adata(adata_merged=adata_merged_test, filename=filename)
+                    # Test on test data
+                    adata_merged_test, acc, f1_median, f1_macro, f1_weighted = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, data=data, 
+                            attention_t=attention_t, attention_s=attention_s,
+                            batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                            heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                            save_path=save_path, train=False, adata_merged=adata_merged_test, adata_RNA=adata_RNA_test, adata_merged_train=adata_merged, repeat=repeat)
 
-                # # Model prediction
-                # pearson = test_concerto_mp(weight_path=weight_path, data=data, 
-                #                  RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, 
-                #                  RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, 
-                #                  attention_t=attention_t, attention_s=attention_s,
-                #                  batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
-                #                  heads=heads, combine_omics=combine_omics, model_type=model_type, 
-                #                  save_path=save_path, repeat=repeat)
-                
-                res_df.loc[repeat] = [acc, f1_median, f1_macro, f1_weighted, 0.0]
+                    filename = f'./Multimodal_pretraining/data/{data}/{data}_qr_test_{combine_omics}_mt_{model_type}_bs_{batch_size}_{e}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.h5ad'
+                    save_merged_adata(adata_merged=adata_merged_test, filename=filename)
+
+                    # # Model prediction
+                    # pearson = test_concerto_mp(weight_path=weight_path, data=data, 
+                    #                  RNA_tf_path_test=RNA_tf_path_test, Protein_tf_path_test=Protein_tf_path_test, 
+                    #                  RNA_tf_path=RNA_tf_path, Protein_tf_path=Protein_tf_path, 
+                    #                  attention_t=attention_t, attention_s=attention_s,
+                    #                  batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                    #                  heads=heads, combine_omics=combine_omics, model_type=model_type, 
+                    #                  save_path=save_path, repeat=repeat)
+                    
+                    res_df.loc[repeat] = [e, acc, f1_median, f1_macro, f1_weighted, 0.0]
     
     if task != 0:
         res_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv')
