@@ -88,14 +88,15 @@ def preprocess_atac(
 
     if not issparse(adata.X):
         adata.X = scipy.sparse.csr_matrix(adata.X)
-    
-    cells_subset, _ = epi.pp.filter_cells(adata, min_features=min_features, inplace=False)
-    adata = adata[cells_subset, :]
+    #print(adata)
+    #print(epi.pp.filter_cells(adata, min_features=min_features))
+    #cells_subset, _ = epi.pp.filter_cells(adata, min_features=min_features, inplace=False)
+    #adata = adata[cells_subset, :]
 
     epi.pp.filter_features(adata, min_cells=min_cells)
 
     # create a new AnnData containing only the most variable features
-    nb_feature_selected = 120000
+    nb_feature_selected = 10000
     adata.raw = adata
     adata = epi.pp.select_var_feature(adata,
                                     nb_features=nb_feature_selected,
@@ -110,7 +111,7 @@ def preprocess_atac(
     print(adata)
 
     print('Processed dataset shape: {}'.format(adata.shape))
-    return adata, cells_subset
+    return adata
 
 def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
     print("Read PBMC data.")
@@ -122,9 +123,9 @@ def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_
     sc.tl.pca(adata_merged_tmp)
 
     adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
-    adata_Protein, cells_subset = preprocess_atac(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocess_atac(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
 
-    adata_RNA = adata_RNA[cells_subset, :]
+    #adata_RNA = adata_RNA[cells_subset, :]
 
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
@@ -159,9 +160,9 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     sc.tl.pca(adata_merged_tmp)
 
     adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
-    adata_Protein, cells_subset = preprocess_atac(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein  = preprocess_atac(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
 
-    adata_RNA = adata_RNA[cells_subset, :]
+    #adata_RNA = adata_RNA[cells_subset, :]
 
     adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
