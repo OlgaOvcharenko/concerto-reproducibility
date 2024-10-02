@@ -122,7 +122,7 @@ def prepare_data_neurips_cite_full(train: bool = True, save_path: str = ''):
 def prepare_data_neurips_multiome_full(train: bool = True, save_path: str = ''):
     print("Read human data")
     adata_RNA = sc.read_h5ad(save_path + f'adata_neurips_GEX_multiome_full.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ADT_multiome_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ATAC_multiome_full.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}")
     print(f"ADT data shape train {adata_Protein.shape}")
@@ -134,17 +134,17 @@ def prepare_data_neurips_multiome_full(train: bool = True, save_path: str = ''):
 
     path_file = 'tfrecord_full/'
     RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ATAC_multiome_tf/'
 
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA
 
 def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
     print("Read human data")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_multiome_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_multiome_train.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_train.h5ad')
 
-    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_multiome_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_multiome_test.h5ad')
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_test.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
@@ -161,21 +161,21 @@ def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
     print("Saved adata.")
 
     path_file = 'tfrecord_train/'
-    RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
+    RNA_tf_path = save_path + path_file + 'GEX_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_tf/'
 
     path_file = 'tfrecord_test/'
-    RNA_tf_path_test = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path_test = save_path + path_file + 'ADT_multiome_tf/'
+    RNA_tf_path_test = save_path + path_file + 'GEX_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ADT_tf/'
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
 
 def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = ''):
     print("Read human data")
     adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_multiome_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_multiome_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ATAC_multiome_train.h5ad')
 
     adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_multiome_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_multiome_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ATAC_multiome_test.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
@@ -193,11 +193,11 @@ def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = 
 
     path_file = 'tfrecord_train/'
     RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ATAC_multiome_tf/'
 
     path_file = 'tfrecord_test/'
     RNA_tf_path_test = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path_test = save_path + path_file + 'ADT_multiome_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ATAC_multiome_tf/'
     return RNA_tf_path, Protein_tf_path, adata_merged, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_merged_test, adata_RNA_test
 
 
@@ -378,8 +378,8 @@ def test_concerto_mp(weight_path: str, RNA_tf_path: str, Protein_tf_path: str,
         adata_Protein = sc.read(save_path + f'adata_ADT_test.h5ad')
         adata_Protein_train = sc.read(save_path + f'adata_ADT_train.h5ad')
     elif data == 'human_multiome':
-        adata_Protein = sc.read(save_path + f'adata_ADT_multiome_test.h5ad')
-        adata_Protein_train = sc.read(save_path + f'adata_ADT_multiome_train.h5ad')
+        adata_Protein = sc.read(save_path + f'adata_ATAC_multiome_test.h5ad')
+        adata_Protein_train = sc.read(save_path + f'adata_ATAC_multiome_train.h5ad')
     
     nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(embedding_train)
     indices = nbrs.kneighbors(embedding, return_distance=False)
