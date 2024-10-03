@@ -152,10 +152,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             
             # If one ds has more tf records than another
             if train_db_mod1b is None and train_db_mod3 is None:
-                print(train_db_mod1a)
-                print(train_db_mod2)
-                print(train_db_mod1b)
-                print(train_db_mod3)
                 train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)]],
                                                            batch_size=super_parameters['batch_size13'],
                                                            is_training=True,
@@ -174,6 +170,12 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                 print(train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3), size=1)])
                 print(train_db_mod1b)
                 print(train_db_mod3)
+            
+            print("Files1")
+            print(train_db_mod1a)
+            print(train_db_mod2)
+            print(train_db_mod1b)
+            print(train_db_mod3)
 
             train_loss.reset_states()
             
