@@ -5,15 +5,12 @@ import pandas as pd
 # from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 sys.path.append("../")
-from concerto_function5_3 import *
+from cellbind_function import *
 import numpy as np
 import scanpy as sc
 import anndata as ad
 import matplotlib.pyplot as plt
-# Inital setting for plot size
-from sklearn.metrics.cluster import adjusted_rand_score, normalized_mutual_info_score, silhouette_score, silhouette_samples
 import tensorflow as tf
-from sklearn.metrics import confusion_matrix
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -27,6 +24,8 @@ def get_args():
                         help='learning rate')
     parser.add_argument('--batch_size', type= int, required=True,
                         help='batch size')
+    parser.add_argument('--batch_size2', type= int, required=True,
+                        help='batch size2')
     parser.add_argument('--drop_rate', type= float, required=True,
                         help='dropout rate')
     parser.add_argument('--heads', type= int, required=True,
@@ -100,29 +99,42 @@ def read_data(data: str = "human", save_path: str = "", task=0):
 
 def train_cellbind(data, weight_path, 
                    GEX_cite_tf_path, ADT_cite_tf_path, 
-                   GEX_multiome_tf_path, ADT_multiome_tf_path,
+                   GEX_multiome_tf_path, ATAC_multiome_tf_path,
                    attention_t, attention_s, 
-                   batch_size, epoch, lr, drop_rate, 
+                   batch_size, batch_size2, epoch, lr, drop_rate, 
                    heads, combine_omics, model_type):
     if attention_t == True and attention_s == False:
-        GEX_network = create_single_cell_network()
-        ADT_network = ...
-        ATAC_network = ...
-        concerto_train_multimodal(['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'] if data == 'human' else ["GEX", "ADT"],
-                                RNA_tf_path, 
-                                Protein_tf_path, 
-                                weight_path, 
-                                super_parameters={
-                                    'data': data,
-                                    'batch_size': batch_size, 
-                                    'epoch_pretrain': epoch, 'lr': lr, 
-                                    'drop_rate': drop_rate, 
-                                    'attention_t': attention_t, 
-                                    'attention_s': attention_s, 
-                                    'heads': heads,
-                                    'combine_omics': combine_omics,
-                                    'model_type': model_type
-                                    })
+        super_parameters = {'data': data,
+                           'batch_size12': batch_size,
+                           'batch_size13': batch_size2,
+                           'epoch_pretrain': epoch, 
+                           'lr': lr, 
+                           'drop_rate': drop_rate, 
+                           'attention_t': attention_t, 
+                           'attention_s': attention_s, 
+                           'heads': heads,
+                           'combine_omics': combine_omics,
+                           'model_type': model_type
+                           }
+        
+        GEX_network = create_single_cell_network(mult_feature_name='GEX', 
+                                                 tf_path=GEX_cite_tf_path, 
+                                                 super_parameters=super_parameters)
+        ADT_network = create_single_cell_network(mult_feature_name='ADT', 
+                                                 tf_path=ADT_cite_tf_path, 
+                                                 super_parameters=super_parameters)
+        ATAC_network = create_single_cell_network(mult_feature_name='ATAC', 
+                                                 tf_path=ATAC_multiome_tf_path, 
+                                                 super_parameters=super_parameters)
+        cellbind_train_multimodal(mod1a_tf_path=GEX_cite_tf_path, 
+                                  mod2_tf_path=ADT_cite_tf_path, 
+                                  mod1b_tf_path=GEX_multiome_tf_path, 
+                                  mod3_tf_path=ATAC_multiome_tf_path,
+                                  weight_path=weight_path, 
+                                  mod1_network=GEX_network, 
+                                  mod2_network=ADT_network, 
+                                  mod3_network=ATAC_network,
+                                  super_parameters=super_parameters)
     else:
         raise Exception("Invalid Teacher/Student combination.")
 
@@ -141,8 +153,9 @@ def main():
     data = args.data
     epoch = args.epoch
     lr = args.lr
-    batch_size= args.batch_size
-    drop_rate= args.drop_rate
+    batch_size = args.batch_size
+    batch_size2 = args.batch_size2
+    drop_rate = args.drop_rate
     attention_t = True if args.attention_t == 1 else False
     attention_s = True if args.attention_s == 1 else False 
     heads = args.heads
@@ -178,7 +191,7 @@ def main():
                            GEX_cite_tf_path=GEX_cite_tf_path, ADT_cite_tf_path=ADT_cite_tf_path, 
                            GEX_multiome_tf_path=GEX_multiome_tf_path, ADT_multiome_tf_path=ADT_multiome_tf_path,
                            attention_t=attention_t, attention_s=attention_s, 
-                           batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
+                           batch_size=batch_size, batch_size2=batch_size2, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                            heads=heads, combine_omics=combine_omics, model_type=model_type)
         print("Trained.")
 

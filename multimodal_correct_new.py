@@ -256,7 +256,7 @@ def test_concerto_qr(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
                    batch_size:int, epoch: int, lr: float, drop_rate: float, 
                    heads: int, combine_omics: int, model_type: int, 
                    save_path: str, train: bool = False, adata_merged_train = None, repeat: int = 0, task: int = 0):
-    adata_merged.obs = adata_RNA.obs
+    # adata_merged.obs = adata_RNA.obs
 
     # Test
     nn = "encoder"

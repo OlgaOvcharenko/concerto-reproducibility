@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import tensorflow as tf
 import numpy as np
 import os
@@ -48,12 +49,10 @@ def clip_loss(text_embeds, image_embeds, logit_scale) :
     image_loss = contrastive_loss(tf.transpose(similarity))
     return (caption_loss + image_loss) / 2.0
 
-def create_single_cell_network(mult_feature_name: str, tf_path: str, weight_path: str, super_parameters=None):
-    set_seeds(np.random.randint(0, 10))   
-    if not os.path.exists(weight_path):
-        os.makedirs(weight_path)
+def create_single_cell_network(mult_feature_name: str, tf_path: str, super_parameters=None):
     if super_parameters is None:
-        super_parameters = {'batch_size': 32, 
+        super_parameters = {'batch_size12': 32,
+                            'batch_size13': 32,
                             'epoch_pretrain': 3,
                             'lr': 1e-4,
                             'drop_rate': 0.1, 
@@ -78,15 +77,20 @@ def create_single_cell_network(mult_feature_name: str, tf_path: str, weight_path
     return encode_network
 
 
-def cellbind_train_multimodal(mod1_tf_path: str, mod2_tf_path: str, weight_path: str, mod1_network, mod2_network, super_parameters=None):
+def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_path: str, mod3_tf_path: str, weight_path: str, mod1_network, mod2_network, mod3_network, super_parameters=None):
     train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
     set_seeds(np.random.randint(0, 10))   
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
+
+    set_seeds(np.random.randint(0, 10))   
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
     if super_parameters is None:
-        super_parameters = {'batch_size': 32, 
+        super_parameters = {'batch_size12': 32,
+                            'batch_size13': 32, 
                             'epoch_pretrain': 3,
                             'lr': 1e-4,
                             'drop_rate': 0.1, 
@@ -96,12 +100,19 @@ def cellbind_train_multimodal(mod1_tf_path: str, mod2_tf_path: str, weight_path:
                             'combine_omics': False,
                             'model_type': 1} 
     
-    tf_list_1 = [f for f in os.listdir(os.path.join(mod1_tf_path)) if 'tfrecord' in f]
-    train_source_list_mod1 = []
+    tf_list_1a = [f for f in os.listdir(os.path.join(mod1a_tf_path)) if 'tfrecord' in f]
+    train_source_list_mod1a = []
     train_source_list_mod2 = []
-    for i in tf_list_1:
-        train_source_list_mod1.append(os.path.join(mod1_tf_path, i))
+    for i in tf_list_1a:
+        train_source_list_mod1a.append(os.path.join(mod1a_tf_path, i))
         train_source_list_mod2.append(os.path.join(mod2_tf_path, i))
+
+    tf_list_1b = [f for f in os.listdir(os.path.join(mod1b_tf_path)) if 'tfrecord' in f]
+    train_source_list_mod1b = []
+    train_source_list_mod3 = []
+    for i in tf_list_1b:
+        train_source_list_mod1b.append(os.path.join(mod1a_tf_path, i))
+        train_source_list_mod3.append(os.path.join(mod3_tf_path, i))
 
     # Params
     train_loss = tf.keras.metrics.Mean(name='train_loss')
@@ -112,8 +123,9 @@ def cellbind_train_multimodal(mod1_tf_path: str, mod2_tf_path: str, weight_path:
 
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
-        for mod1_file, mod2_file in zip(train_source_list_mod1, train_source_list_mod2):
-            train_db_mod1 = create_classifier_dataset_multi([mod1_file],
+        for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
+            # FIXME
+            train_db_mod1a = create_classifier_dataset_multi([mod1a_file],
                                                            batch_size=super_parameters['batch_size'],
                                                            is_training=True,
                                                            data_augment=False,
@@ -127,6 +139,23 @@ def cellbind_train_multimodal(mod1_tf_path: str, mod2_tf_path: str, weight_path:
                                                             shuffle_size=10000,
                                                             seed=epoch
                                                             )
+            train_db_mod1b = create_classifier_dataset_multi([mod1b_file],
+                                                           batch_size=super_parameters['batch_size'],
+                                                           is_training=True,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           seed=epoch
+                                                           )
+            train_db_mod3 = create_classifier_dataset_multi([mod3_file], 
+                                                            batch_size=super_parameters['batch_size'],
+                                                            is_training=True,
+                                                            data_augment=False,
+                                                            shuffle_size=10000,
+                                                            seed=epoch
+                                                            )
+            
+            print(train_db_mod1a)
+            exit()
             train_loss.reset_states()
             
             step = 0
