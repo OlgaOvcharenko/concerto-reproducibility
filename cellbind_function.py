@@ -180,16 +180,15 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             #     step += 1
             # exit()
 
-            while tf.get_static_value(opit1a.has_value()) or tf.get_static_value(opit2.has_value()):
+            while opit1a.has_value() or opit2.has_value():
                 step += 1
 
                 # Oversample for bigger dataset (batches)
-                print(opit1b.has_value())
-                print(tf.get_static_value(opit1b.has_value()))
-                print(not (opit1b.has_value() or opit3.has_value()))
-                print(not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())))
                 if not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())):
                     print("Entered")
+                    print(train_source_list_mod1b)
+                    print(np.random.randint(low=0, high=len(train_source_list_mod1b), size=1))
+                    print(train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)])
                     train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)]],
                                                            batch_size=super_parameters['batch_size13'],
                                                            is_training=True,
