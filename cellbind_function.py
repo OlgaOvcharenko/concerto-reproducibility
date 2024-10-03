@@ -172,6 +172,8 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                 print(train_db_mod3)
 
             train_loss.reset_states()
+
+            print(train_db_mod3)
             
             step = 0
             it1a, it2, it1b, it3 = iter(train_db_mod1a), iter(train_db_mod2), iter(train_db_mod1b), iter(train_db_mod3)
@@ -218,18 +220,17 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                     opit1b, opit3 = it1b.get_next_as_optional(), it3.get_next_as_optional()
                     print(tf.get_static_value(opit1b.has_value()))
                     print(tf.get_static_value(opit3.has_value()))
+                
+                opit1a = it1a.get_next_as_optional()
+                opit2 = it2.get_next_as_optional()
+                opit1b = it1b.get_next_as_optional()
+                opit3 = it3.get_next_as_optional()
 
-                # source_features_mod1a, source_values_mod1a = opit1a.get_value()
+                source_features_mod1a, source_values_mod1a, _, _ = opit1a.get_value()
+                source_features_mod2, source_values_mod2, _, _ = opit2.get_value()
+                source_features_mod1b, source_values_mod1b, _, _ = opit1b.get_value()
+                source_features_mod3, source_values_mod3, _, _ = opit3.get_value()
 
-# iterator = iter(dataset)
-# print(iterator.get_next())
-
-#                 print("Batches")
-                # print(source_features_mod1a)
-                # print(source_features_mod2)
-                # print(source_features_mod1b)
-                # print(source_features_mod3)
-                # exit()
 
     #             with tf.GradientTape() as tape:
     #                 if super_parameters["combine_omics"]:
