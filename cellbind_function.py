@@ -137,7 +137,7 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                                             )
             
             # If one ds has more tf records than another
-            if train_db_mod1b is None and train_db_mod3 is None:
+            if mod1b_file is None and mod3_file is None:
                 print("Files")
                 f_i = np.random.randint(low=0, high=len(train_source_list_mod1b))
                 mod1b_file = [train_source_list_mod1b[f_i]]
