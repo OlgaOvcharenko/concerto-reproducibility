@@ -152,14 +152,14 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             
             # If one ds has more tf records than another
             if train_db_mod1b is None and train_db_mod3 is None:
-                train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)]],
+                train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b))]],
                                                            batch_size=super_parameters['batch_size13'],
                                                            is_training=True,
                                                            data_augment=False,
                                                            shuffle_size=10000,
                                                            seed=epoch
                                                            )
-                train_db_mod3 = create_classifier_dataset_multi([train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3), size=1)]], 
+                train_db_mod3 = create_classifier_dataset_multi([train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3))]], 
                                                                 batch_size=super_parameters['batch_size13'],
                                                                 is_training=True,
                                                                 data_augment=False,
@@ -189,14 +189,14 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                     print(train_source_list_mod1b)
                     print(np.random.randint(low=0, high=len(train_source_list_mod1b), size=1))
                     print(train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)])
-                    train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)]],
+                    train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b))]],
                                                            batch_size=super_parameters['batch_size13'],
                                                            is_training=True,
                                                            data_augment=False,
                                                            shuffle_size=10000,
                                                            seed=epoch
                                                            )
-                    train_db_mod3 = create_classifier_dataset_multi([train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3), size=1)]], 
+                    train_db_mod3 = create_classifier_dataset_multi([train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3))]], 
                                                                     batch_size=super_parameters['batch_size13'],
                                                                     is_training=True,
                                                                     data_augment=False,
