@@ -78,7 +78,7 @@ def create_single_cell_network(mult_feature_name: str, tf_path: str, super_param
 
 
 def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_path: str, mod3_tf_path: str, weight_path: str, mod1_network, mod2_network, mod3_network, super_parameters=None):
-    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
+    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
     set_seeds(np.random.randint(0, 10))   
@@ -122,28 +122,28 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
         for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
             # FIXME
             train_db_mod1a = create_classifier_dataset_multi([mod1a_file],
-                                                           batch_size=super_parameters['batch_size'],
+                                                           batch_size=super_parameters['batch_size12'],
                                                            is_training=True,
                                                            data_augment=False,
                                                            shuffle_size=10000,
                                                            seed=epoch
                                                            )
             train_db_mod2 = create_classifier_dataset_multi([mod2_file], 
-                                                            batch_size=super_parameters['batch_size'],
+                                                            batch_size=super_parameters['batch_size12'],
                                                             is_training=True,
                                                             data_augment=False,
                                                             shuffle_size=10000,
                                                             seed=epoch
                                                             )
             train_db_mod1b = create_classifier_dataset_multi([mod1b_file],
-                                                           batch_size=super_parameters['batch_size'],
+                                                           batch_size=super_parameters['batch_size13'],
                                                            is_training=True,
                                                            data_augment=False,
                                                            shuffle_size=10000,
                                                            seed=epoch
                                                            )
             train_db_mod3 = create_classifier_dataset_multi([mod3_file], 
-                                                            batch_size=super_parameters['batch_size'],
+                                                            batch_size=super_parameters['batch_size13'],
                                                             is_training=True,
                                                             data_augment=False,
                                                             shuffle_size=10000,
