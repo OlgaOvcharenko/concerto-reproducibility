@@ -140,17 +140,20 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             if mod1b_file is None and mod3_file is None:
                 print("Files")
                 f_i = np.random.randint(low=0, high=len(train_source_list_mod1b))
-                mod1b_file = [train_source_list_mod1b[f_i]]
-                mod3_file = [train_source_list_mod3[f_i]]
+                mod1b_file_tmp = [train_source_list_mod1b[f_i]]
+                mod3_file_tmp = [train_source_list_mod3[f_i]]
+            else:
+                mod1b_file_tmp = mod1b_file
+                mod3_file_tmp = mod3_file
 
-            train_db_mod1b = create_classifier_dataset_multi([mod1b_file],
+            train_db_mod1b = create_classifier_dataset_multi([mod1b_file_tmp],
                                                              batch_size=super_parameters['batch_size13'],
                                                              is_training=True,
                                                              data_augment=False,
                                                              shuffle_size=10000,
                                                              seed=epoch
                                                             )
-            train_db_mod3 = create_classifier_dataset_multi([mod3_file], 
+            train_db_mod3 = create_classifier_dataset_multi([mod3_file_tmp], 
                                                             batch_size=super_parameters['batch_size13'],
                                                             is_training=True,
                                                             data_augment=False,
