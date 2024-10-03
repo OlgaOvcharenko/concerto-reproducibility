@@ -170,21 +170,16 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
 
             train_loss.reset_states()
 
-            print(train_db_mod3)
-            
             step = 0
             it1a, it2, it1b, it3 = iter(train_db_mod1a), iter(train_db_mod2), iter(train_db_mod1b), iter(train_db_mod3)
             opit1a, opit2, opit1b, opit3 = it1a.get_next_as_optional(), it2.get_next_as_optional(), it1b.get_next_as_optional(), it3.get_next_as_optional()
-            
-            # for source_features_mod3, source_values_mod3, _, _ in train_db_mod3:
-            #     step += 1
-            # exit()
-
             while opit1a.has_value() or opit2.has_value():
                 step += 1
 
                 # Oversample for bigger dataset (batches)
-                if not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())):
+                print(opit1b.has_value())
+                print(opit3.has_value())
+                if not (opit1b.has_value() or opit3.has_value()):
                     print("Entered")
                     print(train_source_list_mod1b)
                     print(np.random.randint(low=0, high=len(train_source_list_mod1b)))
@@ -205,8 +200,8 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                                                     )
                     it1b, it3 = iter(train_db_mod1b), iter(train_db_mod3)
                     opit1b, opit3 = it1b.get_next_as_optional(), it3.get_next_as_optional()
-                    print(tf.get_static_value(opit1b.has_value()))
-                    print(tf.get_static_value(opit3.has_value()))
+                    print(opit1b.has_value())
+                    print(opit3.has_value())
 
                 source_features_mod1a, source_values_mod1a, _, _ = opit1a.get_value()
                 source_features_mod2, source_values_mod2, _, _ = opit2.get_value()
