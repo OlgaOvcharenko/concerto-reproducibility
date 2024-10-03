@@ -170,12 +170,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                 print(train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3), size=1)])
                 print(train_db_mod1b)
                 print(train_db_mod3)
-            
-            print(f"Epoch {epoch}")
-            print(train_db_mod1a)
-            print(train_db_mod2)
-            print(train_db_mod1b)
-            print(train_db_mod3)
 
             train_loss.reset_states()
             
@@ -189,13 +183,44 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             #         in (itertools.zip_longest(train_db_mod1a, train_db_mod2, train_db_mod1b, train_db_mod3)):
             #     step += 1
 
-            while tf.get_static_value(opit1a.has_value()) or tf.get_static_value(opit2.has_value()) or tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_next()):
-                print(tf.get_static_value(opit1a.has_value()))
+            while tf.get_static_value(opit1a.has_value()) or tf.get_static_value(opit2.has_value()):
+                step += 1
+
                 opit1a = it1a.get_next_as_optional()
-                print(opit1a.get_value())
-                print(tf.get_static_value(opit1a.has_value()))
+                opit2 = it2.get_next_as_optional()
+                opit1b = it1b.get_next_as_optional()
+                opit3 = it3.get_next_as_optional()
+
+                source_features_mod1a, source_values_mod1a, _, _ = opit1a.get_value()
+                source_features_mod2, source_values_mod2, _, _ = opit2.get_value()
+                source_features_mod1b, source_values_mod1b, _, _ = opit1b.get_value()
+                source_features_mod3, source_values_mod3, _, _ = opit3.get_value()
+
+                # Oversample for bigger dataset (batches)
+                if not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())):
+                    print(tf.get_static_value(opit1b.has_value()))
+                    print(tf.get_static_value(opit3.has_value()))
+                    train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)]],
+                                                           batch_size=super_parameters['batch_size13'],
+                                                           is_training=True,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           seed=epoch
+                                                           )
+                    train_db_mod3 = create_classifier_dataset_multi([train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3), size=1)]], 
+                                                                    batch_size=super_parameters['batch_size13'],
+                                                                    is_training=True,
+                                                                    data_augment=False,
+                                                                    shuffle_size=10000,
+                                                                    seed=epoch
+                                                                    )
+                    it1b, it3 = iter(train_db_mod1b), iter(train_db_mod3)
+                    opit1b, opit3 = it1b.get_next_as_optional(), it3.get_next_as_optional()
+                    print(tf.get_static_value(opit1b.has_value()))
+                    print(tf.get_static_value(opit3.has_value()))
+
                 # source_features_mod1a, source_values_mod1a = opit1a.get_value()
-                exit()
+
 # iterator = iter(dataset)
 # print(iterator.get_next())
 
