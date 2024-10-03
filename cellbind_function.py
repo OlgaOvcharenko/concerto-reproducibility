@@ -135,13 +135,21 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                                             shuffle_size=10000,
                                                             seed=epoch
                                                             )
+            
+            # If one ds has more tf records than another
+            if train_db_mod1b is None and train_db_mod3 is None:
+                print("Files")
+                f_i = np.random.randint(low=0, high=len(train_source_list_mod1b))
+                mod1b_file = [train_source_list_mod1b[f_i]]
+                mod3_file = [train_source_list_mod3[f_i]]
+
             train_db_mod1b = create_classifier_dataset_multi([mod1b_file],
-                                                           batch_size=super_parameters['batch_size13'],
-                                                           is_training=True,
-                                                           data_augment=False,
-                                                           shuffle_size=10000,
-                                                           seed=epoch
-                                                           )
+                                                             batch_size=super_parameters['batch_size13'],
+                                                             is_training=True,
+                                                             data_augment=False,
+                                                             shuffle_size=10000,
+                                                             seed=epoch
+                                                            )
             train_db_mod3 = create_classifier_dataset_multi([mod3_file], 
                                                             batch_size=super_parameters['batch_size13'],
                                                             is_training=True,
@@ -149,25 +157,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                                             shuffle_size=10000,
                                                             seed=epoch
                                                             )
-            
-            # If one ds has more tf records than another
-            if train_db_mod1b is None and train_db_mod3 is None:
-                f_i = np.random.randint(low=0, high=len(train_source_list_mod1b))
-                train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[f_i]],
-                                                           batch_size=super_parameters['batch_size13'],
-                                                           is_training=True,
-                                                           data_augment=False,
-                                                           shuffle_size=10000,
-                                                           seed=epoch
-                                                           )
-                train_db_mod3 = create_classifier_dataset_multi([train_source_list_mod3[f_i]], 
-                                                                batch_size=super_parameters['batch_size13'],
-                                                                is_training=True,
-                                                                data_augment=False,
-                                                                shuffle_size=10000,
-                                                                seed=epoch
-                                                                )
-                print("Files")
 
             train_loss.reset_states()
 
