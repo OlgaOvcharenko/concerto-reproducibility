@@ -107,7 +107,7 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
     train_source_list_mod1b = []
     train_source_list_mod3 = []
     for i in tf_list_1b:
-        train_source_list_mod1b.append(os.path.join(mod1a_tf_path, i))
+        train_source_list_mod1b.append(os.path.join(mod1b_tf_path, i))
         train_source_list_mod3.append(os.path.join(mod3_tf_path, i))
     
     # Params
@@ -167,9 +167,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                                                 seed=epoch
                                                                 )
                 print("Files")
-                print(train_source_list_mod3[np.random.randint(low=0, high=len(train_source_list_mod3), size=1)])
-                print(train_db_mod1b)
-                print(train_db_mod3)
 
             train_loss.reset_states()
 
@@ -185,7 +182,7 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
 
             while tf.get_static_value(opit1a.has_value()) or tf.get_static_value(opit2.has_value()):
                 step += 1
-
+                print(f"Stepped {step}")
                 # Oversample for bigger dataset (batches)
                 if not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())):
                     print("Entered")
