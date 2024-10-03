@@ -171,7 +171,7 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                 print(train_db_mod1b)
                 print(train_db_mod3)
             
-            print("Files1")
+            print(f"Epoch {epoch}")
             print(train_db_mod1a)
             print(train_db_mod2)
             print(train_db_mod1b)
@@ -180,14 +180,21 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             train_loss.reset_states()
             
             step = 0
-            for (source_features_mod1a, source_values_mod1a, _, _), \
-                (source_features_mod2, source_values_mod2, _, _), \
-                (source_features_mod1b, source_values_mod1b, _, _), \
-                (source_features_mod3, source_values_mod3, _, _) \
-                    in (itertools.zip_longest(train_db_mod1a, train_db_mod2, train_db_mod1b, train_db_mod3)):
-                step += 1
+            it1a, it2, it1b, it3 = iter(train_db_mod1a), iter(train_db_mod2), iter(train_db_mod1b), iter(train_db_mod3)
+            opit1a, opit2, opit1b, opit3 = it1a.get_next_as_optional(), it2.get_next_as_optional(), it1b.get_next_as_optional(), it3.get_next_as_optional()
+            # for (source_features_mod1a, source_values_mod1a, _, _), \
+            #     (source_features_mod2, source_values_mod2, _, _), \
+            #     (source_features_mod1b, source_values_mod1b, _, _), \
+            #     (source_features_mod3, source_values_mod3, _, _) \
+            #         in (itertools.zip_longest(train_db_mod1a, train_db_mod2, train_db_mod1b, train_db_mod3)):
+            #     step += 1
 
-                # print("Batches")
+#             while tf.get_static_value(opit1a.has_next()) or opit2.has_next() or opit1b.has_next() or opit3.has_next()
+            print(tf.get_static_value(opit1a.has_next()))
+# iterator = iter(dataset)
+# print(iterator.get_next())
+
+#                 print("Batches")
                 # print(source_features_mod1a)
                 # print(source_features_mod2)
                 # print(source_features_mod1b)
