@@ -84,10 +84,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
     set_seeds(np.random.randint(0, 10))   
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
-
-    set_seeds(np.random.randint(0, 10))   
-    if not os.path.exists(weight_path):
-        os.makedirs(weight_path)
     if super_parameters is None:
         super_parameters = {'batch_size12': 32,
                             'batch_size13': 32, 

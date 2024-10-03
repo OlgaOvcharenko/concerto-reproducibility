@@ -414,6 +414,63 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
         return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
     
 
+def single_embedding_attention_transfer(max_length: int = 40000,
+                                        name: str = 'Gene',
+                                        embedding_dims=128,
+                                        head_1=128,
+                                        head_2=128,
+                                        head_3=128,
+                                        drop_rate=0.05,
+                                        include_attention: bool = False,
+                                        combine_omics: bool = True,
+                                        model_type: int = 0
+                                        ):
+    x_feature_inputs = []
+    x_value_inputs = []
+    features = []
+    if include_attention == True:
+        feature_input = Input(shape=(None,), name='Input-{}-Feature'.format(name))
+        value_input = Input(shape=(None,), name='Input-{}-Value'.format(name), dtype='float')
+        x_feature_inputs.append(feature_input)
+        x_value_inputs.append(value_input)
+
+        embedding = Embedding(max_length, embedding_dims, input_length=None, name='{}-Embedding'.format(name))(
+            feature_input)
+
+        sparse_value = tf.expand_dims(value_input, 2, name='{}-Expend-Dims'.format(name))
+        sparse_value = BatchNormalization(name='{}-BN-1'.format(name))(sparse_value)
+        x = tf.multiply(embedding, sparse_value, name='{}-Multiply'.format(name))
+
+        weight_output,a = AttentionWithContext()(x)
+        x = K.tanh(K.sum(weight_output, axis=1))
+
+        x = BatchNormalization(name='{}-BN-3'.format(name))(x)
+
+        features.append(x)
+        inputs = [x_feature_inputs, x_value_inputs]
+
+    else:
+        value_input = Input(shape=(max_length,), name='Input-{}-Value'.format(name), dtype='float')
+
+        x_value_inputs.append(value_input)
+        
+        sparse_value = BatchNormalization(name='{}-BN-1'.format(name))(value_input)
+
+        x = Dense(head_1, name='{}-projection-0'.format(name), activation='relu')(sparse_value)
+
+        x = BatchNormalization(name='{}-BN-3'.format(name))(x)
+
+        features.append(x)
+        inputs = [x_value_inputs]
+        
+
+    feature = features[0]
+    dropout = Dropout(rate=drop_rate)(feature)
+    output = Dense(head_1, name='projection-1', activation='relu')(dropout)
+    
+    return tf.keras.Model(inputs=inputs, outputs=output)
+    
+
 def multi_embedding_attention_transfer_1(supvised_train: bool = False,
                                     scan_train: bool = False,
                                     multi_max_features: list = [40000],
