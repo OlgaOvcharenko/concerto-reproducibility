@@ -190,7 +190,9 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             #     step += 1
 
 #             while tf.get_static_value(opit1a.has_next()) or opit2.has_next() or opit1b.has_next() or opit3.has_next()
-            print(tf.get_static_value(opit1a.has_next()))
+            print(tf.get_static_value(opit1a.has_value()))
+            print(tf.get_static_value(opit1a.get_next()))
+            exit()
 # iterator = iter(dataset)
 # print(iterator.get_next())
 
