@@ -64,8 +64,8 @@ def create_single_cell_network(mult_feature_name: str, tf_path: str, super_param
     
     f = np.load(os.path.join(tf_path, 'vocab_size.npz'))
     vocab_size = int(f['vocab size'])
-    encode_network = multi_embedding_attention_transfer(multi_max_features=[vocab_size],
-                                                        mult_feature_names=[mult_feature_name],
+    encode_network = single_embedding_attention_transfer(max_length=[vocab_size],
+                                                        name=[mult_feature_name],
                                                         embedding_dims=128,
                                                         include_attention=super_parameters['attention_t'],
                                                         drop_rate=super_parameters['drop_rate'],
