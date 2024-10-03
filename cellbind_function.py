@@ -185,7 +185,8 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
 
                 # Oversample for bigger dataset (batches)
                 print(opit1b.has_value())
-                print(opit3.has_value())
+                print(tf.get_static_value(opit1b.has_value()))
+                print(not (opit1b.has_value() or opit3.has_value()))
                 print(not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())))
                 if not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())):
                     print("Entered")
