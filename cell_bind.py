@@ -92,8 +92,8 @@ def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = 
 def read_data(data: str = "human", save_path: str = "", task=0):
     if data == "human":
         GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test = prepare_data_neurips_cite_together(train=True, save_path=save_path)
-        GEX_multiome_tf_path, ADT_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ADT_multiome_tf_path_test, adata_GEX_multiome_test = prepare_data_neurips_multiome_together(train=True, save_path=save_path)
-        return GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, GEX_multiome_tf_path, ADT_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ADT_multiome_tf_path_test, adata_GEX_multiome_test
+        GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test = prepare_data_neurips_multiome_together(train=True, save_path=save_path)
+        return GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test
     else:
         raise Exception("Invalid dataset name.")
 
@@ -182,14 +182,14 @@ def main():
     res_df = pd.DataFrame(columns=["accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
     
     for repeat in range(0, 1):
-        GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, GEX_multiome_tf_path, ADT_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ADT_multiome_tf_path_test, adata_GEX_multiome_test = read_data(data=data, save_path=save_path, task=task)
+        GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test = read_data(data=data, save_path=save_path, task=task)
 
         # Train
         weight_path = save_path + 'weight/'
         if train:
             train_cellbind(data=data, weight_path=weight_path, 
                            GEX_cite_tf_path=GEX_cite_tf_path, ADT_cite_tf_path=ADT_cite_tf_path, 
-                           GEX_multiome_tf_path=GEX_multiome_tf_path, ADT_multiome_tf_path=ADT_multiome_tf_path,
+                           GEX_multiome_tf_path=GEX_multiome_tf_path, ATAC_multiome_tf_path=ATAC_multiome_tf_path,
                            attention_t=attention_t, attention_s=attention_s, 
                            batch_size=batch_size, batch_size2=batch_size2, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                            heads=heads, combine_omics=combine_omics, model_type=model_type)
