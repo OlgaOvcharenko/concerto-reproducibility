@@ -1653,11 +1653,11 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 tf_step += 1
 
         encode_network.save_weights(
-            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}_{super_parameters["task"]}.h5')
         decode_network.save_weights(
-            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}_{super_parameters["task"]}.h5')
 
-    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}_{super_parameters["task"]}.h5')
     return print('finished')
 
 def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str, staining_tf_path: str, weight_path: str, super_parameters=None):

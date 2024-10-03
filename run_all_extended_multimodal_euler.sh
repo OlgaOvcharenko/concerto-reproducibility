@@ -17,7 +17,7 @@ lrs=("1e-3")
 data=("human_cite human_multiome")
 model_type=("1 2 5")
 combine_omics=0
-tasks=("0 1")
+tasks=("1")
 
 
 for e in $epochs; do
