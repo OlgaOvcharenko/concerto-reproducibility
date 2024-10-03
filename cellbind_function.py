@@ -95,8 +95,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                             'heads': 128,
                             'combine_omics': False,
                             'model_type': 1} 
-        
-    print(mod3_tf_path)
     
     tf_list_1a = [f for f in os.listdir(os.path.join(mod1a_tf_path)) if 'tfrecord' in f]
     train_source_list_mod1a = []
@@ -111,7 +109,7 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
     for i in tf_list_1b:
         train_source_list_mod1b.append(os.path.join(mod1a_tf_path, i))
         train_source_list_mod3.append(os.path.join(mod3_tf_path, i))
-    print(train_source_list_mod3)
+    
     # Params
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     total_update_steps = 300 * super_parameters['epoch_pretrain']
@@ -180,16 +178,17 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
             step = 0
             it1a, it2, it1b, it3 = iter(train_db_mod1a), iter(train_db_mod2), iter(train_db_mod1b), iter(train_db_mod3)
             opit1a, opit2, opit1b, opit3 = it1a.get_next_as_optional(), it2.get_next_as_optional(), it1b.get_next_as_optional(), it3.get_next_as_optional()
-            for source_features_mod3, source_values_mod3, _, _ in train_db_mod3:
-                step += 1
             
-            exit()
+            # for source_features_mod3, source_values_mod3, _, _ in train_db_mod3:
+            #     step += 1
+            # exit()
 
             while tf.get_static_value(opit1a.has_value()) or tf.get_static_value(opit2.has_value()):
                 step += 1
 
                 # Oversample for bigger dataset (batches)
                 if not (tf.get_static_value(opit1b.has_value()) or tf.get_static_value(opit3.has_value())):
+                    print("Entered")
                     print(tf.get_static_value(opit1b.has_value()))
                     print(tf.get_static_value(opit3.has_value()))
                     train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[np.random.randint(low=0, high=len(train_source_list_mod1b), size=1)]],
