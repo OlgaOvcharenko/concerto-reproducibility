@@ -529,6 +529,9 @@ def main():
                     i = i * 2
                 ep_vals.append(epoch)
 
+                adata_merged.obs = adata_RNA.obs
+                adata_merged_test.obs = adata_RNA_test.obs
+
                 for e in ep_vals:
                     adata_merged = test_concerto_qr(weight_path=weight_path, RNA_tf_path_test=RNA_tf_path, Protein_tf_path_test=Protein_tf_path, data=data, 
                             attention_t=attention_t, attention_s=attention_s,
