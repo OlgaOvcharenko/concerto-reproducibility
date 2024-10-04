@@ -117,6 +117,9 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
     optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
     temperature = tf.Variable(np.log(1/0.07), trainable=True, dtype='float32')
 
+    for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
+        print(mod1a_file, mod2_file, mod1b_file, mod3_file)
+
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
         for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
@@ -171,7 +174,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
 
                 # Oversample for bigger dataset (batches)
                 if (not opit1b.has_value()) or (not opit3.has_value()):
-                    print("Entered")
                     f_i = np.random.randint(low=0, high=len(train_source_list_mod1b))
                     train_db_mod1b = create_classifier_dataset_multi([train_source_list_mod1b[f_i]],
                                                            batch_size=super_parameters['batch_size13'],
@@ -189,8 +191,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                                                     )
                     it1b, it3 = iter(train_db_mod1b), iter(train_db_mod3)
                     opit1b, opit3 = it1b.get_next_as_optional(), it3.get_next_as_optional()
-                    print(opit1b.has_value())
-                    print(opit3.has_value())
 
                 source_features_mod1a, source_values_mod1a, _, _ = opit1a.get_value()
                 source_features_mod2, source_values_mod2, _, _ = opit2.get_value()
