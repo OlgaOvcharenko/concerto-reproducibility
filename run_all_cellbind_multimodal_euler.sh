@@ -4,8 +4,8 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-batch_sizes=("64")
-batch_sizes2=("64")
+batch_sizes=("128")
+batch_sizes2=("128")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
