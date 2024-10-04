@@ -117,22 +117,21 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
     optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
     temperature = tf.Variable(np.log(1/0.07), trainable=True, dtype='float32')
 
-    for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
-        print(mod1a_file, mod2_file, mod1b_file, mod3_file)
+    # for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
+    #     print(mod1a_file, mod2_file, mod1b_file, mod3_file)
 
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
         for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
-            # FIXME
-            train_db_mod1a = create_classifier_dataset_multi([mod1a_file],
-                                                           batch_size=super_parameters['batch_size12'],
-                                                           is_training=True,
-                                                           data_augment=False,
-                                                           shuffle_size=10000,
-                                                           seed=epoch
-                                                           )
-            train_db_mod2 = create_classifier_dataset_multi([mod2_file], 
-                                                            batch_size=super_parameters['batch_size12'],
+            train_db_mod1b = create_classifier_dataset_multi([mod1b_file],
+                                                             batch_size=super_parameters['batch_size13'],
+                                                             is_training=True,
+                                                             data_augment=False,
+                                                             shuffle_size=10000,
+                                                             seed=epoch
+                                                            )
+            train_db_mod3 = create_classifier_dataset_multi([mod3_file], 
+                                                            batch_size=super_parameters['batch_size13'],
                                                             is_training=True,
                                                             data_augment=False,
                                                             shuffle_size=10000,
@@ -140,29 +139,30 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                                             )
             
             # If one ds has more tf records than another
-            if mod1b_file is None and mod3_file is None:
+            if mod1a_file is None and mod2_file is None:
                 print("Files")
-                f_i = np.random.randint(low=0, high=len(train_source_list_mod1b))
-                mod1b_file_tmp = [train_source_list_mod1b[f_i]]
-                mod3_file_tmp = [train_source_list_mod3[f_i]]
+                f_i = np.random.randint(low=0, high=len(train_source_list_mod1a))
+                mod1a_file_tmp = [train_source_list_mod1a[f_i]]
+                mod2_file_tmp = [train_source_list_mod2[f_i]]
             else:
-                mod1b_file_tmp = mod1b_file
-                mod3_file_tmp = mod3_file
+                mod1a_file_tmp = mod1a_file
+                mod2_file_tmp = mod2_file
 
-            train_db_mod1b = create_classifier_dataset_multi([mod1b_file_tmp],
-                                                             batch_size=super_parameters['batch_size13'],
-                                                             is_training=True,
-                                                             data_augment=False,
-                                                             shuffle_size=10000,
-                                                             seed=epoch
-                                                            )
-            train_db_mod3 = create_classifier_dataset_multi([mod3_file_tmp], 
-                                                            batch_size=super_parameters['batch_size13'],
+            train_db_mod1a = create_classifier_dataset_multi([mod1a_file_tmp],
+                                                           batch_size=super_parameters['batch_size12'],
+                                                           is_training=True,
+                                                           data_augment=False,
+                                                           shuffle_size=10000,
+                                                           seed=epoch
+                                                           )
+            train_db_mod2 = create_classifier_dataset_multi([mod2_file_tmp], 
+                                                            batch_size=super_parameters['batch_size12'],
                                                             is_training=True,
                                                             data_augment=False,
                                                             shuffle_size=10000,
                                                             seed=epoch
                                                             )
+            
 
             train_loss.reset_states()
 
