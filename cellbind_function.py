@@ -259,9 +259,9 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
 
         mod1_network.save_weights(
             weight_path + f'GEX_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
-        mod2_file.save_weights(
+        mod2_network.save_weights(
             weight_path + f'ADT_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
-        mod2_file.save_weights(
+        mod2_network.save_weights(
             weight_path + f'ATAC_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
 
     print(weight_path + f'GEX/ADT/ATAC_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
