@@ -213,7 +213,7 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                                             [source_values_mod1b]], training=True)
                             z3 = mod3_network([[source_features_mod3],
                                             [source_values_mod3]], training=True)
-                            loss = (clip_loss(z1a, z2, temperature=0.1) + clip_loss(z1b, z3, temperature=0.1)) / 2
+                            loss = (clip_loss(z1a, z2, temperature) + clip_loss(z1b, z3, temperature)) / 2
                         
                     elif not super_parameters["combine_omics"]:
                         raise Exception("Not implemented")
