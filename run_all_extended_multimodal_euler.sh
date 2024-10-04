@@ -14,10 +14,10 @@ test=1
 
 epochs=("100")
 lrs=("1e-3")
-# data=("human_cite human_multiome")
-# model_type=("1 2 5")
-data=("human_cite")
-model_type=("1")
+data=("human_cite human_multiome")
+model_type=("1 2 5")
+# data=("human_cite")
+# model_type=("1")
 combine_omics=0
 tasks=("1")
 
