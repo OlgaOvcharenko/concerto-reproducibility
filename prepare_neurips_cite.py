@@ -177,9 +177,9 @@ def prepare_data_neurips_full(adata_RNA, adata_Protein, save_path: str = '', is_
     # sc.pl.umap(adata_RNA, color=["cell_type_l1"], legend_fontweight='light') 
     # plt.savefig("tmp.png")
 
-    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
-    adata_RNA = adata_RNA[ix, :]
-    adata_Protein = adata_Protein[ix, :]
+    # ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    # adata_RNA = adata_RNA[ix, :]
+    # adata_Protein = adata_Protein[ix, :]
 
     # Add PCA after preprocessing for benchmarking
     adata_RNA.write_h5ad(save_path + f'adata_neurips_GEX_full.h5ad')
@@ -213,13 +213,13 @@ def prepare_data_neurips_together(train_idx, test_idx, adata_RNA, adata_Protein,
     adata_RNA = adata_RNA[train_idx, :]
     adata_Protein = adata_Protein[train_idx, :]
 
-    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
-    adata_RNA = adata_RNA[ix, :]
-    adata_Protein = adata_Protein[ix, :]
+    # ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    # adata_RNA = adata_RNA[ix, :]
+    # adata_Protein = adata_Protein[ix, :]
 
-    ix = (adata_RNA_test.obs['cell_type_l1'] != 'other') & (adata_RNA_test.obs['cell_type_l1'] != 'other T')
-    adata_RNA_test = adata_RNA_test[ix, :]
-    adata_Protein_test = adata_Protein_test[ix, :]
+    # ix = (adata_RNA_test.obs['cell_type_l1'] != 'other') & (adata_RNA_test.obs['cell_type_l1'] != 'other T')
+    # adata_RNA_test = adata_RNA_test[ix, :]
+    # adata_Protein_test = adata_Protein_test[ix, :]
 
     adata_RNA.write_h5ad(save_path + f'adata_GEX_train.h5ad')
     adata_Protein.write_h5ad(save_path + f'adata_ADT_train.h5ad')

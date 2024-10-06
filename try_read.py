@@ -33,13 +33,17 @@ from matplotlib import rcParams
 # print(adata_gex.layers["counts"])
 # print(adata_gex.obs["batch"])
 
-adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+path = "../../../../../Downloads/fetal.h5mu"
+adata_fetal = sc.read(path)
+print(adata_fetal)
+
+# adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
 # print(adata_adt.var["feature_types"])
 # print(adata_adt.var["feature_types"].value_counts())
 # adata_adt.X = adata_adt.layers["counts"]
 # adata_adt_atac = adata_adt[:, 13431:]
 # adata_adt_gex = adata_adt[:, 0:13431]
-print(adata_adt)
+# print(adata_adt)
 # print(np.unique(adata_adt.obs["batch"].to_list()))
 # print(np.unique(adata_adt.obs["cell_type"].to_list()))
 

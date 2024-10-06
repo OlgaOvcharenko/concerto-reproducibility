@@ -421,7 +421,7 @@ def main():
                                         attention_t=attention_t, attention_s=attention_s, mask=mask,
                                         batch_size=batch_size, epoch=epoch, lr=lr, drop_rate=drop_rate, 
                                         heads=heads, combine_omics=combine_omics, model_type=model_type, cell_labels=cell_labels, model_type_image=model_type_image) 
-            filename = f'./Multimodal_pretraining/results/{data}/qr_{mask}_{combine_omics}_mt_{model_type}_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv'
+            filename = f'./Multimodal_pretraining/results/{data}/qr_{mask}_{combine_omics}_mt_{model_type}_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{model_type_image}.csv'
             res_df.to_csv(filename)
         
         else:
