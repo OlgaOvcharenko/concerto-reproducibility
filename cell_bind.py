@@ -140,6 +140,16 @@ def train_cellbind(data, weight_path,
 
     print("Trained.")
 
+def test_cellbind(adata_GEX, adata_GEX_test,
+                  adata_ADT, adata_ADT_test,
+                  adata_ATAC, adata_ATAC_test,
+                  GEX_tf_path_test: str, ADT_tf_path_test: str, ATAC_tf_path_test: str, 
+                  weight_path: str,
+                  attention_t: bool, attention_s: bool, batch_size:int, epoch: int, lr: float, drop_rate: float, 
+                  heads: int, combine_omics: int, model_type: int, save_path: str):
+    pass
+
+
 
 def save_merged_adata(adata_merged, filename):
     adata_merged.write(filename)

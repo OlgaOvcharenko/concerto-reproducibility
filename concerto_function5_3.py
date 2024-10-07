@@ -1800,8 +1800,9 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     train_loss(loss)
 
                 if super_parameters["combine_omics"]:
-                    variables = [encode_network.trainable_variables, decode_network.trainable_variables]
-                elif super_parameters["model_type"] in [1, 4]:
+                    raise Exception("Wrong path.")
+                    # variables = [encode_network.trainable_variables, decode_network.trainable_variables]
+                elif super_parameters["model_type"] == 1:
                     variables = [encode_network.trainable_variables, [temperature]]
                 else:
                     variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]
