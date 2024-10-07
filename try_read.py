@@ -9,6 +9,40 @@ import matplotlib.pyplot as plt
 # Inital setting for plot size
 from matplotlib import rcParams
 
+l2tol1 = {
+ 'CD8 Naive': 'CD8 T',
+ 'CD8 Proliferating': 'CD8 T',
+ 'CD8 TCM': 'CD8 T',
+ 'CD8 TEM': 'CD8 T',
+ 'CD4 CTL': 'CD4 T',
+ 'CD4 Naive': 'CD4 T',
+ 'CD4 Proliferating': 'CD4 T',
+ 'CD4 TCM': 'CD4 T',
+ 'CD4 TEM': 'CD4 T',
+ 'Treg': 'CD4 T',
+ 'NK': 'NK',
+ 'NK Proliferating': 'NK',
+ 'NK_CD56bright': 'NK',
+ 'dnT': 'other T',
+ 'gdT': 'other T',
+ 'ILC': 'other T',
+ 'MAIT': 'other T',
+ 'CD14 Mono': 'Monocytes',
+ 'CD16 Mono': 'Monocytes',
+ 'cDC1': 'DC',
+ 'cDC2': 'DC',
+ 'pDC': 'DC',
+ 'ASDC':'DC',
+ 'B intermediate': 'B',
+ 'B memory': 'B',
+ 'B naive': 'B',
+ 'Plasmablast': 'B',
+ 'Eryth': 'other',
+ 'HSPC': 'other',
+ 'Platelet': 'other',
+ 'Doublet': 'other'
+}
+
 # X_train = np.random.rand(1000, 128)
 # X_test = np.random.rand(250, 128)
 # y_train = np.random.randint(low=1, high=2, size=1000)
@@ -33,9 +67,9 @@ from matplotlib import rcParams
 # print(adata_gex.layers["counts"])
 # print(adata_gex.obs["batch"])
 
-path = "../../../../../Downloads/fetal.h5mu"
-adata_fetal = sc.read(path)
-print(adata_fetal)
+# path = "../../../../../Downloads/fetal.h5mu"
+# adata_fetal = sc.read(path)
+# print(adata_fetal)
 
 # adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
 # print(adata_adt.var["feature_types"])
@@ -92,10 +126,11 @@ print(adata_fetal)
 # # # print(adata_adt_rna.X)
 
 
-# path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
-# adata_RNA = sc.read(path)
+path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
+adata_RNA = sc.read(path)
+adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
 
-# print(adata_RNA)
+print(adata_RNA)
 
 # path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
 # adata_Protein = sc.read(path) #cell_type batch
@@ -115,8 +150,11 @@ print(adata_fetal)
 
 # # print(adata_RNA)
 
-# # print(np.unique(adata_RNA.obs["batch"].to_list()))
-# # print(np.unique(adata_RNA.obs["cell_type"].to_list()))
+b_list = np.unique(adata_RNA.obs["batch"].to_list())
+for b in b_list:
+    print(f"\n{b}")
+    print(adata_RNA[adata_RNA.obs["batch"] == b, :].obs["cell_type_l1"].value_counts())
+
 # # print(np.unique(adata_RNA.obs["batch"].to_list()))
 # # print(np.unique(adata_RNA.obs["cell_type"].to_list()))
 

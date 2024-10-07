@@ -264,7 +264,7 @@ def test_concerto_qr(adata_merged, adata_RNA, weight_path: str, RNA_tf_path_test
     e = epoch
     accuracies, macro_f1s, weighted_f1s, per_class_f1s, median_f1s = [], [], [], [], []
     
-    saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
+    saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}_{task}.h5'
     embedding, _, RNA_id, _ =  concerto_test_multimodal(
             ['RNA','Protein'] if data == 'simulated' else ['ATAC', 'GEX'] if data == 'human' else ["GEX", "ADT"],
             weight_path, 
