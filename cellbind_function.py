@@ -117,9 +117,6 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
     optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=lr_schedule)
     temperature = tf.Variable(np.log(1/0.07), trainable=True, dtype='float32')
 
-    # for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
-    #     print(mod1a_file, mod2_file, mod1b_file, mod3_file)
-
     tf_step = 0
     for epoch in range(super_parameters['epoch_pretrain']):
         for mod1a_file, mod2_file, mod1b_file, mod3_file in itertools.zip_longest(train_source_list_mod1a, train_source_list_mod2, train_source_list_mod1b, train_source_list_mod3):
@@ -204,16 +201,16 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
                 # Trained
                 with tf.GradientTape() as tape:
                     if super_parameters["combine_omics"]:
-                            z1a = mod1_network([[source_features_mod1a],
-                                            [source_values_mod1a]], training=True)
-                            z2 = mod2_network([[source_features_mod2],
-                                            [source_values_mod2]], training=True)
-                            
-                            z1b = mod1_network([[source_features_mod1b],
-                                            [source_values_mod1b]], training=True)
-                            z3 = mod3_network([[source_features_mod3],
-                                            [source_values_mod3]], training=True)
-                            loss = (clip_loss(z1a, z2, temperature) + clip_loss(z1b, z3, temperature)) / 2
+                        z1a = mod1_network([[source_features_mod1a],
+                                        [source_values_mod1a]], training=True)
+                        z2 = mod2_network([[source_features_mod2],
+                                        [source_values_mod2]], training=True)
+                        
+                        z1b = mod1_network([[source_features_mod1b],
+                                        [source_values_mod1b]], training=True)
+                        z3 = mod3_network([[source_features_mod3],
+                                        [source_values_mod3]], training=True)
+                        loss = (clip_loss(z1a, z2, temperature) + clip_loss(z1b, z3, temperature)) / 2
                         
                     elif not super_parameters["combine_omics"]:
                         raise Exception("Not implemented")
@@ -266,3 +263,187 @@ def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_pa
 
     print(weight_path + f'GEX/ADT/ATAC_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
     print('finished')
+
+def cellbind_test_multimodal(mod1_tf_path: str, mod2_tf_path: str,
+                             mod1_network, mod2_network, batch_size: int,
+                             saved_weight_path: str, saved_weight_path2: str, super_parameters=None, 
+                             concat_modalities: bool = True, n_cells_for_sample = None):
+    if super_parameters is None:
+        super_parameters = {'batch_size12': 32,
+                            'batch_size13': 32, 
+                            'epoch_pretrain': 3,
+                            'lr': 1e-4,
+                            'drop_rate': 0.1, 
+                            'attention_t': True, 
+                            'attention_s': False, 
+                            'heads': 128,
+                            'combine_omics': False,
+                            'model_type': 1} 
+    
+    tf_list_1a = [f for f in os.listdir(os.path.join(mod1_tf_path)) if 'tfrecord' in f]
+    train_source_list_mod1a = []
+    train_source_list_mod2 = []
+    for i in tf_list_1a:
+        train_source_list_mod1a.append(os.path.join(mod1_tf_path, i))
+        train_source_list_mod2.append(os.path.join(mod2_tf_path, i))
+
+    if saved_weight_path is None:
+        raise Exception("Give a weight")
+
+    else:
+        mod1_network.load_weights(saved_weight_path, by_name=True)
+        mod2_network.load_weights(saved_weight_path2, by_name=True)
+
+    source_data_batch = []
+    source_data_feature, source_data_feature2 = [], []
+    mod1_id_all = []
+        
+    for mod1a_file, mod2_file in zip(train_source_list_mod1a, train_source_list_mod2):
+        train_db_mod1a = create_classifier_dataset_multi([mod1a_file],
+                                                            batch_size=batch_size,
+                                                            is_training=False,
+                                                            data_augment=False,
+                                                            shuffle_size=10000,
+                                                        )
+        train_db_mod2 = create_classifier_dataset_multi([mod2_file], 
+                                                        batch_size=batch_size,
+                                                        is_training=False,
+                                                        data_augment=False,
+                                                        shuffle_size=10000,
+                                                        )
+
+        step = 0
+        for (source_features_mod1a, source_values_mod1a, _, _), \
+                (source_features_mod2, source_values_mod2, _, _) \
+                    in zip(train_db_mod1a, train_db_mod2):
+            if step == 0:
+                if super_parameters["combine_omics"]:
+                    z1a = mod1_network([[source_features_mod1a],
+                                    [source_values_mod1a]], training=False)
+                    z2 = mod2_network([[source_features_mod2],
+                                    [source_values_mod2]], training=False)
+                    
+                elif not super_parameters["combine_omics"]:
+                    raise Exception("Not implemented")
+
+                if concat_modalities:
+                    encode_output = tf.concat([z1a, z2], axis=1)
+                    dim = encode_output.shape[1]
+                else:
+                    encode_output = [z1a, z2]
+                    dim = encode_output[0].shape[1]
+        
+        if n_cells_for_sample is None:            
+            feature_len = 1000000
+        else:            
+            n_cells_for_sample_1 = n_cells_for_sample//8
+            feature_len = n_cells_for_sample_1 // batch_size * batch_size
+        
+        source_data_feature_1 = np.zeros((feature_len, dim))
+        source_data_feature_2 = np.zeros((feature_len, dim))
+        source_data_batch_1 = np.zeros((feature_len))
+
+        mod_id = []
+        all_samples = 0
+        for (source_features_mod1a, source_values_mod1a, source_batch_mod1a, source_id_mod1a), \
+            (source_features_mod2, source_values_mod2, source_batch_mod2, source_id_mod2) \
+                    in zip(train_db_mod1a, train_db_mod2):
+            if all_samples  >= feature_len:
+                break
+            
+            if super_parameters["combine_omics"]:
+                encode_output1 = mod1_network([[source_features_mod1a],
+                                        [source_values_mod1a]], training=True)
+                encode_output2 = mod2_network([[source_features_mod2],
+                                [source_values_mod2]], training=True)
+                
+            else:
+                raise Exception("Not implemented")
+            
+            if concat_modalities:
+                encode_output = tf.concat([encode_output1, encode_output2], axis=1)
+                encode_output = tf.nn.l2_normalize(encode_output, axis=-1)
+                source_data_feature_1[all_samples:all_samples + len(source_id_mod1a), :] = encode_output
+                source_data_batch_1[all_samples:all_samples + len(source_id_mod1a)] = source_batch_mod1a
+                
+            else:
+                encode_output1 = tf.nn.l2_normalize(encode_output1, axis=-1)
+                source_data_feature_1[all_samples:all_samples + len(source_id_mod1a), :] = encode_output1
+                encode_output2 = tf.nn.l2_normalize(encode_output2, axis=-1)
+                source_data_feature_2[all_samples:all_samples + len(source_id_mod1a), :] = encode_output2
+                source_data_batch_1[all_samples:all_samples + len(source_id_mod1a)] = source_batch_mod1a
+            
+            mod_id.extend(list(source_id_mod1a.numpy().astype('U')))
+            all_samples += len(source_id_mod1a)
+
+        if concat_modalities:
+            source_data_feature.extend(source_data_feature_1[:all_samples])
+            source_data_batch.extend(source_data_batch_1[:all_samples])
+            mod1_id_all.extend(mod_id[:all_samples])
+        else:
+            source_data_feature.extend(source_data_feature_1[:all_samples])
+            source_data_feature2.extend(source_data_feature_2[:all_samples])
+            source_data_batch.extend(source_data_batch_1[:all_samples])
+            mod1_id_all.extend(mod_id[:all_samples])
+
+
+    if concat_modalities:
+        source_data_feature = np.array(source_data_feature).astype('float32')
+        source_data_batch = np.array(source_data_batch).astype('int32')
+        return source_data_feature, source_data_batch, mod1_id_all
+
+    else:
+        source_data_feature = np.array(source_data_feature).astype('float32')
+        source_data_feature2 = np.array(source_data_feature2).astype('float32')
+        source_data_batch = np.array(source_data_batch).astype('int32')
+        return source_data_feature, source_data_feature2, source_data_batch, mod1_id_all
+
+
+def knn_classifier(ref_embedding, query_embedding, ref_anndata, column_name, k, num_chunks=100):
+    '''
+    return :
+        target_neighbor: predicted label
+        traget_prob: confidence score
+    '''
+    train_features = tf.transpose(ref_embedding)
+    num_test_images = int(query_embedding.shape[0])
+    imgs_per_chunk = num_test_images // num_chunks
+    if imgs_per_chunk == 0:
+        imgs_per_chunk = 10
+
+    train_labels = ref_anndata.obs[column_name].tolist()
+    target_pred_labels = []
+    target_pred_prob = []
+    for idx in range(0, num_test_images, imgs_per_chunk):
+        # get the features for test images
+        features = query_embedding[
+                   idx: min((idx + imgs_per_chunk), num_test_images), :
+                   ]
+        # targets = test_labels[idx : min((idx + imgs_per_chunk), num_test_images)]
+        similarity = tf.matmul(features, train_features)
+        target_distances, target_indices = tf.math.top_k(similarity, k, sorted=True)
+
+        for distances, indices in zip(target_distances, target_indices):
+            selected_label = {}
+            selected_count = {}
+            count = 0
+            for distance, index in zip(distances, indices):
+                label = train_labels[index]
+                weight = distance
+                if label not in selected_label:
+                    selected_label[label] = 0
+                    selected_count[label] = 0
+                selected_label[label] += weight
+                selected_count[label] += 1
+                count += 1
+
+            filter_label_list = sorted(selected_label.items(), key=lambda x: x[1], reverse=True)
+            target_pred_labels.append(filter_label_list[0][0])
+
+            prob = selected_label[filter_label_list[0][0]] / selected_count[filter_label_list[0][0]]
+            target_pred_prob.append(prob)
+
+    target_neighbor = np.array(target_pred_labels)
+    target_prob = np.array(target_pred_prob)
+
+    return target_neighbor, target_prob 

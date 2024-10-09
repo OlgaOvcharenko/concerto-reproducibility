@@ -66,7 +66,7 @@ def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
     path_file = 'tfrecord_test/'
     RNA_tf_path_test = save_path + path_file + 'GEX_tf/'
     Protein_tf_path_test = save_path + path_file + 'ADT_tf/'
-    return RNA_tf_path, Protein_tf_path, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_RNA_test
+    return RNA_tf_path, Protein_tf_path, adata_RNA, adata_Protein, RNA_tf_path_test, Protein_tf_path_test, adata_RNA_test, adata_Protein_test
 
 def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = ''):
     print("Read human data")
@@ -86,14 +86,14 @@ def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = 
     path_file = 'tfrecord_test/'
     RNA_tf_path_test = save_path + path_file + 'GEX_multiome_tf/'
     Protein_tf_path_test = save_path + path_file + 'ATAC_multiome_tf/'
-    return RNA_tf_path, Protein_tf_path, adata_RNA, RNA_tf_path_test, Protein_tf_path_test, adata_RNA_test
+    return RNA_tf_path, Protein_tf_path, adata_RNA, adata_Protein, RNA_tf_path_test, Protein_tf_path_test, adata_RNA_test, adata_Protein_test
 
 
 def read_data(data: str = "human", save_path: str = "", task=0):
     if data == "human":
-        GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test = prepare_data_neurips_cite_together(train=True, save_path=save_path)
-        GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test = prepare_data_neurips_multiome_together(train=True, save_path=save_path)
-        return GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test
+        GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, adata_ADT_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, adata_ADT_cite_test = prepare_data_neurips_cite_together(train=True, save_path=save_path)
+        GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, adata_ATAC_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test, adata_ATAC_multiome_test = prepare_data_neurips_multiome_together(train=True, save_path=save_path)
+        return GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, adata_ADT_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, adata_ADT_cite_test, GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, adata_ATAC_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test, adata_ATAC_multiome_test
     else:
         raise Exception("Invalid dataset name.")
 
@@ -140,14 +140,233 @@ def train_cellbind(data, weight_path,
 
     print("Trained.")
 
-def test_cellbind(adata_GEX, adata_GEX_test,
+def qr_test(adata_ref, embedding_ref, embedding_query, test_cell_types):
+    # FIXME fix merged train to cover all cell types
+    query_neighbor, _ = knn_classifier(ref_embedding=embedding_ref, query_embedding=embedding_query, ref_anndata=adata_ref, column_name='cell_type_l1', k=5)
+    cell_types_list = pd.unique(test_cell_types).tolist() 
+    acc = accuracy_score(test_cell_types.to_list(), query_neighbor)
+    f1 = f1_score(test_cell_types.to_list(), query_neighbor, labels=cell_types_list, average=None)
+    f1_weighted = f1_score(test_cell_types.to_list(), query_neighbor, labels=cell_types_list, average='weighted')
+    f1_macro = f1_score(test_cell_types.to_list(), query_neighbor, labels=cell_types_list, average='macro')
+    f1_median = np.median(f1)
+    
+    print(f"\nQR")
+    print(f"Per class {cell_types_list} F1 {f1}")
+    print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
+
+    res_dict = {"Accuracy": acc, "F1 median": f1_median, "F1 macro": f1_macro, "F1 weigted": f1_weighted}
+    for k, v in zip(cell_types_list, f1):
+        res_dict[k] = v
+    return res_dict
+
+def mp_3mod_test(embedding_train, embedding_test, adata_unknown_train, adata_unknown_test):
+    nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(embedding_train)
+    indices = nbrs.kneighbors(embedding_test, return_distance=False)
+
+    val_new_protein = np.array(adata_unknown_train.X.todense())[indices].mean(axis=1)
+    tmp = adata_unknown_test.X.todense()
+
+    pearsons = []
+    for true_protein, pred_protein in zip(tmp, val_new_protein):
+        pearsons.append(np.corrcoef(pred_protein, true_protein)[0, 1])
+
+    print(f'\nKnown modality Pearson: {np.mean(pearsons)}')
+    return np.mean(pearsons)
+
+def mp_2mod_unknown_test(embedding_train, embedding_test, adata_unknown_train, adata_unknown_test):
+    nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(embedding_train)
+    indices = nbrs.kneighbors(embedding_test, return_distance=False)
+
+    val_new_unknown = np.array(adata_unknown_train.obs["cell_type_l1"])[indices].mode()
+    
+    test_cell_types = adata_unknown_test.obs["cell_type_l1"]
+    cell_types_list = pd.unique(test_cell_types).tolist() # FIXME fix merged cell types
+    acc = accuracy_score(test_cell_types.to_list(), val_new_unknown)
+    f1 = f1_score(test_cell_types.to_list(), val_new_unknown, labels=cell_types_list, average=None)
+    f1_weighted = f1_score(test_cell_types.to_list(), val_new_unknown, labels=cell_types_list, average='weighted')
+    f1_macro = f1_score(test_cell_types.to_list(), val_new_unknown, labels=cell_types_list, average='macro')
+    f1_median = np.median(f1)
+    
+    print(f"\nUnknown modality 2")
+    print(f"Per class {cell_types_list} F1 {f1}")
+    print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
+
+    res_dict = {"Accuracy": acc, "F1 median": f1_median, "F1 macro": f1_macro, "F1 weigted": f1_weighted}
+    for k, v in zip(cell_types_list, f1):
+        res_dict[k] = v
+
+    # Correlation between two GEX averaged and true
+    val_new_GEX = np.array(adata_unknown_train.X.todense())[indices].mean(axis=1)
+    tmp = adata_unknown_test.X.todense()
+
+    pearsons = []
+    for true_protein, pred_protein in zip(tmp, val_new_GEX):
+        pearsons.append(np.corrcoef(pred_protein, true_protein)[0, 1])
+
+    res_dict["pearsons"] = np.mean(pearsons)
+    print(f'\GEX Pearson: {np.mean(pearsons)}')
+
+    return res_dict
+
+def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
                   adata_ADT, adata_ADT_test,
+                  adata_multiome_GEX, adata_multiome_GEX_test,
                   adata_ATAC, adata_ATAC_test,
-                  GEX_tf_path_test: str, ADT_tf_path_test: str, ATAC_tf_path_test: str, 
+                  cite_GEX_tf_path: str, multiome_GEX_tf_path: str, ADT_tf_path: str, ATAC_tf_path: str, 
+                  cite_GEX_tf_path_test: str, multiome_GEX_tf_path_test: str, str, ADT_tf_path_test: str, ATAC_tf_path_test: str, 
                   weight_path: str,
-                  attention_t: bool, attention_s: bool, batch_size:int, epoch: int, lr: float, drop_rate: float, 
-                  heads: int, combine_omics: int, model_type: int, save_path: str):
-    pass
+                  data: str, attention_t: bool, attention_s: bool, batch_size:int, batch_size2:int, epoch: int, lr: float, drop_rate: float, 
+                  heads: int, combine_omics: int, model_type: int):
+    
+    super_parameters = {'data': data,
+                        'batch_size12': batch_size,
+                        'batch_size13': batch_size2,
+                        'epoch_pretrain': epoch, 
+                        'lr': lr, 
+                        'drop_rate': drop_rate, 
+                        'attention_t': attention_t, 
+                        'attention_s': attention_s, 
+                        'heads': heads,
+                        'combine_omics': combine_omics,
+                        'model_type': model_type
+                        }
+        
+    GEX_network = create_single_cell_network(mult_feature_name='GEX', 
+                                                tf_path=cite_GEX_tf_path_test, 
+                                                super_parameters=super_parameters)
+    ADT_network = create_single_cell_network(mult_feature_name='ADT', 
+                                                tf_path=ADT_tf_path_test, 
+                                                super_parameters=super_parameters)
+    ATAC_network = create_single_cell_network(mult_feature_name='ATAC', 
+                                                tf_path=ATAC_tf_path_test, 
+                                                super_parameters=super_parameters)
+    saved_weight_path_GEX = weight_path + f'GEX_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+    saved_weight_path_ADT = weight_path + f'ADT_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+    saved_weight_path_ATAC = weight_path + f'ATAC_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+
+
+    result_dicts = []
+    for concat_mod in [True, False]:
+        res12_train = cellbind_test_multimodal(mod1_tf_path=cite_GEX_tf_path, mod2_tf_path=ADT_tf_path,
+                                mod1_network=GEX_network, mod2_network=ADT_network, batch_size=batch_size,
+                                saved_weight_path=saved_weight_path_GEX, saved_weight_path2=saved_weight_path_ADT, 
+                                super_parameters=super_parameters, concat_modalities=concat_mod)
+        
+        res12_test = cellbind_test_multimodal(mod1_tf_path=cite_GEX_tf_path_test, mod2_tf_path=ADT_tf_path_test,
+                                mod1_network=GEX_network, mod2_network=ADT_network, batch_size=batch_size,
+                                saved_weight_path=saved_weight_path_GEX, saved_weight_path2=saved_weight_path_ADT, 
+                                super_parameters=super_parameters, concat_modalities=concat_mod)
+        
+        res13_train = cellbind_test_multimodal(mod1_tf_path=multiome_GEX_tf_path, mod2_tf_path=ATAC_tf_path,
+                                mod1_network=GEX_network, mod2_network=ATAC_network, batch_size=batch_size2,
+                                saved_weight_path=saved_weight_path_GEX, saved_weight_path2=saved_weight_path_ATAC, 
+                                super_parameters=super_parameters, concat_modalities=concat_mod)
+        
+        res13_test = cellbind_test_multimodal(mod1_tf_path=multiome_GEX_tf_path_test, mod2_tf_path=ATAC_tf_path_test,
+                                mod1_network=GEX_network, mod2_network=ATAC_network, batch_size=batch_size2,
+                                saved_weight_path=saved_weight_path_GEX, saved_weight_path2=saved_weight_path_ATAC, 
+                                super_parameters=super_parameters, concat_modalities=concat_mod)
+        
+        if concat_mod:
+            embedding12_train, _, GEX12_id_train = res12_train
+            embedding12_test, _, GEX12_id_test = res12_test
+            embedding13_train, _, GEX13_id_train = res13_train
+            embedding13_test, _, GEX13_id_test = res13_test
+
+            # Test QR on full appended GEX + ADT
+            # FIXME add both train as reference
+            res_dict_12 = qr_test(adata_ref=adata_cite_GEX[GEX12_id_train], 
+                    embedding_ref=embedding12_train, 
+                    embedding_query=embedding12_test, 
+                    test_cell_types=adata_cite_GEX_test[GEX12_id_test].obs['cell_type_l1'])
+            res_dict_12["concat"] = "cite GEX + ADT"
+            res_dict_12["epoch"] = epoch
+            res_dict_12["pearsons"] = 0.0
+            result_dicts.append(res_dict_12)
+
+            # Test QR on full appended GEX + ATAC
+            # FIXME add both train as reference
+            res_dict_13 = qr_test(adata_ref=adata_multiome_GEX[GEX13_id_train], 
+                    embedding_ref=embedding13_train, 
+                    embedding_query=embedding13_test, 
+                    test_cell_types=adata_multiome_GEX_test[GEX13_id_test].obs['cell_type_l1'])
+            res_dict_13["concat"] = "multiome GEX + ATAC"
+            res_dict_13["epoch"] = epoch
+            res_dict_13["pearsons"] = 0.0
+            result_dicts.append(res_dict_13)
+
+        else:
+            embedding12_GEX_train, embedding12_ADT_train, _, GEX12_id_train = res12_train
+            embedding12_GEX_test, embedding12_ADT_test, _, GEX12_id_test = res12_test
+            embedding13_GEX_train, embedding13_ATAC_train, _, GEX13_id_train = res13_train
+            embedding13_GEX_test, embedding13_ATAC_test, _, GEX13_id_test = res13_test
+
+            # Test QR on cite GEX
+            # FIXME add both train as reference
+            res_dict_cite_GEX_12 = qr_test(adata_ref=adata_cite_GEX[GEX12_id_train], 
+                    embedding_ref=embedding12_GEX_train, 
+                    embedding_query=embedding12_GEX_test, 
+                    test_cell_types=adata_cite_GEX_test[GEX12_id_test].obs['cell_type_l1'])
+            res_dict_cite_GEX_12["concat"] = "QR cite GEX"
+            res_dict_cite_GEX_12["epoch"] = epoch
+
+            # Modality prediction ADT
+            pearson = mp_3mod_test(embedding_train=embedding12_GEX_train, 
+                                   embedding_test=embedding12_GEX_test, 
+                                   adata_unknown_train=adata_ADT[GEX12_id_train], 
+                                   adata_unknown_test=adata_ADT_test[GEX12_id_test])
+            res_dict_cite_GEX_12["pearsons"] = pearson
+            result_dicts.append(res_dict_cite_GEX_12)
+
+            # Test QR on multiome GEX
+            # FIXME add both train as reference
+            res_dict_multiome_GEX_13 = qr_test(adata_ref=adata_multiome_GEX[GEX13_id_train], 
+                    embedding_ref=embedding13_GEX_train, 
+                    embedding_query=embedding13_GEX_test, 
+                    test_cell_types=adata_multiome_GEX_test[GEX13_id_test].obs['cell_type_l1'])
+            res_dict_multiome_GEX_13["concat"] = "QR multiome GEX"
+            res_dict_multiome_GEX_13["epoch"] = epoch
+
+            # Modality prediction ATAC
+            pearson = mp_3mod_test(embedding_train=embedding13_GEX_train, 
+                                   embedding_test=embedding13_GEX_test, 
+                                   adata_unknown_train=adata_ATAC[GEX13_id_train], 
+                                   adata_unknown_test=adata_ATAC_test[GEX13_id_test])
+            res_dict_multiome_GEX_13["pearsons"] = pearson
+            result_dicts.append(res_dict_multiome_GEX_13)
+
+            # Test QR on multiome ATAC
+            # FIXME add both train as reference
+            res_dict_multiome_qr_GEX_13 = qr_test(adata_ref=adata_ATAC[GEX13_id_train], 
+                    embedding_ref=embedding13_ATAC_train, 
+                    embedding_query=embedding13_ATAC_test, 
+                    test_cell_types=adata_ATAC_test[GEX13_id_test].obs['cell_type_l1'])
+            res_dict_multiome_qr_GEX_13["concat"] = "QR multiome ATAC"
+            res_dict_multiome_qr_GEX_13["epoch"] = epoch
+            res_dict_multiome_GEX_13["pearsons"] = 0.0
+            result_dicts.append(res_dict_multiome_qr_GEX_13)
+
+            # Modality prediction unknown ADT through GEX
+            res_dict_cite_ADT_13 = mp_2mod_unknown_test(embedding_train=GEX12_id_train, 
+                                                 embedding_test=GEX13_id_test, 
+                                                 adata_unknown_train=adata_cite_GEX, 
+                                                 adata_unknown_test=adata_multiome_GEX_test)
+            res_dict_cite_ADT_13["concat"] = "MP ADT through GEX"
+            res_dict_cite_ADT_13["epoch"] = epoch
+            result_dicts.append(res_dict_cite_ADT_13)
+
+            # Modality prediction unknown ATAC through GEX
+            res_dict_cite_ATAC_13 = mp_2mod_unknown_test(embedding_train=GEX13_id_train, 
+                                                 embedding_test=GEX12_id_test, 
+                                                 adata_unknown_train=adata_multiome_GEX, 
+                                                 adata_unknown_test=adata_cite_GEX_test)
+            res_dict_cite_ATAC_13["concat"] = "MP ATAC through GEX"
+            res_dict_cite_ATAC_13["epoch"] = epoch
+            result_dicts.append(res_dict_cite_ATAC_13)
+
+            # TODO ATAC -> GEX -> ADT
+            
+            return result_dicts
 
 
 
@@ -192,7 +411,7 @@ def main():
     res_df = pd.DataFrame(columns=["accuracy", "f1_median", "f1_macro", "f1_weighted", "pearson" ])
     
     for repeat in range(0, 1):
-        GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test = read_data(data=data, save_path=save_path, task=task)
+        GEX_cite_tf_path, ADT_cite_tf_path, adata_GEX_cite, adata_ADT_cite, GEX_cite_tf_path_test, ADT_cite_tf_path_test, adata_GEX_cite_test, adata_ADT_cite_test, GEX_multiome_tf_path, ATAC_multiome_tf_path, adata_GEX_multiome, adata_ATAC_multiome, GEX_multiome_tf_path_test, ATAC_multiome_tf_path_test, adata_GEX_multiome_test, adata_ATAC_multiome_test = read_data(data=data, save_path=save_path, task=task)
 
         # Train
         weight_path = save_path + 'weight/'
@@ -205,8 +424,29 @@ def main():
                            heads=heads, combine_omics=combine_omics, model_type=model_type)
         print("Trained.")
 
-        # if test:    
-        #     res_df.loc[repeat] = [acc, f1_median, f1_macro, f1_weighted, pearson]
-    # res_df.to_csv(f'./Multimodal_pretraining/results/{data}_qr_train_{combine_omics}_mt_{model_type}_bs_{batch_size}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}.csv')
+        if test:   
+            epochs_test = [epoch]
+            res_dicts = None
+            for e in epochs_test:
+                res_dicts_tmp = test_cellbind(adata_cite_GEX=adata_GEX_cite, adata_cite_GEX_test=adata_GEX_cite_test,
+                                        adata_ADT=adata_ADT_cite, adata_ADT_test=adata_ADT_cite_test,
+                                        adata_multiome_GEX=adata_GEX_multiome, adata_multiome_GEX_test=adata_GEX_multiome_test, 
+                                        adata_ATAC=adata_ATAC_multiome, adata_ATAC_test=adata_ATAC_multiome_test,
+                                        cite_GEX_tf_path=GEX_cite_tf_path, multiome_GEX_tf_path=GEX_multiome_tf_path, 
+                                        ADT_tf_path=ADT_cite_tf_path, ATAC_tf_path=ATAC_multiome_tf_path, 
+                                        cite_GEX_tf_path_test=GEX_cite_tf_path_test, multiome_GEX_tf_path_test=GEX_multiome_tf_path_test, 
+                                        ADT_tf_path_test=ADT_cite_tf_path_test, ATAC_tf_path_test=ATAC_multiome_tf_path_test, 
+                                        weight_path=weight_path, data=data,
+                                        attention_t=attention_t, attention_s=attention_s, 
+                                        batch_size=batch_size, batch_size2=batch_size2, 
+                                        epoch=e, lr=lr, drop_rate=drop_rate, 
+                                        heads=heads, combine_omics=combine_omics, model_type=model_type)
+                if res_dicts is None:
+                    res_dicts = res_dicts_tmp
+                else:
+                    res_dicts.extend(res_dicts_tmp)
+                
+            res_df = pd.DataFrame(res_dicts)
+            res_df.to_csv(f'./Multimodal_pretraining/results/{data}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{batch_size2}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.csv')
 
 main()
