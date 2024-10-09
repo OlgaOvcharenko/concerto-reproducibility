@@ -179,15 +179,16 @@ def mp_2mod_unknown_test(embedding_train, embedding_test, adata_unknown_train, a
 
     # FIXME remove
     tmp = np.array(adata_unknown_train.obs["cell_type_l1"])[indices]
-    print(tmp)
+    # print(tmp)
     tmp_res = []
     for val in tmp:
         g = mode(val)
-        print(g)
+        # print(g)
         tmp_res.append(g)
-    print(np.array(tmp_res))
+    # print(np.array(tmp_res))
 
-    val_new_unknown = np.array(adata_unknown_train.obs["cell_type_l1"])[indices].mode()
+    # np.array(adata_unknown_train.obs["cell_type_l1"])[indices].mode()
+    val_new_unknown = np.array(tmp_res) 
     
     test_cell_types = adata_unknown_test.obs["cell_type_l1"]
     cell_types_list = pd.unique(test_cell_types).tolist() 
