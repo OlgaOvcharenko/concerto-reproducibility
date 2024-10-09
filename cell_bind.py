@@ -141,7 +141,6 @@ def train_cellbind(data, weight_path,
     print("Trained.")
 
 def qr_test(adata_ref, embedding_ref, embedding_query, test_cell_types):
-    # FIXME fix merged train to cover all cell types
     query_neighbor, _ = knn_classifier(ref_embedding=embedding_ref, query_embedding=embedding_query, ref_anndata=adata_ref, column_name='cell_type_l1', k=5)
     cell_types_list = pd.unique(test_cell_types).tolist() 
     acc = accuracy_score(test_cell_types.to_list(), query_neighbor)
@@ -180,7 +179,7 @@ def mp_2mod_unknown_test(embedding_train, embedding_test, adata_unknown_train, a
     val_new_unknown = np.array(adata_unknown_train.obs["cell_type_l1"])[indices].mode()
     
     test_cell_types = adata_unknown_test.obs["cell_type_l1"]
-    cell_types_list = pd.unique(test_cell_types).tolist() # FIXME fix merged cell types
+    cell_types_list = pd.unique(test_cell_types).tolist() 
     acc = accuracy_score(test_cell_types.to_list(), val_new_unknown)
     f1 = f1_score(test_cell_types.to_list(), val_new_unknown, labels=cell_types_list, average=None)
     f1_weighted = f1_score(test_cell_types.to_list(), val_new_unknown, labels=cell_types_list, average='weighted')
@@ -273,13 +272,24 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             embedding13_train, _, GEX13_id_train = res13_train
             embedding13_test, _, GEX13_id_test = res13_test
 
+            adata_merged_GEX = ad.concat([adata_cite_GEX[GEX12_id_train], adata_multiome_GEX[GEX13_id_train]], axis=0)
+            embedding_merged = np.concatenate([embedding12_train, embedding13_train], axis=0)
+
             # Test QR on full appended GEX + ADT
-            # FIXME add both train as reference
             res_dict_12 = qr_test(adata_ref=adata_cite_GEX[GEX12_id_train], 
                     embedding_ref=embedding12_train, 
                     embedding_query=embedding12_test, 
                     test_cell_types=adata_cite_GEX_test[GEX12_id_test].obs['cell_type_l1'])
-            res_dict_12["concat"] = "cite GEX + ADT"
+            res_dict_12["concat"] = "QR cite GEX + ADT"
+            res_dict_12["epoch"] = epoch
+            res_dict_12["pearsons"] = 0.0
+            result_dicts.append(res_dict_12)
+            
+            res_dict_12 = qr_test(adata_ref=adata_merged_GEX, # Both train as reference
+                    embedding_ref=embedding_merged, 
+                    embedding_query=embedding12_test, 
+                    test_cell_types=adata_cite_GEX_test[GEX12_id_test].obs['cell_type_l1'])
+            res_dict_12["concat"] = "QR merged train, cite GEX + ADT"
             res_dict_12["epoch"] = epoch
             res_dict_12["pearsons"] = 0.0
             result_dicts.append(res_dict_12)
@@ -290,7 +300,16 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
                     embedding_ref=embedding13_train, 
                     embedding_query=embedding13_test, 
                     test_cell_types=adata_multiome_GEX_test[GEX13_id_test].obs['cell_type_l1'])
-            res_dict_13["concat"] = "multiome GEX + ATAC"
+            res_dict_13["concat"] = "QR multiome GEX + ATAC"
+            res_dict_13["epoch"] = epoch
+            res_dict_13["pearsons"] = 0.0
+            result_dicts.append(res_dict_13)
+
+            res_dict_13 = qr_test(adata_ref=adata_merged_GEX, 
+                    embedding_ref=embedding_merged, 
+                    embedding_query=embedding13_test, 
+                    test_cell_types=adata_multiome_GEX_test[GEX13_id_test].obs['cell_type_l1'])
+            res_dict_13["concat"] = "QR merged train, multiome GEX + ATAC"
             res_dict_13["epoch"] = epoch
             res_dict_13["pearsons"] = 0.0
             result_dicts.append(res_dict_13)
@@ -301,15 +320,16 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             embedding13_GEX_train, embedding13_ATAC_train, _, GEX13_id_train = res13_train
             embedding13_GEX_test, embedding13_ATAC_test, _, GEX13_id_test = res13_test
 
+            adata_merged_GEX = ad.concat([adata_cite_GEX[GEX12_id_train], adata_multiome_GEX[GEX13_id_train]], axis=0)
+            embedding_merged = np.concatenate([embedding12_GEX_train, embedding13_GEX_train], axis=0)
+
             # Test QR on cite GEX
-            # FIXME add both train as reference
             res_dict_cite_GEX_12 = qr_test(adata_ref=adata_cite_GEX[GEX12_id_train], 
                     embedding_ref=embedding12_GEX_train, 
                     embedding_query=embedding12_GEX_test, 
                     test_cell_types=adata_cite_GEX_test[GEX12_id_test].obs['cell_type_l1'])
             res_dict_cite_GEX_12["concat"] = "QR cite GEX"
             res_dict_cite_GEX_12["epoch"] = epoch
-
             # Modality prediction ADT
             pearson = mp_3mod_test(embedding_train=embedding12_GEX_train, 
                                    embedding_test=embedding12_GEX_test, 
@@ -318,15 +338,22 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             res_dict_cite_GEX_12["pearsons"] = pearson
             result_dicts.append(res_dict_cite_GEX_12)
 
+            res_dict_cite_GEX_12 = qr_test(adata_ref=adata_merged_GEX, # Both train as reference
+                    embedding_ref=embedding_merged, 
+                    embedding_query=embedding12_GEX_test, 
+                    test_cell_types=adata_cite_GEX_test[GEX12_id_test].obs['cell_type_l1'])
+            res_dict_cite_GEX_12["concat"] = "QR merged cite GEX"
+            res_dict_cite_GEX_12["epoch"] = epoch
+            res_dict_cite_GEX_12["pearsons"] = 0.0
+            result_dicts.append(res_dict_cite_GEX_12)
+
             # Test QR on multiome GEX
-            # FIXME add both train as reference
             res_dict_multiome_GEX_13 = qr_test(adata_ref=adata_multiome_GEX[GEX13_id_train], 
                     embedding_ref=embedding13_GEX_train, 
                     embedding_query=embedding13_GEX_test, 
                     test_cell_types=adata_multiome_GEX_test[GEX13_id_test].obs['cell_type_l1'])
             res_dict_multiome_GEX_13["concat"] = "QR multiome GEX"
             res_dict_multiome_GEX_13["epoch"] = epoch
-
             # Modality prediction ATAC
             pearson = mp_3mod_test(embedding_train=embedding13_GEX_train, 
                                    embedding_test=embedding13_GEX_test, 
@@ -335,8 +362,16 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             res_dict_multiome_GEX_13["pearsons"] = pearson
             result_dicts.append(res_dict_multiome_GEX_13)
 
+            res_dict_multiome_GEX_13 = qr_test(adata_ref=adata_merged_GEX, # Both train as reference
+                    embedding_ref=embedding_merged, 
+                    embedding_query=embedding13_GEX_test, 
+                    test_cell_types=adata_multiome_GEX_test[GEX13_id_test].obs['cell_type_l1'])
+            res_dict_multiome_GEX_13["concat"] = "QR merged multiome GEX"
+            res_dict_multiome_GEX_13["epoch"] = epoch
+            res_dict_multiome_GEX_13["pearsons"] = 0.0
+            result_dicts.append(res_dict_multiome_GEX_13)
+
             # Test QR on multiome ATAC
-            # FIXME add both train as reference
             res_dict_multiome_qr_GEX_13 = qr_test(adata_ref=adata_ATAC[GEX13_id_train], 
                     embedding_ref=embedding13_ATAC_train, 
                     embedding_query=embedding13_ATAC_test, 
