@@ -14,10 +14,10 @@ heads=("128")
 data=("spatial_split")
 train=1
 test=1
-mask=("0 1")
+mask=("0")
 
 model_type_image=("1")
-model_type=("2")
+model_type=("1 2")
 combine_omics=0
 
 for e in $epochs; do
