@@ -295,7 +295,6 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             result_dicts.append(res_dict_12)
 
             # Test QR on full appended GEX + ATAC
-            # FIXME add both train as reference
             res_dict_13 = qr_test(adata_ref=adata_multiome_GEX[GEX13_id_train], 
                     embedding_ref=embedding13_train, 
                     embedding_query=embedding13_test, 
@@ -305,7 +304,7 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             res_dict_13["pearsons"] = 0.0
             result_dicts.append(res_dict_13)
 
-            res_dict_13 = qr_test(adata_ref=adata_merged_GEX, 
+            res_dict_13 = qr_test(adata_ref=adata_merged_GEX, # both train as reference
                     embedding_ref=embedding_merged, 
                     embedding_query=embedding13_test, 
                     test_cell_types=adata_multiome_GEX_test[GEX13_id_test].obs['cell_type_l1'])
