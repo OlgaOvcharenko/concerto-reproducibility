@@ -381,19 +381,19 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             result_dicts.append(res_dict_multiome_qr_GEX_13)
 
             # Modality prediction unknown ADT through GEX
-            res_dict_cite_ADT_13 = mp_2mod_unknown_test(embedding_train=GEX12_id_train, 
-                                                 embedding_test=GEX13_id_test, 
-                                                 adata_unknown_train=adata_cite_GEX, 
-                                                 adata_unknown_test=adata_multiome_GEX_test)
+            res_dict_cite_ADT_13 = mp_2mod_unknown_test(embedding_train=embedding12_GEX_train, 
+                                                 embedding_test=embedding13_GEX_test, 
+                                                 adata_unknown_train=adata_cite_GEX[GEX12_id_train], 
+                                                 adata_unknown_test=adata_multiome_GEX_test[GEX13_id_test])
             res_dict_cite_ADT_13["concat"] = "MP ADT through GEX"
             res_dict_cite_ADT_13["epoch"] = epoch
             result_dicts.append(res_dict_cite_ADT_13)
 
             # Modality prediction unknown ATAC through GEX
-            res_dict_cite_ATAC_13 = mp_2mod_unknown_test(embedding_train=GEX13_id_train, 
-                                                 embedding_test=GEX12_id_test, 
-                                                 adata_unknown_train=adata_multiome_GEX, 
-                                                 adata_unknown_test=adata_cite_GEX_test)
+            res_dict_cite_ATAC_13 = mp_2mod_unknown_test(embedding_train=embedding13_GEX_test, 
+                                                 embedding_test=embedding12_GEX_train, 
+                                                 adata_unknown_train=adata_multiome_GEX_test[GEX13_id_test], 
+                                                 adata_unknown_test=adata_cite_GEX[GEX12_id_train])
             res_dict_cite_ATAC_13["concat"] = "MP ATAC through GEX"
             res_dict_cite_ATAC_13["epoch"] = epoch
             result_dicts.append(res_dict_cite_ATAC_13)
