@@ -11,6 +11,7 @@ import scanpy as sc
 import anndata as ad
 import matplotlib.pyplot as plt
 import tensorflow as tf
+from statistics import mode
 
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
@@ -175,6 +176,16 @@ def mp_3mod_test(embedding_train, embedding_test, adata_unknown_train, adata_unk
 def mp_2mod_unknown_test(embedding_train, embedding_test, adata_unknown_train, adata_unknown_test):
     nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(embedding_train)
     indices = nbrs.kneighbors(embedding_test, return_distance=False)
+
+    # FIXME remove
+    tmp = np.array(adata_unknown_train.obs["cell_type_l1"])[indices]
+    print(tmp)
+    tmp_res = []
+    for val in tmp:
+        g = mode(val)
+        print(g)
+        tmp_res.append(g)
+    print(np.array(tmp_res))
 
     val_new_unknown = np.array(adata_unknown_train.obs["cell_type_l1"])[indices].mode()
     
@@ -459,7 +470,15 @@ def main():
         print("Trained.")
 
         if test:   
-            epochs_test = [epoch]
+            # epochs_test = [epoch]
+
+            epochs_test = []
+            i = 4
+            while i < epoch:
+                epochs_test.append(i)
+                i = i * 2
+            epochs_test.append(epoch)
+
             res_dicts = None
             for e in epochs_test:
                 res_dicts_tmp = test_cellbind(adata_cite_GEX=adata_GEX_cite, adata_cite_GEX_test=adata_GEX_cite_test,
