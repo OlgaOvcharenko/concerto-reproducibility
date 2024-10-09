@@ -16,7 +16,7 @@ train=1
 test=1
 mask=("0 1")
 
-model_type_image=("0 1")
+model_type_image=("1")
 model_type=("2")
 combine_omics=0
 

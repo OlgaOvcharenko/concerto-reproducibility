@@ -123,7 +123,7 @@ def test_concerto(adata_RNA, weight_path: str, data: str,
     only_images = [False] # if combine_omics == 0 else [False]
     for only_image in only_images:
         for e in [200]: 
-            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
+            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{model_type_image}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
             
             embedding, _, RNA_id =  concerto_test_spatial_multimodal(
                     ['RNA', 'staining'],
@@ -221,7 +221,7 @@ def test_concerto_full(adata_RNA, adata_RNA_test, weight_path: str, data: str,
     res_df = pd.DataFrame(columns=["epoch", "onlyImage", "modality", "accuracy", "f1_median", "f1_macro", "f1_weighted"])
     for only_image in only_images:
         for e in ep_vals: 
-            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
+            saved_weight_path = f'./Multimodal_pretraining/weight/multi_weight_{nn}_{data}_{model_type_image}_{mask}_{batch_size}_model_{combine_omics}_{model_type}_epoch_{e}_{lr}_{drop_rate}_{attention_t}_{attention_s}_{heads}.h5'
             
             ret_train = concerto_test_spatial_multimodal(
                     ['RNA', 'staining'],
