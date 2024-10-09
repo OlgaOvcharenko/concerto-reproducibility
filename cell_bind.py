@@ -212,7 +212,7 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
                   adata_multiome_GEX, adata_multiome_GEX_test,
                   adata_ATAC, adata_ATAC_test,
                   cite_GEX_tf_path: str, multiome_GEX_tf_path: str, ADT_tf_path: str, ATAC_tf_path: str, 
-                  cite_GEX_tf_path_test: str, multiome_GEX_tf_path_test: str, str, ADT_tf_path_test: str, ATAC_tf_path_test: str, 
+                  cite_GEX_tf_path_test: str, multiome_GEX_tf_path_test: str, ADT_tf_path_test: str, ATAC_tf_path_test: str, 
                   weight_path: str,
                   data: str, attention_t: bool, attention_s: bool, batch_size:int, batch_size2:int, epoch: int, lr: float, drop_rate: float, 
                   heads: int, combine_omics: int, model_type: int):

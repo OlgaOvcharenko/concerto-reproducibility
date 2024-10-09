@@ -10,7 +10,7 @@ drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("64")
-train=1
+train=0
 test=1
 
 epochs=("100")
