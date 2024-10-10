@@ -410,6 +410,24 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             res_dict_cite_ATAC_13["epoch"] = epoch
             result_dicts.append(res_dict_cite_ATAC_13)
 
+            # Merged modality prediction unknown ADT through GEX
+            res_dict_cite_ADT_13 = mp_2mod_unknown_test(embedding_train=embedding_merged, 
+                                                 embedding_test=embedding13_GEX_test, 
+                                                 adata_unknown_train=adata_merged_GEX, 
+                                                 adata_unknown_test=adata_multiome_GEX_test[GEX13_id_test])
+            res_dict_cite_ADT_13["concat"] = "MP merged ADT through GEX"
+            res_dict_cite_ADT_13["epoch"] = epoch
+            result_dicts.append(res_dict_cite_ADT_13)
+
+            # Merged modality prediction unknown ATAC through GEX
+            res_dict_cite_ATAC_13 = mp_2mod_unknown_test(embedding_train=embedding_merged, 
+                                                 embedding_test=embedding12_GEX_train, 
+                                                 adata_unknown_train=adata_merged_GEX, 
+                                                 adata_unknown_test=adata_cite_GEX[GEX12_id_train])
+            res_dict_cite_ATAC_13["concat"] = "MP merged ATAC through GEX"
+            res_dict_cite_ATAC_13["epoch"] = epoch
+            result_dicts.append(res_dict_cite_ATAC_13)
+
             # TODO ATAC -> GEX -> ADT
             
             return result_dicts
