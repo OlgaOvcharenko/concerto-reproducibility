@@ -68,3 +68,4 @@ Multimodal_pretraining/adata_Protein_raw_full.h5ad
 Multimodal_pretraining/adata_neurips_ATAC_multiome_full.h5ad
 Multimodal_pretraining/adata_neurips_GEX_multiome_full.h5ad
 
+*.h5ad
