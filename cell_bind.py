@@ -265,7 +265,7 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
 
 
     result_dicts = []
-    for concat_mod in [True, False]:
+    for concat_mod in [False, True]:
         res12_train = cellbind_test_multimodal(mod1_tf_path=cite_GEX_tf_path, mod2_tf_path=ADT_tf_path,
                                 mod1_network=GEX_network, mod2_network=ADT_network, batch_size=batch_size,
                                 saved_weight_path=saved_weight_path_GEX, saved_weight_path2=saved_weight_path_ADT, 
@@ -294,7 +294,7 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
 
             adata_merged_GEX = ad.concat([adata_cite_GEX[GEX12_id_train], adata_multiome_GEX[GEX13_id_train]], axis=0)
             embedding_merged = np.concatenate([embedding12_train, embedding13_train], axis=0)
-
+            
             # Test QR on full appended GEX + ADT
             res_dict_12 = qr_test(adata_ref=adata_cite_GEX[GEX12_id_train], 
                     embedding_ref=embedding12_train, 
@@ -341,7 +341,8 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
 
             adata_merged_GEX = ad.concat([adata_cite_GEX[GEX12_id_train], adata_multiome_GEX[GEX13_id_train]], axis=0)
             embedding_merged = np.concatenate([embedding12_GEX_train, embedding13_GEX_train], axis=0)
-
+            print(f'After 1 {adata_merged_GEX.shape}')
+            print(f'After 1 emb {embedding_merged.shape}')
             # Test QR on cite GEX
             res_dict_cite_GEX_12 = qr_test(adata_ref=adata_cite_GEX[GEX12_id_train], 
                     embedding_ref=embedding12_GEX_train, 
@@ -417,6 +418,9 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
             res_dict_cite_ATAC_13["concat"] = "MP ATAC through GEX"
             res_dict_cite_ATAC_13["epoch"] = epoch
             result_dicts.append(res_dict_cite_ATAC_13)
+
+            print(f'After 1 {adata_merged_GEX.shape}')
+            print(f'After 1 emb {embedding_merged.shape}')
 
             # Merged modality prediction unknown ADT through GEX
             res_dict_cite_ADT_13 = mp_2mod_unknown_test(embedding_train=embedding_merged, 
