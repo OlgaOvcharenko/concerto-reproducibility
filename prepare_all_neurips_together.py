@@ -341,6 +341,6 @@ def main():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     
-    read_data(save_path=save_path)
+    read_data(save_path_cite=save_path, save_path_multiome=save_path)
 
 main()

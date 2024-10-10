@@ -51,42 +51,42 @@ def get_args():
 
 def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
     print("Read human data")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_train.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_cellbind_GEX_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_cellbind_ADT_train.h5ad')
 
-    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_test.h5ad')
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_cellbind_GEX_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_cellbind_ADT_test.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
 
     path_file = 'tfrecord_train/'
-    RNA_tf_path = save_path + path_file + 'GEX_tf/'
-    Protein_tf_path = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path = save_path + path_file + 'GEX_cellbind_tf/'
+    Protein_tf_path = save_path + path_file + 'ADT_cellbind_tf/'
 
     path_file = 'tfrecord_test/'
-    RNA_tf_path_test = save_path + path_file + 'GEX_tf/'
-    Protein_tf_path_test = save_path + path_file + 'ADT_tf/'
+    RNA_tf_path_test = save_path + path_file + 'GEX_cellbind_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ADT_cellbind_tf/'
     return RNA_tf_path, Protein_tf_path, adata_RNA, adata_Protein, RNA_tf_path_test, Protein_tf_path_test, adata_RNA_test, adata_Protein_test
 
 def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = ''):
     print("Read human data")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_multiome_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ATAC_multiome_train.h5ad')
+    adata_RNA = sc.read_h5ad(save_path + f'adata_cellbind_GEX_multiome_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_cellbind_ATAC_multiome_train.h5ad')
 
-    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_multiome_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ATAC_multiome_test.h5ad')
+    adata_RNA_test = sc.read_h5ad(save_path + f'adata_cellbind_GEX_multiome_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_cellbind_ATAC_multiome_test.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
 
     path_file = 'tfrecord_train/'
-    RNA_tf_path = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path = save_path + path_file + 'ATAC_multiome_tf/'
+    RNA_tf_path = save_path + path_file + 'GEX_cellbind_multiome_tf/'
+    Protein_tf_path = save_path + path_file + 'ATAC_cellbind_multiome_tf/'
 
     path_file = 'tfrecord_test/'
-    RNA_tf_path_test = save_path + path_file + 'GEX_multiome_tf/'
-    Protein_tf_path_test = save_path + path_file + 'ATAC_multiome_tf/'
+    RNA_tf_path_test = save_path + path_file + 'GEX_cellbind_multiome_tf/'
+    Protein_tf_path_test = save_path + path_file + 'ATAC_cellbind_multiome_tf/'
     return RNA_tf_path, Protein_tf_path, adata_RNA, adata_Protein, RNA_tf_path_test, Protein_tf_path_test, adata_RNA_test, adata_Protein_test
 
 
