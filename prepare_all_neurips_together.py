@@ -149,7 +149,9 @@ def preprocess_rna(
     adata_multiome = adata_multiome[cells_subset2, :]
     
     adata = ad.concat([adata_cite, adata_multiome], axis=0)
-    adata.obs["dataset"] = np.concatenate([np.zeros(shape=(adata_cite.shape[0])), np.ones(shape=(adata_multiome.shape[0]))], axis=0)
+    # adata.obs["dataset"] = np.concatenate([np.zeros(shape=(adata_cite.shape[0])), np.ones(shape=(adata_multiome.shape[0]))], axis=0)
+    adata.obs["dataset"] = pd.DataFrame(np.concatenate([np.zeros(shape=(adata_cite.shape[0])), np.ones(shape=(adata_multiome.shape[0]))], axis=0), columns=['y'])
+    adata.obs["dataset"]=adata.obs["dataset"].astype('category')
     print(adata)
 
     if not issparse(adata.X):
