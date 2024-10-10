@@ -207,11 +207,16 @@ def mp_2mod_unknown_test(embedding_train, embedding_test, adata_unknown_train, a
         res_dict[k] = v
 
     # Correlation between two GEX averaged and true
+    nbrs = NearestNeighbors(metric='cosine', n_neighbors=5, algorithm='auto').fit(embedding_train)
+    indices = nbrs.kneighbors(embedding_test, return_distance=False)
+    print(np.array(adata_unknown_train.X.todense())[indices].shape)
     val_new_GEX = np.array(adata_unknown_train.X.todense())[indices].mean(axis=1)
-    tmp = adata_unknown_test.X.todense()
+    tmp_a = adata_unknown_test.X.todense()
+    print(val_new_GEX.shape)
+    print(tmp_a.shape)
 
     pearsons = []
-    for true_protein, pred_protein in zip(tmp, val_new_GEX):
+    for true_protein, pred_protein in zip(tmp_a, val_new_GEX):
         print(true_protein.shape)
         print(pred_protein.shape)
         print(np.corrcoef(pred_protein, true_protein))
