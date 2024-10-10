@@ -58,8 +58,10 @@ l2tol1 = {
 
 # # from scib_metrics.benchmark import Benchmarker
 
-# adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
-# print(adata_gex)
+adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
+adata_gex = adata_gex[:, 0:13953]
+# adata_gex.obsm["dataset"] = np.zeros(shape=(adata_gex.shape[0]))
+# print(adata_gex.var["gene_id"])
 
 # print(adata_gex.X)
 # print(adata_gex.var["feature_types"])
@@ -71,18 +73,44 @@ l2tol1 = {
 # adata_fetal = sc.read(path)
 # print(adata_fetal)
 
-# adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
 # print(adata_adt.var["feature_types"])
 # print(adata_adt.var["feature_types"].value_counts())
 # adata_adt.X = adata_adt.layers["counts"]
 # adata_adt_atac = adata_adt[:, 13431:]
-# adata_adt_gex = adata_adt[:, 0:13431]
+adata_adt_gex = adata_adt[:, 0:13431]
+# adata_adt_gex.obsm["dataset"] = np.ones(shape=(adata_adt_gex.shape[0]))
 # print(adata_adt)
 # print(np.unique(adata_adt.obs["batch"].to_list()))
 # print(np.unique(adata_adt.obs["cell_type"].to_list()))
 
 # print(adata_adt_atac)
-# print(adata_adt_gex)
+# print(adata_adt_gex.var["gene_id"])
+# print(set(adata_gex.var["gene_id"])).symmetric_difference(set(adata_adt_gex.var["gene_id"]))
+# print(len(set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))))
+# print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
+
+# tmp = ad.concat([adata_gex, adata_adt_gex], axis=0)
+# print(tmp)
+# print(tmp.var)
+# print(sum(tmp.var=='ENSG00000153006'))
+# tmp.var == set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))
+sym_d = list(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names)))
+adata_gex = adata_gex[:, [gene for gene in adata_gex.var_names
+                      if str(gene) not in sym_d]]
+adata_adt_gex = adata_adt_gex[:, [gene for gene in adata_adt_gex.var_names
+                      if str(gene) not in sym_d]]
+print(adata_gex.shape)
+print(adata_adt_gex.shape)
+tmp = ad.concat([adata_gex, adata_adt_gex], axis=0)
+print(tmp.shape)
+print(np.concatenate([np.zeros(shape=(adata_gex.shape[0])), np.ones(shape=(adata_adt_gex.shape[0]))], axis=0).shape)
+tmp.obs["dataset"] = np.concatenate([np.zeros(shape=(adata_gex.shape[0])), np.ones(shape=(adata_adt_gex.shape[0]))], axis=0)
+print(tmp[tmp.obs["dataset"] == 0, :])
+# print(adata_gex.var_names)
+# print(adata_adt_gex.var_names)
+# print(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names)))
+
 
 # # print(adata_adt.X)
 # # print(adata_adt.X)
@@ -126,11 +154,11 @@ l2tol1 = {
 # # # print(adata_adt_rna.X)
 
 
-path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
-adata_RNA = sc.read(path)
-adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
+# path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
+# adata_RNA = sc.read(path)
+# adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
 
-print(adata_RNA)
+# print(adata_RNA)
 
 # path = './Multimodal_pretraining/data/data/multi_protein_l2.loom'
 # adata_Protein = sc.read(path) #cell_type batch
@@ -150,10 +178,10 @@ print(adata_RNA)
 
 # # print(adata_RNA)
 
-b_list = np.unique(adata_RNA.obs["batch"].to_list())
-for b in b_list:
-    print(f"\n{b}")
-    print(adata_RNA[adata_RNA.obs["batch"] == b, :].obs["cell_type_l1"].value_counts())
+# b_list = np.unique(adata_RNA.obs["batch"].to_list())
+# for b in b_list:
+#     print(f"\n{b}")
+#     print(adata_RNA[adata_RNA.obs["batch"] == b, :].obs["cell_type_l1"].value_counts())
 
 # # print(np.unique(adata_RNA.obs["batch"].to_list()))
 # # print(np.unique(adata_RNA.obs["cell_type"].to_list()))
