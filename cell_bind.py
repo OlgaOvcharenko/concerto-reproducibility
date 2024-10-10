@@ -212,6 +212,9 @@ def mp_2mod_unknown_test(embedding_train, embedding_test, adata_unknown_train, a
 
     pearsons = []
     for true_protein, pred_protein in zip(tmp, val_new_GEX):
+        print(true_protein.shape)
+        print(pred_protein.shape)
+        print(np.corrcoef(pred_protein, true_protein))
         pearsons.append(np.corrcoef(pred_protein, true_protein)[0, 1])
 
     res_dict["pearsons"] = np.mean(pearsons)
