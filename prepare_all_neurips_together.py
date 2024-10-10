@@ -163,7 +163,7 @@ def preprocess_rna(
     
     if is_hvg == True:
         # sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key=batch_key, inplace=True, subset=True)
-        sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key='obs', inplace=True, subset=True)
+        sc.pp.highly_variable_genes(adata, n_top_genes=n_top_features, batch_key='dataset', inplace=True, subset=True)
 
     print('Processed dataset shape: {}'.format(adata.shape))
 
