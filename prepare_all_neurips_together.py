@@ -150,9 +150,7 @@ def preprocess_rna(
     
     adata = ad.concat([adata_cite, adata_multiome], axis=0)
     # adata.obs["dataset"] = np.concatenate([np.zeros(shape=(adata_cite.shape[0])), np.ones(shape=(adata_multiome.shape[0]))], axis=0)
-    adata.obs["dataset"] = pd.DataFrame(np.concatenate([np.zeros(shape=(adata_cite.shape[0])), np.ones(shape=(adata_multiome.shape[0]))], axis=0), columns=['y'])
-    adata.obs["dataset"]=adata.obs["dataset"].astype('category')
-    print(adata)
+    adata.obs["dataset"] = pd.Categorical(["cite"] * adata_cite.shape[0] + ["multiome"] * adata_multiome.shape[0])
 
     if not issparse(adata.X):
         adata.X = scipy.sparse.csr_matrix(adata.X)
@@ -169,8 +167,8 @@ def preprocess_rna(
 
     print('Processed dataset shape: {}'.format(adata.shape))
 
-    adata_cite_new = adata[adata.obs["dataset"] == 0, :]
-    adata_multiome_new = adata[adata.obs["dataset"] == 1, :]
+    adata_cite_new = adata[adata.obs["dataset"] == 'cite', :]
+    adata_multiome_new = adata[adata.obs["dataset"] == 'multiome', :]
     return adata_cite_new, cells_subset1, adata_multiome_new, cells_subset2
 
 def preprocess_protein(
