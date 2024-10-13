@@ -4,17 +4,17 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-batch_sizes=("256")
-batch_sizes2=("256")
+batch_sizes=("512")
+batch_sizes2=("512")
 drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
-heads=("64")
+heads=("64 128 256")
 train=1
 test=1
 
-epochs=("100")
-lrs=("1e-3")
+epochs=("150")
+lrs=("1e-5")
 data=("human")
 model_type=("0")
 combine_omics=1

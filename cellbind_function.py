@@ -78,7 +78,7 @@ def create_single_cell_network(mult_feature_name: str, tf_path: str, super_param
 
 
 def cellbind_train_multimodal(mod1a_tf_path: str, mod2_tf_path: str, mod1b_tf_path: str, mod3_tf_path: str, weight_path: str, mod1_network, mod2_network, mod3_network, super_parameters=None):
-    train_log_dir = 'logs_tensorboard/gradient_tape/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
+    train_log_dir = 'logs_tensorboard/gradient_tape_cell_bind/' + f'{super_parameters["model_type"]}_multi_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_s"]}_{super_parameters["attention_t"]}_{super_parameters["heads"]}' + '/train'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
     set_seeds(np.random.randint(0, 10))   

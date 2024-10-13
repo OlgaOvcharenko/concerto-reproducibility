@@ -86,7 +86,9 @@ adata_adt_gex = adata_adt[:, 0:13431]
 
 # print(adata_adt_atac)
 # print(adata_adt_gex.var["gene_id"])
-# print(set(adata_gex.var["gene_id"])).symmetric_difference(set(adata_adt_gex.var["gene_id"]))
+
+print(set(adata_gex.obs_names).intersection(set(adata_adt_gex.obs_names)))
+print(len(set(adata_gex.obs_names).intersection(set(adata_adt_gex.obs_names))))
 # print(len(set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))))
 # print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
 
@@ -95,20 +97,20 @@ adata_adt_gex = adata_adt[:, 0:13431]
 # print(tmp.var)
 # print(sum(tmp.var=='ENSG00000153006'))
 # tmp.var == set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))
-sym_d = list(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names)))
-adata_gex = adata_gex[:, [gene for gene in adata_gex.var_names
-                      if str(gene) not in sym_d]]
-adata_adt_gex = adata_adt_gex[:, [gene for gene in adata_adt_gex.var_names
-                      if str(gene) not in sym_d]]
-print(adata_gex.shape)
-print(adata_adt_gex.shape)
-tmp = ad.concat([adata_gex, adata_adt_gex], axis=0)
-print(tmp.shape)
-print(np.concatenate([np.zeros(shape=(adata_gex.shape[0])), np.ones(shape=(adata_adt_gex.shape[0]))], axis=0).shape)
-pd.Categorical(["cite"] * adata_gex.shape[0] + ["multiome"] * adata_adt_gex.shape[0])
-tmp.obs["dataset"] = pd.Categorical(["cite"] * adata_gex.shape[0] + ["multiome"] * adata_adt_gex.shape[0])
-# tmp.obs["dataset"]=tmp.obs["dataset"].astype('category')
-print(tmp.obs["dataset"])
+# sym_d = list(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names)))
+# adata_gex = adata_gex[:, [gene for gene in adata_gex.var_names
+#                       if str(gene) not in sym_d]]
+# adata_adt_gex = adata_adt_gex[:, [gene for gene in adata_adt_gex.var_names
+#                       if str(gene) not in sym_d]]
+# print(adata_gex.shape)
+# print(adata_adt_gex.shape)
+# tmp = ad.concat([adata_gex, adata_adt_gex], axis=0)
+# print(tmp.shape)
+# print(np.concatenate([np.zeros(shape=(adata_gex.shape[0])), np.ones(shape=(adata_adt_gex.shape[0]))], axis=0).shape)
+# pd.Categorical(["cite"] * adata_gex.shape[0] + ["multiome"] * adata_adt_gex.shape[0])
+# tmp.obs["dataset"] = pd.DataFrame(np.concatenate([np.zeros(shape=(adata_gex.shape[0])), np.ones(shape=(adata_adt_gex.shape[0]))], axis=0), columns=['y'])['y']
+# # tmp.obs["dataset"]=tmp.obs["dataset"].astype('category')
+# print(tmp.obs["dataset"])
 # print(adata_gex.var_names)
 # print(adata_adt_gex.var_names)
 # print(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names)))

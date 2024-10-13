@@ -442,7 +442,7 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
 
             # TODO ATAC -> GEX -> ADT
             
-            return result_dicts
+    return result_dicts
 
 
 
@@ -531,6 +531,6 @@ def main():
                     res_dicts.extend(res_dicts_tmp)
                 
             res_df = pd.DataFrame(res_dicts)
-            res_df.to_csv(f'./Multimodal_pretraining/results/{data}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{batch_size2}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.csv')
+            res_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_{combine_omics}_mt_{model_type}_bs_{batch_size}_{batch_size2}_{epoch}_{lr}_{drop_rate}_{attention_s}_{attention_t}_{heads}_{repeat}.csv')
 
 main()
