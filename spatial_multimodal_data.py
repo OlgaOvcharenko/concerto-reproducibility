@@ -555,7 +555,7 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             i += 1
             
         print(f"Written {i} images")
-        save_dict = {'rows': rows, 'cols': cols, 'depth': depth}
+        save_dict = {'rows': 384, 'cols': 384, 'depth': 1}
         file = tfrecord_file_test.replace('tf_0.tfrecord','vocab_size.npz')
         np.savez_compressed(file, **save_dict)
 
