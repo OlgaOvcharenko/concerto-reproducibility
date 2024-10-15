@@ -431,7 +431,7 @@ def encode_trans_path(model, transforms, image):
 
     data = transforms(img).unsqueeze(0)  # input is (batch_size, num_channels, img_size, img_size) shaped tensor
     output = model(data)  # output is (batch_size, num_features) shaped tensor
-    return output.numpy()
+    return output.detach().numpy()
 
 def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', is_hvg_RNA: bool = False):
     print("Read spatial data.")
@@ -519,7 +519,7 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
 
             image = tf.convert_to_tensor(image)
             image = tf.io.serialize_tensor(image)
-            
+
             example = serialize_example_batch_spatial(image, geom, radius)
             writer.write(example)
 
