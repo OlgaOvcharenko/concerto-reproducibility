@@ -22,6 +22,8 @@ from PIL import Image
 from scipy.sparse import issparse
 import scipy
 from sklearn.model_selection import train_test_split
+from PIL import Image
+import timm
 
 def preprocessing_changed_rna(
         adata,
@@ -424,6 +426,141 @@ def prepare_data_spatial_split(sdata, align_matrix, save_path: str = '', is_hvg_
 
     return RNA_tf_path, adata_RNA, staining_tf_path, RNA_tf_path_test, adata_RNA_test, staining_tf_path_test
 
+def encode_trans_path(model, transforms, image):
+    img = Image.fromarray(image)
+
+    data = transforms(img).unsqueeze(0)  # input is (batch_size, num_channels, img_size, img_size) shaped tensor
+    output = model(data)  # output is (batch_size, num_features) shaped tensor
+    return output.numpy()
+
+def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', is_hvg_RNA: bool = False):
+    print("Read spatial data.")
+    adata_RNA = sdata['table']
+
+    # Create PCA for benchmarking
+    sc.tl.pca(adata_RNA)
+
+    adata_RNA.obs["batch"] = np.full((adata_RNA.shape[0],), 1)
+
+    adata_RNA = preprocessing_changed_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    print(f"RNA data shape {adata_RNA.shape}")
+    
+    train_idx, test_idx = train_test_split(
+        adata_RNA.obs_names.values,
+        test_size=0.2,
+        stratify=adata_RNA.obs["cell_type"],
+        shuffle=True,
+        random_state=42,
+    )
+    adata_RNA_test = adata_RNA[test_idx, :]
+    adata_RNA = adata_RNA[train_idx, :]
+
+    adata_RNA.write_h5ad(save_path + f'train_spatial_adata_RNA.h5ad')
+    adata_RNA_test.write_h5ad(save_path + f'test_spatial_adata_RNA.h5ad')
+    print("Saved adata.")
+
+    path_file = 'tfrecord/'
+    RNA_tf_path = save_path + path_file + 'train_spatial_RNA_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path=RNA_tf_path, batch_col_name='batch')
+
+    RNA_tf_path_test = save_path + path_file + 'test_spatial_RNA_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA_test, tf_path=RNA_tf_path_test, batch_col_name='batch')
+    print("Made tf record RNA.")
+
+    rows = 128
+    cols = 128
+    depth = 3
+    align_matrix = np.linalg.inv(align_matrix)
+    image_raw = sdata['he_image'].data.compute()
+
+    staining_tf_path = save_path + path_file + 'train_spatial_staining_tf'
+    print('Writing ', staining_tf_path)
+    staining_tf_path_test = save_path + path_file + 'test_spatial_staining_tf'
+    print('Writing ', staining_tf_path_test)
+
+    tfrecord_file = staining_tf_path + '/tf_0.tfrecord'
+    if not os.path.exists(staining_tf_path):
+        os.makedirs(staining_tf_path)
+
+    tfrecord_file_test = staining_tf_path_test + '/tf_0.tfrecord'
+    if not os.path.exists(staining_tf_path_test):
+        os.makedirs(staining_tf_path_test)
+
+    # load model from the hub
+    model = timm.create_model(
+        model_name="hf-hub:1aurent/vit_small_patch16_224.transpath_mocov3",
+        pretrained=True,
+        num_heads=12,
+        ).eval()
+
+    # get model specific transforms (normalization, resize)
+    data_config = timm.data.resolve_model_data_config(model)
+    transforms = timm.data.create_transform(**data_config, is_training=False)
+
+    with tf.io.TFRecordWriter(tfrecord_file) as writer:
+        geoms = adata_RNA.obs['cell_id']
+        shapes = spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[geoms, ["geometry", "radius"]]
+        i = 0
+        for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
+            coords_x = shape.x
+            coords_y = shape.y
+
+            cor_coords = align_matrix @ np.array([coords_x, coords_y, 1])
+            coords_y_new, coords_x_new = cor_coords[0], cor_coords[1]
+
+            x_min, x_max = coords_x_new - (rows / 2), coords_x_new + (cols / 2)
+            y_min, y_max = coords_y_new - (rows / 2), coords_y_new + (cols / 2)
+            
+            image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+            image = np.rot90(image, 1, axes=(0,1))
+
+            image = tf.convert_to_tensor(image)
+            image = tf.io.serialize_tensor(image)
+
+            image = encode_trans_path(model=model, transforms=transforms, image=image)
+
+            example = serialize_example_batch_spatial(image, geom, radius)
+            writer.write(example)
+
+            i += 1
+            
+        print(f"Written {i} images")
+        save_dict = {'rows': rows, 'cols': cols, 'depth': depth}
+        file = tfrecord_file.replace('tf_0.tfrecord','vocab_size.npz')
+        np.savez_compressed(file, **save_dict)
+
+    with tf.io.TFRecordWriter(tfrecord_file_test) as writer:
+        geoms = adata_RNA_test.obs['cell_id']
+        shapes = spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[geoms, ["geometry", "radius"]]
+        i = 0
+        for geom, shape, radius in zip(geoms, shapes["geometry"], shapes["radius"]):
+            coords_x = shape.x
+            coords_y = shape.y
+
+            cor_coords = align_matrix @ np.array([coords_x, coords_y, 1])
+            coords_y_new, coords_x_new = cor_coords[0], cor_coords[1]
+
+            x_min, x_max = coords_x_new - (rows / 2), coords_x_new + (cols / 2)
+            y_min, y_max = coords_y_new - (rows / 2), coords_y_new + (cols / 2)
+            
+            image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+            image = np.rot90(image, 1, axes=(0,1))
+
+            image = tf.convert_to_tensor(image)
+            image = tf.io.serialize_tensor(image)
+
+            example = serialize_example_batch_spatial(image, geom, radius)
+            writer.write(example)
+
+            i += 1
+            
+        print(f"Written {i} images")
+        save_dict = {'rows': rows, 'cols': cols, 'depth': depth}
+        file = tfrecord_file_test.replace('tf_0.tfrecord','vocab_size.npz')
+        np.savez_compressed(file, **save_dict)
+
+    return RNA_tf_path, adata_RNA, staining_tf_path, RNA_tf_path_test, adata_RNA_test, staining_tf_path_test
+
 
 def read_data_spatial(data: str = "", save_path: str = ""):
     data_path="./Multimodal_pretraining/data/Xinium/Xenium_V1_humanLung_Cancer_FFPE_outs"
@@ -452,8 +589,11 @@ def read_data_spatial(data: str = "", save_path: str = ""):
     if data == 'spatial':    
         prepare_data_spatial(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
     
+    # elif data == 'spatial_split':
+    #     prepare_data_spatial_split(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
+    
     elif data == 'spatial_split':
-        prepare_data_spatial_split(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
+        prepare_data_spatial_split_encode(sdata=sdata, align_matrix=align_matrix, save_path=save_path, is_hvg_RNA=False)
 
 
 def save_merged_adata(adata_merged, filename):
