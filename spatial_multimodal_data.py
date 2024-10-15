@@ -512,10 +512,16 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
 
             x_min, x_max = coords_x_new - (rows / 2), coords_x_new + (cols / 2)
             y_min, y_max = coords_y_new - (rows / 2), coords_y_new + (cols / 2)
+
+            print(x_min, x_max)
+            print(y_min, y_max)
+
+            print(image_raw.shape)
             
             image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+            print(image.shape)
+            
             image = np.rot90(image, 1, axes=(0,1))
-
 
             image = encode_trans_path(model=model, transforms=transforms, image=image)
 
