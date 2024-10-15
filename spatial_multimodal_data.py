@@ -429,8 +429,8 @@ def prepare_data_spatial_split(sdata, align_matrix, save_path: str = '', is_hvg_
 def encode_trans_path(model, transforms, image):
     img = Image.fromarray(image)
 
+    print(img)
     data = transforms(img)
-    print(data.shape)
     data = data.unsqueeze(0)  # input is (batch_size, num_channels, img_size, img_size) shaped tensor
     output = model(data)  # output is (batch_size, num_features) shaped tensor
     return output.detach().numpy()
@@ -548,6 +548,8 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             
             image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
             image = np.rot90(image, 1, axes=(0,1))
+
+            image = encode_trans_path(model=model, transforms=transforms, image=image)
 
             image = tf.convert_to_tensor(image)
             image = tf.io.serialize_tensor(image)
