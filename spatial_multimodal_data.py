@@ -429,7 +429,9 @@ def prepare_data_spatial_split(sdata, align_matrix, save_path: str = '', is_hvg_
 def encode_trans_path(model, transforms, image):
     img = Image.fromarray(image)
 
-    data = transforms(img).unsqueeze(0)  # input is (batch_size, num_channels, img_size, img_size) shaped tensor
+    data = transforms(img)
+    print(data.shape)
+    data = data.unsqueeze(0)  # input is (batch_size, num_channels, img_size, img_size) shaped tensor
     output = model(data)  # output is (batch_size, num_features) shaped tensor
     return output.detach().numpy()
 
