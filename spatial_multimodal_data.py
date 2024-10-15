@@ -514,11 +514,12 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
             image = np.rot90(image, 1, axes=(0,1))
 
-            image = tf.convert_to_tensor(image)
-            image = tf.io.serialize_tensor(image)
 
             image = encode_trans_path(model=model, transforms=transforms, image=image)
 
+            image = tf.convert_to_tensor(image)
+            image = tf.io.serialize_tensor(image)
+            
             example = serialize_example_batch_spatial(image, geom, radius)
             writer.write(example)
 
