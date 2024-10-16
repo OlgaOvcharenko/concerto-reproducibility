@@ -507,12 +507,14 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             print(x_min, x_max)
             print(y_min, y_max)
 
-            if x_min < 0 or x_max < 0 or y_min < 0 or y_max < 0:
+            image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)]
+
+            if x_min < 0 or x_max < 0 or y_min < 0 or y_max < 0 or image.shape[0] == 0 or image.shape[1] == 0 or image.shape[2] == 0:
                 # remove cell 
                 remove_list.append(geom)
             
             else:
-                image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+                image = image.transpose(1,2,0)
                 print(f"Sliced image: {image.shape}")
                 
                 image = np.rot90(image, 1, axes=(0,1))
@@ -556,12 +558,14 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             x_min, x_max = coords_x_new - (rows / 2), coords_x_new + (cols / 2)
             y_min, y_max = coords_y_new - (rows / 2), coords_y_new + (cols / 2)
 
-            if x_min < 0 or x_max < 0 or y_min < 0 or y_max < 0:
+            image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)]
+
+            if x_min < 0 or x_max < 0 or y_min < 0 or y_max < 0 or image.shape[0] == 0 or image.shape[1] == 0 or image.shape[2] == 0:
                 # remove cell 
                 remove_list_test.append(geom)
             
             else:
-                image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+                image = image.transpose(1,2,0)
                 
                 print(f"Sliced image: {image.shape}")
 
