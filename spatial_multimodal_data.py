@@ -429,7 +429,6 @@ def prepare_data_spatial_split(sdata, align_matrix, save_path: str = '', is_hvg_
 def encode_trans_path(model, transforms, image):
     img = Image.fromarray(image)
 
-    print(img)
     data = transforms(img)
     data = data.unsqueeze(0)  # input is (batch_size, num_channels, img_size, img_size) shaped tensor
     output = model(data)  # output is (batch_size, num_features) shaped tensor
@@ -504,9 +503,6 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             x_min, x_max = coords_x_new - (rows / 2), coords_x_new + (cols / 2)
             y_min, y_max = coords_y_new - (rows / 2), coords_y_new + (cols / 2)
 
-            print(x_min, x_max)
-            print(y_min, y_max)
-
             image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)]
 
             if x_min < 0 or x_max < 0 or y_min < 0 or y_max < 0 or image.shape[0] == 0 or image.shape[1] == 0 or image.shape[2] == 0:
@@ -515,7 +511,6 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             
             else:
                 image = image.transpose(1,2,0)
-                print(f"Sliced image: {image.shape}")
                 
                 image = np.rot90(image, 1, axes=(0,1))
 
@@ -534,7 +529,7 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
         file = tfrecord_file.replace('tf_0.tfrecord','vocab_size.npz')
         np.savez_compressed(file, **save_dict)
 
-    non_list = [name for name in adata_RNA.obs['cell_id'] if name not in remove_list]
+    non_list = [True if name not in remove_list else False  for name in adata_RNA.obs['cell_id']]
     adata_RNA = adata_RNA[non_list, :]
 
     adata_RNA.write_h5ad(save_path + f'train_spatial_adata_RNA.h5ad')
@@ -566,8 +561,6 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             
             else:
                 image = image.transpose(1,2,0)
-                
-                print(f"Sliced image: {image.shape}")
 
                 image = np.rot90(image, 1, axes=(0,1))
 
@@ -586,8 +579,8 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
         file = tfrecord_file_test.replace('tf_0.tfrecord','vocab_size.npz')
         np.savez_compressed(file, **save_dict)
 
-    non_list = [name for name in adata_RNA_test.obs['cell_id'] if name not in remove_list_test]
-    adata_RNA_test = adata_RNA[non_list, :]
+    non_list = [True if name not in remove_list_test else False for name in adata_RNA_test.obs['cell_id']]
+    adata_RNA_test = adata_RNA_test[non_list, :]
 
     adata_RNA_test.write_h5ad(save_path + f'test_spatial_adata_RNA.h5ad')
     RNA_tf_path_test = save_path + path_file + 'test_spatial_RNA_tf/'

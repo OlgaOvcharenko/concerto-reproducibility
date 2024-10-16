@@ -25,18 +25,24 @@ sdata = spatialdata_io.xenium(data_path)
 # align_matrix = np.genfromtxt(alignment_matrix_path, delimiter=",", dtype=float)
 
 adata_RNA = sdata['table']
-difference = list(set(sdata['table'].obs["cell_id"].tolist()).symmetric_difference(set(labels["id"].tolist())))
+# difference = list(set(sdata['table'].obs["cell_id"].tolist()).symmetric_difference(set(labels["id"].tolist())))
 
-for val in difference:
-    labels = labels._append({"id": val, "manual_cell_type": "other"}, ignore_index = True)
+# for val in difference:
+#     labels = labels._append({"id": val, "manual_cell_type": "other"}, ignore_index = True)
 
-labels = labels.set_index('id')
-labels = labels.reindex(index=sdata["table"].obs["cell_id"])
-labels = labels.reset_index()
+# labels = labels.set_index('id')
+# labels = labels.reindex(index=sdata["table"].obs["cell_id"])
+# labels = labels.reset_index()
 
-sdata["table"].obs["cell_type"] = labels["manual_cell_type"]
+# sdata["table"].obs["cell_type"] = labels["manual_cell_type"]
 
-print(pd.unique(sdata["table"].obs['cell_type']).tolist())
+# print(pd.unique(sdata["table"].obs['cell_type']).tolist())
+
+print(adata_RNA.shape)
+remove_list = ['endlppki-1', 'namalnlj-1', 'nioccikc-1', 'chiglbek-1', 'gdohiafa-1', 'mdcjoacp-1']
+non_list = [True if name not in remove_list else False for name in adata_RNA.obs['cell_id']]
+adata_RNA = adata_RNA[non_list, :]
+print(adata_RNA.shape)
 
 # times, times2, times3 = [], [], []
 
