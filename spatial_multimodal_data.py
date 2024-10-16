@@ -457,17 +457,7 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
     adata_RNA_test = adata_RNA[test_idx, :]
     adata_RNA = adata_RNA[train_idx, :]
 
-    adata_RNA.write_h5ad(save_path + f'train_spatial_adata_RNA.h5ad')
-    adata_RNA_test.write_h5ad(save_path + f'test_spatial_adata_RNA.h5ad')
-    print("Saved adata.")
-
     path_file = 'tfrecord/'
-    RNA_tf_path = save_path + path_file + 'train_spatial_RNA_tf/'
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path=RNA_tf_path, batch_col_name='batch')
-
-    RNA_tf_path_test = save_path + path_file + 'test_spatial_RNA_tf/'
-    RNA_tf_path = concerto_make_tfrecord(adata_RNA_test, tf_path=RNA_tf_path_test, batch_col_name='batch')
-    print("Made tf record RNA.")
 
     rows = 128
     cols = 128
@@ -499,6 +489,7 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
     data_config = timm.data.resolve_model_data_config(model)
     transforms = timm.data.create_transform(**data_config, is_training=False)
 
+    remove_list = []
     with tf.io.TFRecordWriter(tfrecord_file) as writer:
         geoms = adata_RNA.obs['cell_id']
         shapes = spatialdata.transform(sdata["cell_circles"], to_coordinate_system="global").loc[geoms, ["geometry", "radius"]]
@@ -516,20 +507,23 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
             print(x_min, x_max)
             print(y_min, y_max)
 
-            print(image_raw.shape)
+            if x_min < 0 or x_max < 0 or y_min < 0 or y_max < 0:
+                # remove cell 
+                remove_list.append(geom)
             
-            image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
-            print(image.shape)
-            
-            image = np.rot90(image, 1, axes=(0,1))
+            else:
+                image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+                print(f"Sliced image: {image.shape}")
+                
+                image = np.rot90(image, 1, axes=(0,1))
 
-            image = encode_trans_path(model=model, transforms=transforms, image=image)
+                image = encode_trans_path(model=model, transforms=transforms, image=image)
 
-            image = tf.convert_to_tensor(image)
-            image = tf.io.serialize_tensor(image)
+                image = tf.convert_to_tensor(image)
+                image = tf.io.serialize_tensor(image)
 
-            example = serialize_example_batch_spatial(image, geom, radius)
-            writer.write(example)
+                example = serialize_example_batch_spatial(image, geom, radius)
+                writer.write(example)
 
             i += 1
             
@@ -537,6 +531,16 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
         save_dict = {'rows': rows, 'cols': cols, 'depth': depth}
         file = tfrecord_file.replace('tf_0.tfrecord','vocab_size.npz')
         np.savez_compressed(file, **save_dict)
+
+    non_list = [name for name in adata_RNA.obs['cell_id'] if name not in remove_list]
+    adata_RNA = adata_RNA[non_list, :]
+
+    adata_RNA.write_h5ad(save_path + f'train_spatial_adata_RNA.h5ad')
+    RNA_tf_path = save_path + path_file + 'train_spatial_RNA_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path=RNA_tf_path, batch_col_name='batch')
+
+
+    remove_list_test = []
 
     with tf.io.TFRecordWriter(tfrecord_file_test) as writer:
         geoms = adata_RNA_test.obs['cell_id']
@@ -551,17 +555,25 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
 
             x_min, x_max = coords_x_new - (rows / 2), coords_x_new + (cols / 2)
             y_min, y_max = coords_y_new - (rows / 2), coords_y_new + (cols / 2)
+
+            if x_min < 0 or x_max < 0 or y_min < 0 or y_max < 0:
+                # remove cell 
+                remove_list_test.append(geom)
             
-            image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
-            image = np.rot90(image, 1, axes=(0,1))
+            else:
+                image = image_raw[:, int(x_min): int(x_max), int(y_min): int(y_max)].transpose(1,2,0)
+                
+                print(f"Sliced image: {image.shape}")
 
-            image = encode_trans_path(model=model, transforms=transforms, image=image)
+                image = np.rot90(image, 1, axes=(0,1))
 
-            image = tf.convert_to_tensor(image)
-            image = tf.io.serialize_tensor(image)
+                image = encode_trans_path(model=model, transforms=transforms, image=image)
 
-            example = serialize_example_batch_spatial(image, geom, radius)
-            writer.write(example)
+                image = tf.convert_to_tensor(image)
+                image = tf.io.serialize_tensor(image)
+
+                example = serialize_example_batch_spatial(image, geom, radius)
+                writer.write(example)
 
             i += 1
             
@@ -570,6 +582,13 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
         file = tfrecord_file_test.replace('tf_0.tfrecord','vocab_size.npz')
         np.savez_compressed(file, **save_dict)
 
+    non_list = [name for name in adata_RNA_test.obs['cell_id'] if name not in remove_list_test]
+    adata_RNA_test = adata_RNA[non_list, :]
+
+    adata_RNA_test.write_h5ad(save_path + f'test_spatial_adata_RNA.h5ad')
+    RNA_tf_path_test = save_path + path_file + 'test_spatial_RNA_tf/'
+    RNA_tf_path = concerto_make_tfrecord(adata_RNA_test, tf_path=RNA_tf_path_test, batch_col_name='batch')
+    
     return RNA_tf_path, adata_RNA, staining_tf_path, RNA_tf_path_test, adata_RNA_test, staining_tf_path_test
 
 
