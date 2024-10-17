@@ -1736,7 +1736,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                                batch_size=super_parameters['batch_size'],
                                                                is_training=True,
                                                                shuffle_size=10000,
-                                                               seed=epoch
+                                                               seed=epoch,
+                                                               is_image=False if super_parameters["model_type_image"] == 1 else True
                                                                )
             
             step = 0
