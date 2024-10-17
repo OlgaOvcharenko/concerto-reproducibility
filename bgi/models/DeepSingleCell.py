@@ -161,13 +161,13 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         elif model_type == 2:
             # 
             image_network = models.Sequential([
-                Dense(512, name='{}-projection-0'.format(name), activation='relu'),
+                Dense(512, name='{}-projection-1'.format(name), activation='relu'),
                 BatchNormalization(),
-                Dense(256, name='{}-projection-0'.format(name), activation='relu'),
+                Dense(256, name='{}-projection-2'.format(name), activation='relu'),
                 BatchNormalization(),
-                Dense(128, name='{}-projection-0'.format(name), activation='relu'),
+                Dense(128, name='{}-projection-3'.format(name), activation='relu'),
                 Dropout(rate=drop_rate),
-                Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
+                Dense(head_1, name='{}-projection-4'.format(name), activation='relu')
             ])
             output1 = image_network(image_value_input)
 
