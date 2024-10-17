@@ -4,7 +4,23 @@ mkdir -p logs
 
 source "python_venv/bin/activate"
 
-epochs=("50")
+# epochs=("50")
+# lrs=("1e-5")
+# batch_sizes=("64")
+# drop_rates=("0.1")
+# attention_t=("1")
+# attention_s=("0")
+# heads=("32 64 128")
+# data=("spatial_split")
+# train=1
+# test=1
+# mask=("0")
+
+# model_type_image=("2")
+# model_type=("1 2")
+# combine_omics=0
+
+epochs=("150")
 lrs=("1e-5")
 batch_sizes=("64")
 drop_rates=("0.1")
@@ -16,8 +32,8 @@ train=1
 test=1
 mask=("0")
 
-model_type_image=("1")
-model_type=("1 2")
+model_type_image=("2")
+model_type=("2")
 combine_omics=0
 
 for e in $epochs; do

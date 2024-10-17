@@ -135,7 +135,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 Dense(head_1, activation='relu')
             ])
             output1 = image_network(image_value_input)
-        else:
+        elif model_type == 1:
             # EfficientNet B7
             base_model2 = EfficientNetB2(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
@@ -158,6 +158,19 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
             print(image_network.summary())
             output1 = image_network(image_value_input)
 
+        elif model_type == 2:
+            # 
+            image_network = models.Sequential([
+                Dense(512, name='{}-projection-0'.format(name), activation='relu'),
+                BatchNormalization(),
+                Dense(256, name='{}-projection-0'.format(name), activation='relu'),
+                BatchNormalization(),
+                Dense(128, name='{}-projection-0'.format(name), activation='relu'),
+                Dropout(rate=drop_rate),
+                Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
+            ])
+            output1 = image_network(image_value_input)
+
     else:
         if model_type == 0:
             # CNNs
@@ -174,7 +187,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
             ])
             output1 = image_network(image_value_input)
-        else:
+        elif model_type == 1:
             # EfficientNet B4
             base_model2 = EfficientNetB0(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
@@ -196,6 +209,15 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
             ])
             print(image_network.summary())
+            output1 = image_network(image_value_input)
+
+        elif model_type == 2:
+            # 
+            image_network = models.Sequential([
+                BatchNormalization(),
+                Dense(head_1, name='{}-projection-0'.format(name), activation='relu'),
+                BatchNormalization(),
+            ])
             output1 = image_network(image_value_input)
 
     return tf.keras.Model(inputs=inputs, outputs=[output0, output1])

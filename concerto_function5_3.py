@@ -1745,10 +1745,18 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
+                print("RNA")
+                print(source_values_RNA)
+                print(source_values_RNA.shape)
+                
+                print("Stain")
+                print(source_image_raw_staining)
+                print(source_image_raw_staining.shape)
+                exit()
 
-                # TODO Add preprocessing of mask
+                # Add preprocessing of mask
                 batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
-                if super_parameters['mask'] == 1:
+                if super_parameters['mask'] == 1 and super_parameters['model_type_image'] != 2:
                     radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
                     for im, r in enumerate(radius):
                         arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
@@ -1759,9 +1767,6 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
 
                     batch_masks = tf.convert_to_tensor(batch_masks, dtype=tf.uint8)
                     source_image_raw_staining = tf.math.multiply(source_image_raw_staining, batch_masks)
-
-                    # print(batch_masks)
-                    # print(source_image_raw_staining)
 
                 with tf.GradientTape() as tape:
                     if super_parameters["combine_omics"]:
