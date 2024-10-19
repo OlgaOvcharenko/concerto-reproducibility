@@ -1748,14 +1748,14 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
 
                 source_image_raw_staining = tf.squeeze(source_image_raw_staining)
 
-                print("RNA")
-                print(source_values_RNA)
-                print(source_values_RNA.shape)
+                # print("RNA")
+                # print(source_values_RNA)
+                # print(source_values_RNA.shape)
                 
-                print("Stain")
-                print(source_image_raw_staining)
-                print(source_image_raw_staining.shape)
-                exit()
+                # print("Stain")
+                # print(source_image_raw_staining)
+                # print(source_image_raw_staining.shape)
+                # exit()
 
                 # Add preprocessing of mask
                 batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
