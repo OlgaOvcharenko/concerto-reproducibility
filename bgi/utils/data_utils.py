@@ -180,8 +180,6 @@ def single_file_dataset_spatial_multi(input_file: list, name_to_features, sparse
         radius = example['radius']
         radius = tf.sparse.to_dense(radius, default_value=0)
 
-        print(is_image)
-
         if is_image:
             image_raw = tf.io.parse_tensor(image_raw, tf.uint8)
         else:
@@ -211,7 +209,7 @@ def create_classifier_dataset_spatial_multi(record_files: list,
     dataset = single_file_dataset_spatial_multi(record_files, name_to_features, sparse_to_denses, is_image=is_image)
 
     dataset = dataset.padded_batch(batch_size=batch_size,
-                                       padded_shapes=([], [None, None, 3],[None]),
+                                       padded_shapes=([], [None, None],[None]),
                                        drop_remainder=True)
     if is_training:
         dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
