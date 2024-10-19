@@ -209,7 +209,7 @@ def create_classifier_dataset_spatial_multi(record_files: list,
     dataset = single_file_dataset_spatial_multi(record_files, name_to_features, sparse_to_denses, is_image=is_image)
 
     dataset = dataset.padded_batch(batch_size=batch_size,
-                                       padded_shapes=([], [None, None],[None]),
+                                       padded_shapes=([], [None, None, 3],[None]) if is_image else ([], [None, None],[None]),
                                        drop_remainder=True)
     if is_training:
         dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)

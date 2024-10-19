@@ -1746,6 +1746,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
+                source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+
                 print("RNA")
                 print(source_values_RNA)
                 print(source_values_RNA.shape)
