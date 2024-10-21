@@ -1684,6 +1684,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
     f = np.load(os.path.join(staining_tf_path, 'vocab_size.npz'))
     vocab_size_staining = int(f['rows'])
     
+
+    print(vocab_size_RNA, vocab_size_staining)
     encode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
                                                   mult_feature_names=mult_feature_names,
                                                   embedding_dims=128,

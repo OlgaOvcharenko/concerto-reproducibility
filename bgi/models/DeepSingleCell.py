@@ -220,7 +220,7 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         elif model_type == 2:
             # 
             image_network = models.Sequential([
-                BatchNormalization(),
+                BatchNormalization(name='BN-0-transpath', input_shape=(multi_max_features[1])),
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu'),
                 BatchNormalization(),
             ])
