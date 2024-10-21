@@ -65,7 +65,10 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         x = BatchNormalization(name='{}-BN-3'.format(name))(x)
         features.append(x)
 
-        image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        if model_type != 2:
+            image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        else:
+            image_value_input = Input(shape=(multi_max_features[1],), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
         x_value_inputs.append(image_value_input)
 
         inputs.append(x_feature_inputs)
