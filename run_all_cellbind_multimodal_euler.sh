@@ -6,7 +6,7 @@ source "python_venv/bin/activate"
 
 batch_sizes=("256")
 batch_sizes2=("256")
-drop_rates=("0.1 0.3")
+drop_rates=("0.1")
 attention_t=("1")
 attention_s=("0")
 heads=("64 128 256")
