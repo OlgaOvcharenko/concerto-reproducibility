@@ -1748,7 +1748,7 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
-                if super_parameters['model_type_image'] != 2:
+                if super_parameters['model_type_image'] == 2:
                     source_image_raw_staining = tf.squeeze(source_image_raw_staining)
 
                 # print("RNA")
