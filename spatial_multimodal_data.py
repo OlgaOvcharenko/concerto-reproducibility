@@ -516,7 +516,7 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
                 image = np.rot90(image, 1, axes=(0,1))
 
                 image = encode_trans_path(model=model, transforms=transforms, image=image)
-                image_shapes.append(image.shape[0])
+                image_shapes.append(image.shape[1])
 
                 image = tf.convert_to_tensor(image)
                 image = tf.io.serialize_tensor(image)

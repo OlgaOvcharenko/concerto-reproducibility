@@ -16,7 +16,7 @@ test=1
 epochs=("150")
 lrs=("1e-5")
 data=("human")
-model_type=("0")
+model_type=("2")
 combine_omics=1
 tasks=("1")
 

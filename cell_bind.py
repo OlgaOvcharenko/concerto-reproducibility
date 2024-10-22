@@ -118,24 +118,51 @@ def train_cellbind(data, weight_path,
                            'model_type': model_type
                            }
         
-        GEX_network = create_single_cell_network(mult_feature_name='GEX', 
+        GEX_network = create_single_cell_network_teacher(mult_feature_name='GEX', 
                                                  tf_path=GEX_cite_tf_path, 
                                                  super_parameters=super_parameters)
-        ADT_network = create_single_cell_network(mult_feature_name='ADT', 
+        ADT_network = create_single_cell_network_teacher(mult_feature_name='ADT', 
                                                  tf_path=ADT_cite_tf_path, 
                                                  super_parameters=super_parameters)
-        ATAC_network = create_single_cell_network(mult_feature_name='ATAC', 
+        ATAC_network = create_single_cell_network_teacher(mult_feature_name='ATAC', 
                                                  tf_path=ATAC_multiome_tf_path, 
                                                  super_parameters=super_parameters)
-        cellbind_train_multimodal(mod1a_tf_path=GEX_cite_tf_path, 
-                                  mod2_tf_path=ADT_cite_tf_path, 
-                                  mod1b_tf_path=GEX_multiome_tf_path, 
-                                  mod3_tf_path=ATAC_multiome_tf_path,
-                                  weight_path=weight_path, 
-                                  mod1_network=GEX_network, 
-                                  mod2_network=ADT_network, 
-                                  mod3_network=ATAC_network,
-                                  super_parameters=super_parameters)
+        
+        if model_type == 2:
+            GEX_network_student = create_single_cell_network_student(mult_feature_name='GEX', 
+                                                     tf_path=GEX_cite_tf_path, 
+                                                     super_parameters=super_parameters)
+            ADT_network_student = create_single_cell_network_student(mult_feature_name='ADT', 
+                                                     tf_path=ADT_cite_tf_path, 
+                                                     super_parameters=super_parameters)
+            ATAC_network_student = create_single_cell_network_student(mult_feature_name='ATAC', 
+                                                     tf_path=ATAC_multiome_tf_path, 
+                                                     super_parameters=super_parameters)
+
+            cellbind_train_multimodal_ts(mod1a_tf_path=GEX_cite_tf_path, 
+                                    mod2_tf_path=ADT_cite_tf_path, 
+                                    mod1b_tf_path=GEX_multiome_tf_path, 
+                                    mod3_tf_path=ATAC_multiome_tf_path,
+                                    weight_path=weight_path, 
+                                    mod1_network_teacher=GEX_network, 
+                                    mod2_network_teacher=ADT_network, 
+                                    mod3_network_teacher=ATAC_network,
+                                    mod1_network_student=GEX_network_student, 
+                                    mod2_network_student=ADT_network_student, 
+                                    mod3_network_student=ATAC_network_student,
+                                    super_parameters=super_parameters)
+            
+        else:
+            cellbind_train_multimodal(mod1a_tf_path=GEX_cite_tf_path, 
+                                    mod2_tf_path=ADT_cite_tf_path, 
+                                    mod1b_tf_path=GEX_multiome_tf_path, 
+                                    mod3_tf_path=ATAC_multiome_tf_path,
+                                    weight_path=weight_path, 
+                                    mod1_network=GEX_network, 
+                                    mod2_network=ADT_network, 
+                                    mod3_network=ATAC_network,
+                                    super_parameters=super_parameters)
+            
     else:
         raise Exception("Invalid Teacher/Student combination.")
 
