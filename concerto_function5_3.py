@@ -1748,7 +1748,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
-                source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+                if super_parameters['model_type_image'] != 2:
+                    source_image_raw_staining = tf.squeeze(source_image_raw_staining)
 
                 # print("RNA")
                 # print(source_values_RNA)
@@ -1900,7 +1901,8 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         train_db_staining = create_classifier_dataset_spatial_multi([staining_file],
                                                             batch_size=super_parameters['batch_size'],
                                                             is_training=False,
-                                                            shuffle_size=10000
+                                                            shuffle_size=10000,
+                                                            is_image=False if super_parameters["model_type_image"] == 2 else True
                                                             )
 
 
@@ -1913,10 +1915,6 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 if super_parameters["combine_omics"]:
                     # TODO
                     raise Exception("Not implemented")
-                    # encode_output, attention_output = encode_network([[source_features_RNA,],
-                    #                         [source_values_RNA, source_image_raw_staining]], training=False)
-                    
-                    # break
 
                 else:
                     encode_output1, encode_output2 = encode_network([[source_features_RNA,],
@@ -1949,9 +1947,12 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
             if all_samples  >= feature_len:
                 print("Entered if break")
                 break
+            
+            if super_parameters['model_type_image'] != 2:
+                    source_image_raw_staining = tf.squeeze(source_image_raw_staining)
 
             batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
-            if super_parameters['mask'] == 1:
+            if super_parameters['mask'] == 1 and super_parameters['model_type_image'] != 2:
                 radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
                 for im, r in enumerate(radius):
                     arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
@@ -1966,14 +1967,6 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
             if super_parameters["combine_omics"]:
                 raise Exception("Not implemented")
-                # if only_image:
-                #     encode_output, attention_output = encode_network([[source_features_RNA],
-                #                                                 [source_values_RNA]],
-                #                                                 training=False)
-                # else:
-                #     encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
-                #                                                     [source_values_RNA, source_values_protein]],
-                #                                                     training=False)
 
             else:
                 encode_output1, encode_output2 = encode_network([[source_features_RNA,],
