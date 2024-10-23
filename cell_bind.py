@@ -277,20 +277,25 @@ def test_cellbind(adata_cite_GEX, adata_cite_GEX_test,
                         'model_type': model_type
                         }
         
-    GEX_network = create_single_cell_network(mult_feature_name='GEX', 
+    GEX_network = create_single_cell_network_teacher(mult_feature_name='GEX', 
                                                 tf_path=cite_GEX_tf_path_test, 
                                                 super_parameters=super_parameters)
-    ADT_network = create_single_cell_network(mult_feature_name='ADT', 
+    ADT_network = create_single_cell_network_teacher(mult_feature_name='ADT', 
                                                 tf_path=ADT_tf_path_test, 
                                                 super_parameters=super_parameters)
-    ATAC_network = create_single_cell_network(mult_feature_name='ATAC', 
+    ATAC_network = create_single_cell_network_teacher(mult_feature_name='ATAC', 
                                                 tf_path=ATAC_tf_path_test, 
                                                 super_parameters=super_parameters)
-    saved_weight_path_GEX = weight_path + f'GEX_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
-    saved_weight_path_ADT = weight_path + f'ADT_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
-    saved_weight_path_ATAC = weight_path + f'ATAC_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
-
-
+    if super_parameters["model_type"] == 2:
+        saved_weight_path_GEX = weight_path + f'encoder_GEX_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+        saved_weight_path_ADT = weight_path + f'encoder_ADT_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+        saved_weight_path_ATAC = weight_path + f'encoder_ATAC_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+    
+    else:
+        saved_weight_path_GEX = weight_path + f'GEX_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+        saved_weight_path_ADT = weight_path + f'ADT_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+        saved_weight_path_ATAC = weight_path + f'ATAC_weight_{super_parameters["data"]}_{super_parameters["batch_size12"]}_{super_parameters["batch_size13"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5'
+    
     result_dicts = []
     for concat_mod in [False, True]:
         res12_train = cellbind_test_multimodal(mod1_tf_path=cite_GEX_tf_path, mod2_tf_path=ADT_tf_path,

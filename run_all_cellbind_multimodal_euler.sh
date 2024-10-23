@@ -13,7 +13,7 @@ heads=("64 128 256")
 train=1
 test=1
 
-epochs=("150")
+epochs=("100")
 lrs=("1e-5")
 data=("human")
 model_type=("2")

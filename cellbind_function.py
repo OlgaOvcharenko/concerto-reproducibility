@@ -646,3 +646,53 @@ def knn_classifier(ref_embedding, query_embedding, ref_anndata, column_name, k, 
     target_prob = np.array(target_pred_prob)
 
     return target_neighbor, target_prob 
+
+
+def knn_classifier(ref_embedding, query_embedding, ref_anndata, column_name, k, num_chunks=100):
+    '''
+    return :
+        target_neighbor: predicted label
+        traget_prob: confidence score
+    '''
+    train_features = tf.transpose(ref_embedding)
+    num_test_images = int(query_embedding.shape[0])
+    imgs_per_chunk = num_test_images // num_chunks
+    if imgs_per_chunk == 0:
+        imgs_per_chunk = 10
+
+    train_labels = ref_anndata.obs[column_name].tolist()
+    target_pred_labels = []
+    target_pred_prob = []
+    for idx in range(0, num_test_images, imgs_per_chunk):
+        # get the features for test images
+        features = query_embedding[
+                   idx: min((idx + imgs_per_chunk), num_test_images), :
+                   ]
+        # targets = test_labels[idx : min((idx + imgs_per_chunk), num_test_images)]
+        similarity = tf.matmul(features, train_features)
+        target_distances, target_indices = tf.math.top_k(similarity, k, sorted=True)
+
+        for distances, indices in zip(target_distances, target_indices):
+            selected_label = {}
+            selected_count = {}
+            count = 0
+            for distance, index in zip(distances, indices):
+                label = train_labels[index]
+                weight = distance
+                if label not in selected_label:
+                    selected_label[label] = 0
+                    selected_count[label] = 0
+                selected_label[label] += weight
+                selected_count[label] += 1
+                count += 1
+
+            filter_label_list = sorted(selected_label.items(), key=lambda x: x[1], reverse=True)
+            target_pred_labels.append(filter_label_list[0][0])
+
+            prob = selected_label[filter_label_list[0][0]] / selected_count[filter_label_list[0][0]]
+            target_pred_prob.append(prob)
+
+    target_neighbor = np.array(target_pred_labels)
+    target_prob = np.array(target_pred_prob)
+
+    return target_neighbor, target_prob 
