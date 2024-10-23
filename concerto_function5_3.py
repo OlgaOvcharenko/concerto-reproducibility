@@ -1912,6 +1912,10 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 (_, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
             if step == 0:
+                if super_parameters['model_type_image'] == 2:
+                    source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+                print(source_image_raw_staining.shape)
+                
                 if super_parameters["combine_omics"]:
                     # TODO
                     raise Exception("Not implemented")
@@ -1948,8 +1952,9 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 print("Entered if break")
                 break
             
-            if super_parameters['model_type_image'] != 2:
-                    source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+            if super_parameters['model_type_image'] == 2:
+                source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+            print(source_image_raw_staining.shape)
 
             batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
             if super_parameters['mask'] == 1 and super_parameters['model_type_image'] != 2:
