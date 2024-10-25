@@ -73,15 +73,15 @@ def preprocess_rna(
     return adata, cells_subset
 
 def preprocess_atac(
-        adata,
-        min_features: int = 600,
-        min_cells: int = 5,
-        target_sum: int = 10000,
-        n_top_features=2000,  # or gene list
-        chunk_size: int = 20000,
-        is_hvg = True,
-        batch_key = 'batch',
-        log=True
+    adata,
+    min_features: int = 600,
+    min_cells: int = 5,
+    target_sum: int = 10000,
+    n_top_features=2000,  # or gene list
+    chunk_size: int = 20000,
+    is_hvg = True,
+    batch_key = 'batch',
+    log=True
 ):
     if min_features is None: min_features = 600
     if n_top_features is None: n_top_features = 40000

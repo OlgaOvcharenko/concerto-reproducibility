@@ -87,7 +87,7 @@ adata_adt_gex = adata_adt[:, 0:13431]
 # print(adata_adt_atac)
 # print(adata_adt_gex.var["gene_id"])
 
-print(set(adata_gex.obs_names).intersection(set(adata_adt_gex.obs_names)))
+print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
 print(len(set(adata_gex.obs_names).intersection(set(adata_adt_gex.obs_names))))
 # print(len(set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))))
 # print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))

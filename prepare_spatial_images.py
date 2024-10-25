@@ -46,8 +46,8 @@ print(adata_RNA.shape)
 
 # times, times2, times3 = [], [], []
 
-width = 128
-height = 128
+width = 224
+height = 224
 
 align_matrix = np.linalg.inv(align_matrix)
 geoms = adata_RNA.obs['cell_id'][:2]

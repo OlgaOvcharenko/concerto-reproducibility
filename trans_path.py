@@ -6,7 +6,7 @@ import numpy as np
 
 # get example histology image
 img = Image.open(
-  'staining_examples/your_fileajbkcoho-1.jpeg',
+  'staining_examples/your_fileaaaaficg-1.png',
 #   urlopen(
 #     "https://github.com/owkin/HistoSSLscaling/raw/main/assets/example.tif"
 #   )
@@ -19,7 +19,7 @@ print(img)
 model = timm.create_model(
   model_name="hf-hub:1aurent/vit_small_patch16_224.transpath_mocov3",
   pretrained=True,
-  num_heads=12,
+  num_heads=24,
 ).eval()
 
 # get model specific transforms (normalization, resize)

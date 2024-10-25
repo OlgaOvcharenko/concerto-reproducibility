@@ -235,12 +235,12 @@ def fix_image_size(width, height, x_min, x_max, y_min, y_max):
         y_max += slice_height_to_add - math.floor(slice_height_to_add / 2)
 
 
-    if int(x_max - x_min) != 128:
+    if int(x_max - x_min) != 224:
         print(x_min, x_max)
         x_max += int(x_max - x_min)
         
 
-    if int(y_max - y_min) != 128:
+    if int(y_max - y_min) != 224:
         print(y_min, y_max)
         y_max += int(y_max - y_min)
 
@@ -266,8 +266,8 @@ def prepare_data_spatial(sdata, align_matrix, save_path: str = '', is_hvg_RNA: b
     RNA_tf_path = concerto_make_tfrecord(adata_RNA, tf_path=RNA_tf_path, batch_col_name='batch')
     print("Made tf record RNA.")
 
-    rows = 128
-    cols = 128
+    rows = 224
+    cols = 224
     depth = 3
     align_matrix = np.linalg.inv(align_matrix)
     image_raw = sdata['he_image'].data.compute()
@@ -345,8 +345,8 @@ def prepare_data_spatial_split(sdata, align_matrix, save_path: str = '', is_hvg_
     RNA_tf_path = concerto_make_tfrecord(adata_RNA_test, tf_path=RNA_tf_path_test, batch_col_name='batch')
     print("Made tf record RNA.")
 
-    rows = 128
-    cols = 128
+    rows = 224
+    cols = 224
     depth = 3
     align_matrix = np.linalg.inv(align_matrix)
     image_raw = sdata['he_image'].data.compute()
@@ -458,8 +458,8 @@ def prepare_data_spatial_split_encode(sdata, align_matrix, save_path: str = '', 
 
     path_file = 'tfrecord/'
 
-    rows = 128
-    cols = 128
+    rows = 224
+    cols = 224
     depth = 3
     align_matrix = np.linalg.inv(align_matrix)
     image_raw = sdata['he_image'].data.compute()
