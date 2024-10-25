@@ -20,7 +20,7 @@ source "python_venv/bin/activate"
 # model_type=("1 2")
 # combine_omics=0
 
-epochs=("150")
+epochs=("100")
 lrs=("1e-5")
 batch_sizes=("128")
 drop_rates=("0.1")
@@ -28,7 +28,7 @@ attention_t=("1")
 attention_s=("0")
 heads=("128")
 data=("spatial_split")
-train=0
+train=1
 test=1
 mask=("0")
 
