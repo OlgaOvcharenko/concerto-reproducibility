@@ -59,7 +59,9 @@ l2tol1 = {
 # # from scib_metrics.benchmark import Benchmarker
 
 adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
-adata_gex = adata_gex[:, 0:13953]
+# adata_gex = adata_gex[:, 0:13953]
+adata_adt = adata_gex[:, 13953:]
+print(adata_adt.X)
 # adata_gex.obsm["dataset"] = np.zeros(shape=(adata_gex.shape[0]))
 # print(adata_gex.var["gene_id"])
 
@@ -73,12 +75,12 @@ adata_gex = adata_gex[:, 0:13953]
 # adata_fetal = sc.read(path)
 # print(adata_fetal)
 
-adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
+# adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
 # print(adata_adt.var["feature_types"])
 # print(adata_adt.var["feature_types"].value_counts())
 # adata_adt.X = adata_adt.layers["counts"]
 # adata_adt_atac = adata_adt[:, 13431:]
-adata_adt_gex = adata_adt[:, 0:13431]
+# adata_adt_gex = adata_adt[:, 0:13431]
 # adata_adt_gex.obsm["dataset"] = np.ones(shape=(adata_adt_gex.shape[0]))
 # print(adata_adt)
 # print(np.unique(adata_adt.obs["batch"].to_list()))
@@ -87,8 +89,8 @@ adata_adt_gex = adata_adt[:, 0:13431]
 # print(adata_adt_atac)
 # print(adata_adt_gex.var["gene_id"])
 
-print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
-print(len(set(adata_gex.obs_names).intersection(set(adata_adt_gex.obs_names))))
+# print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
+# print(len(set(adata_gex.obs_names).intersection(set(adata_adt_gex.obs_names))))
 # print(len(set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))))
 # print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
 

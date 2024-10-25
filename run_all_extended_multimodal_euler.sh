@@ -17,7 +17,7 @@ lrs=("0.0001")
 data=("simulated human_cite human_multiome")
 model_type=("1 2 3")
 combine_omics=0
-tasks=("0 1")
+tasks=("0")
 
 for e in $epochs; do
     for lr in $lrs; do
