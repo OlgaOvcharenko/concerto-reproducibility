@@ -2,7 +2,9 @@
 
 mkdir -p logs
 
-source "python_venv/bin/activate"
+# source "python_venv/bin/activate"
+
+conda activate concerto
 
 # epochs=("50")
 # lrs=("1e-5")

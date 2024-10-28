@@ -1915,6 +1915,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 if super_parameters['model_type_image'] == 2:
                     source_image_raw_staining = tf.squeeze(source_image_raw_staining)
                 print(source_image_raw_staining.shape)
+                print(encode_network)
                 
                 if super_parameters["combine_omics"]:
                     # TODO
@@ -1922,8 +1923,8 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
                 else:
                     encode_output1, encode_output2 = encode_network([[source_features_RNA,],
-                                            [source_values_RNA, source_image_raw_staining]], training=False)
-
+                                    [source_values_RNA, source_image_raw_staining]], training=False)
+                    exit()
                     if only_image:
                         encode_output = encode_output1
                     else:
