@@ -16,6 +16,8 @@ sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
+
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
 
@@ -169,6 +171,101 @@ def train_scvi(adata_RNA, adata_Protein):
     rna.obsm[TOTALVI_LATENT_KEY] = embedding
     return rna, embedding
 
+def evaluate_model(adata, batch_key="batch", cell_type_label="cell_type_l1"):
+    names_obs = ['X_totalVI']
+    print(names_obs)
+    bm = Benchmarker(
+                adata,
+                batch_key=batch_key,
+                label_key=cell_type_label,
+                embedding_obsm_keys=names_obs,
+                bio_conservation_metrics=_BIO_METRICS,
+                batch_correction_metrics=_BATCH_METRICS,
+                n_jobs=4,
+            )
+    bm.benchmark()
+    a = bm.get_results(False, True)
+    results = a.round(decimals=4)
+    return results
+
+def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
+    # Settings
+    scvi.settings.seed = 0
+    print("Last run with scvi-tools version:", scvi.__version__)
+
+    sc.set_figure_params(figsize=(6, 6), frameon=False)
+    sns.set_theme()
+    torch.set_float32_matmul_precision("high")
+
+    sc.set_figure_params(figsize=(6, 6), frameon=False)
+    sns.set_theme()
+    torch.set_float32_matmul_precision("high")
+
+    mdata = md.MuData({"rna": adata_RNA, "protein": adata_Protein})
+    scvi.model.TOTALVI.setup_mudata(
+        mdata,
+        rna_layer="counts",
+        protein_layer=None,
+        batch_key="batch",
+        modalities={
+            "rna_layer": "rna",
+            "protein_layer": "protein",
+        },
+    )
+
+    mdata_test = md.MuData({"rna": adata_RNA_test, "protein": adata_Protein_test})
+    scvi.model.TOTALVI.setup_mudata(
+        mdata_test,
+        rna_layer="counts",
+        protein_layer=None,
+        batch_key="batch",
+        modalities={
+            "rna_layer": "rna",
+            "protein_layer": "protein",
+        },
+    )
+
+    model = scvi.model.TOTALVI(mdata)
+    model.train()
+
+    # arbitrarily store latent in rna modality
+    rna = mdata.mod["rna_subset"]
+    protein = mdata.mod["protein"]
+    TOTALVI_LATENT_KEY = "X_totalVI"
+    embedding = model.get_latent_representation()
+    rna.obsm[TOTALVI_LATENT_KEY] = embedding
+
+
+    # Query
+    scvi.model.TOTALVI.prepare_query_anndata(mdata_test, model)
+    model_query = scvi.model.TOTALVI.load_query_data(mdata_test, model)
+    model_query.train(
+        max_epochs=100,
+        plan_kwargs=dict(weight_decay=0.0, scale_adversarial_loss=0.0),
+    )
+    rna_test = mdata_test.mod["rna_subset"]
+    embedding_test = model_query.get_latent_representation(mdata_query)
+    rna_test.obsm["X_totalVI_test"] = embedding_test
+
+    # predict cell types of query
+    predictions = model_query.latent_space_classifer_.predict(rna_test.obsm["X_totalvi_scarches"])
+    categories = adata_RNA.obs["cell_type_l1"].astype("category").cat.categories
+    cat_preds = [categories[i] for i in predictions]
+    rna_test.obs["predicted_l2"] = cat_preds
+
+    cell_types_list = pd.unique(rna_test.obs['cell_type_l1']).tolist()
+    acc = accuracy_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds)
+    f1 = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average=None)
+    f1_weighted = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='weighted')
+    f1_macro = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='macro')
+    f1_median = np.median(f1)
+    
+    print(f"Per class {cell_types_list} F1 {f1}")
+    print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
+
+
+    return rna, embedding, rna_test, embedding_test
+
 def main():
     # Parse args
     args = get_args()
@@ -200,14 +297,18 @@ def main():
     # Train
     weight_path = save_path + 'weight/'
     if train:
-        rna, embedding = train_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein)
+        if task == 0:
+            rna, embedding = train_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein)
+        else:
+            rna, embedding, rna_test, embedding_test = train_qr_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein, adata_RNA_test=adata_RNA_test, adata_Protein_test=adata_Protein_test)
     print("Trained.")
 
     if test:
         if task == 0:
             filename = f'./Multimodal_pretraining/data/{data}/{data}_bs_{epoch}.h5ad'
             save_merged_adata(adata_merged=rna, filename=filename)
-
+            final_df = evaluate_model(adata=rna)
+            final_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_totalvi_metrics_unscaled.csv')
         else:
             pass
             # # Query-to-reference
