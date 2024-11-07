@@ -102,7 +102,7 @@ for file_read in only_files:
 
     final_df = pd.concat([df, final_df], ignore_index=True)
 
-final_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_metrics_unscaled.csv')
+final_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_new_metrics_unscaled.csv')
 
-final_df = scale_result(final_df)
-final_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_metrics_scaled.csv')
+# final_df = scale_result(final_df)
+# final_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_metrics_scaled.csv')

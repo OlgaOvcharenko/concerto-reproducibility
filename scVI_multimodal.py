@@ -18,6 +18,19 @@ import matplotlib.pyplot as plt
 
 from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
 
+_BIO_METRICS = BioConservation(isolated_labels=True, 
+                               nmi_ari_cluster_labels_leiden=True, 
+                               nmi_ari_cluster_labels_kmeans=False, 
+                               silhouette_label=True, 
+                               clisi_knn=True
+                               )
+_BATCH_METRICS = BatchCorrection(graph_connectivity=True, 
+                                 kbet_per_label=True, 
+                                 ilisi_knn=True, 
+                                 pcr_comparison=True, 
+                                 silhouette_batch=True
+                                 )
+
 def get_args():
     parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
 
@@ -206,9 +219,9 @@ def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
     mdata = md.MuData({"rna": adata_RNA, "protein": adata_Protein})
     scvi.model.TOTALVI.setup_mudata(
         mdata,
-        rna_layer="counts",
-        protein_layer=None,
-        batch_key="batch",
+        # rna_layer="counts",
+        # protein_layer=None,
+        # batch_key="batch",
         modalities={
             "rna_layer": "rna",
             "protein_layer": "protein",
@@ -218,9 +231,9 @@ def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
     mdata_test = md.MuData({"rna": adata_RNA_test, "protein": adata_Protein_test})
     scvi.model.TOTALVI.setup_mudata(
         mdata_test,
-        rna_layer="counts",
-        protein_layer=None,
-        batch_key="batch",
+        # rna_layer="counts",
+        # protein_layer=None,
+        # batch_key="batch",
         modalities={
             "rna_layer": "rna",
             "protein_layer": "protein",
