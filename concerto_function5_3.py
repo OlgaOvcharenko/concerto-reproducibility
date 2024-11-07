@@ -1856,10 +1856,11 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
     batch_size = super_parameters['batch_size']
     
+    print(vocab_size_RNA, vocab_size_staining)
     encode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
                                                   mult_feature_names=mult_feature_names,
                                                   embedding_dims=128,
-                                                  include_attention=super_parameters['attention_t'],
+                                                  include_attention=True,
                                                   drop_rate=super_parameters['drop_rate'],
                                                   head_1=super_parameters["heads"],
                                                   head_2=super_parameters["heads"],
@@ -1911,12 +1912,13 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         for (source_features_RNA, source_values_RNA, _, _, _), \
                 (_, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
-            if step == 0:
-                if super_parameters['model_type_image'] == 2:
-                    source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+
+            if super_parameters['model_type_image'] == 2:
+                source_image_raw_staining = tf.squeeze(source_image_raw_staining)
                 print(source_image_raw_staining.shape)
-                print(encode_network)
-                
+                print(encode_network.summary())
+            
+            if step == 0:
                 if super_parameters["combine_omics"]:
                     # TODO
                     raise Exception("Not implemented")

@@ -2,7 +2,8 @@
 
 mkdir -p logs
 
-source "python_venv/bin/activate"
+# source "python_venv/bin/activate"
+conda activate concerto
 
 batch_sizes=("64")
 drop_rates=("0.1")
@@ -14,10 +15,13 @@ test=1
 
 epochs=("100")
 lrs=("0.0001")
-data=("simulated human_cite human_multiome")
-model_type=("1 2 3")
+data=("simulated")
+data=("human_cite human_multiome")
 combine_omics=0
-tasks=("0 1")
+# model_type=("4 5")
+model_type=("1 2 3")
+tasks=("0")
+# tasks=("0 1")
 
 for e in $epochs; do
     for lr in $lrs; do
