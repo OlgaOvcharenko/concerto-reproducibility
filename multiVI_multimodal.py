@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import mudata as md
 import scanpy as sc
 import scvi
+import muon
 import seaborn as sns
 import torch
 
@@ -49,93 +50,16 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def prepare_data_PBMC_together(train: bool = True, save_path: str = ''):
-    print("Read PBMC data.")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_RNA_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_Protein_raw_train.h5ad')
-
-    adata_RNA_test = sc.read_h5ad(save_path + f'adata_RNA_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_Protein_raw_test.h5ad')
-
-    print(f"RNA data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
-    print(f"Protein data shape {adata_Protein.shape}, test {adata_Protein_test.shape}")
-
-    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
-    sc.tl.pca(adata_merged)
-    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
-
-    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
-    sc.tl.pca(adata_merged_test)
-    adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
-    
-    return adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test
-
-def prepare_data_PBMC_full(train: bool = True, save_path: str = ''):
-    print("Read PBMC data.")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_RNA_full.h5ad')
-    adata_Protein = sc.read(save_path + f'adata_Protein_raw_full.h5ad')
-
-    print(f"RNA data shape train {adata_RNA.shape}")
-    print(f"Protein data shape {adata_Protein.shape}")
-
-    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
-    sc.tl.pca(adata_merged)
-    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
-    
-    print("Preprocessed data.")
-    return adata_merged, adata_RNA, adata_Protein
-
-def prepare_data_neurips_cite_full(train: bool = True, save_path: str = ''):
-    print("Read human data")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_neurips_GEX_full.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ADT_raw_full.h5ad')
-    adata_Protein.X = adata_Protein.layers["counts"]
-
-    print(f"GEX data shape train {adata_RNA.shape}")
-    print(f"ADT data shape train {adata_Protein.shape}")
-
-    # Add PCA after preprocessing for benchmarking
-    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
-    sc.tl.pca(adata_merged)
-    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
-
-    return adata_merged, adata_RNA, adata_Protein
-
-def prepare_data_neurips_cite_together(train: bool = True, save_path: str = ''):
-    print("Read human data")
-    adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ADT_raw_train.h5ad')
-    adata_Protein.X = adata_Protein.layers["counts"]
-
-    adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ADT_raw_test.h5ad')
-    adata_Protein_test.X = adata_Protein_test.layers["counts"]
-
-    print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
-    print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
-
-    # Add PCA after preprocessing for benchmarking
-    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
-    sc.tl.pca(adata_merged)
-    adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
-
-    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
-    sc.tl.pca(adata_merged_test)
-    adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
-
-    print("Saved adata.")
-    return adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test
-
 def prepare_data_neurips_multiome_full(train: bool = True, save_path: str = ''):
     print("Read human data")
     adata_RNA = sc.read_h5ad(save_path + f'adata_neurips_GEX_multiome_full.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ATAC_raw_multiome_full.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_neurips_ATAC_multiome_full.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}")
     print(f"ADT data shape train {adata_Protein.shape}")
 
     # Add PCA after preprocessing for benchmarking
-    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1, merge="same")
     sc.tl.pca(adata_merged)
     adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
 
@@ -144,20 +68,20 @@ def prepare_data_neurips_multiome_full(train: bool = True, save_path: str = ''):
 def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = ''):
     print("Read human data")
     adata_RNA = sc.read_h5ad(save_path + f'adata_GEX_multiome_train.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_ATAC_raw_multiome_train.h5ad')
+    adata_Protein = sc.read_h5ad(save_path + f'adata_ATAC_multiome_train.h5ad')
 
     adata_RNA_test = sc.read_h5ad(save_path + f'adata_GEX_multiome_test.h5ad')
-    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ATAC_raw_multiome_test.h5ad')
+    adata_Protein_test = sc.read_h5ad(save_path + f'adata_ATAC_multiome_test.h5ad')
 
     print(f"GEX data shape train {adata_RNA.shape}, test {adata_RNA_test.shape}")
     print(f"ADT data shape train {adata_Protein.shape}, test {adata_Protein_test.shape}")
 
     # Add PCA after preprocessing for benchmarking
-    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1)
+    adata_merged = ad.concat([adata_RNA, adata_Protein], axis=1, merge="same")
     sc.tl.pca(adata_merged)
     adata_merged.obsm["Unintegrated_HVG_only"] = adata_merged.obsm["X_pca"]
 
-    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1)
+    adata_merged_test = ad.concat([adata_RNA_test, adata_Protein_test], axis=1, merge="same")
     sc.tl.pca(adata_merged_test)
     adata_merged_test.obsm["Unintegrated_HVG_only"] = adata_merged_test.obsm["X_pca"]
 
@@ -165,20 +89,8 @@ def prepare_data_neurips_multiome_together(train: bool = True, save_path: str = 
     return adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test
 
 
-def read_data(data: str = "simulated", save_path: str = "", task=0):
-    if data == "simulated":
-        if task == 0:
-            adata_merged, adata_RNA, adata_Protein = prepare_data_PBMC_full(train=True, save_path=save_path)
-        else:
-            adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test = prepare_data_PBMC_together(train=True, save_path=save_path)
-    
-    elif data == "human_cite":
-        if task == 0:
-            adata_merged, adata_RNA, adata_Protein = prepare_data_neurips_cite_full(train=True, save_path=save_path)
-        else:
-            adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test = prepare_data_neurips_cite_together(train=True, save_path=save_path)
-    
-    elif data == "human_multiome":
+def read_data(data: str = "human_multiome", save_path: str = "", task=0):
+    if data == "human_multiome":
         if task == 0:
             adata_merged, adata_RNA, adata_Protein = prepare_data_neurips_multiome_full(train=True, save_path=save_path)
         else:
@@ -195,7 +107,7 @@ def save_merged_adata(adata_merged, filename):
     print(adata_merged)
     print(f"Saved adata all at {filename}")
 
-def train_scvi(adata_RNA, adata_Protein):
+def train_scvi(adata_merged, adata_RNA, adata_atac):
     # Settings
     scvi.settings.seed = 0
     print("Last run with scvi-tools version:", scvi.__version__)
@@ -208,30 +120,19 @@ def train_scvi(adata_RNA, adata_Protein):
     sns.set_theme()
     torch.set_float32_matmul_precision("high")
     
-    print(adata_RNA)
-    print(adata_Protein)
-    mdata = md.MuData({"rna": adata_RNA, "protein": adata_Protein})
-    scvi.model.TOTALVI.setup_mudata(
-        mdata,
-        #rna_layer="counts",
-        #protein_layer=None,
-        #batch_key="batch",
-        modalities={
-            "rna_layer": "rna",
-            "protein_layer": "protein",
-        },
+    adata_mvi = scvi.data.organize_multiome_anndatas(adata_merged)
+    scvi.model.MULTIVI.setup_anndata(adata_mvi)
+    mvi = scvi.model.MULTIVI(
+        adata_mvi,
+        n_genes=(adata_mvi.var["feature_types"] == "GEX").sum(),
+        n_regions=(adata_mvi.var["feature_types"] == "ATAC").sum(),
     )
+    mvi.view_anndata_setup()
+    mvi.train()
+    embedding = mvi.get_latent_representation()
+    adata_RNA.obsm["MultiVI_latent"] = embedding
 
-    model = scvi.model.TOTALVI(mdata)
-    model.train()
-
-    # arbitrarily store latent in rna modality
-    rna = mdata.mod["rna"]
-    protein = mdata.mod["protein"]
-    TOTALVI_LATENT_KEY = "X_totalVI"
-    embedding = model.get_latent_representation()
-    rna.obsm[TOTALVI_LATENT_KEY] = embedding
-    return rna, embedding
+    return adata_rna, embedding
 
 def evaluate_model(adata, batch_key="batch", cell_type_label="cell_type_l1"):
     names_obs = ['X_totalVI']
@@ -291,7 +192,7 @@ def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
     model.train()
 
     # arbitrarily store latent in rna modality
-    rna = mdata.mod["rna"]
+    rna = mdata.mod["rna_subset"]
     protein = mdata.mod["protein"]
     TOTALVI_LATENT_KEY = "X_totalVI"
     embedding = model.get_latent_representation()
@@ -305,7 +206,7 @@ def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
         max_epochs=100,
         plan_kwargs=dict(weight_decay=0.0, scale_adversarial_loss=0.0),
     )
-    rna_test = mdata_test.mod["rna"]
+    rna_test = mdata_test.mod["rna_subset"]
     embedding_test = model_query.get_latent_representation(mdata_query)
     rna_test.obsm["X_totalVI_test"] = embedding_test
 
@@ -361,7 +262,7 @@ def main():
     weight_path = save_path + 'weight/'
     if train:
         if task == 0:
-            rna, embedding = train_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein)
+            rna, embedding = train_scvi(adata_merged=adata_merged, adata_RNA=adata_RNA, adata_atac=adata_Protein)
         else:
             rna, embedding, rna_test, embedding_test = train_qr_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein, adata_RNA_test=adata_RNA_test, adata_Protein_test=adata_Protein_test)
     print("Trained.")

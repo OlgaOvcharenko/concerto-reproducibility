@@ -154,6 +154,32 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, sa
 
     print("Saved adata and tf.")
 
+def prepare_data_PBMC_together_raw(train_idx, test_idx, adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
+    print("Read PBMC data.")
+    print(f"RNA data shape {adata_RNA.shape}")
+    print(f"Protein data shape {adata_Protein.shape}")
+
+    # Create PCA for benchmarking
+    adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = adata_Protein[cells_subset, :]
+
+    adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
+    adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
+
+    adata_RNA_test = adata_RNA[test_idx, :]
+    adata_Protein_test = adata_Protein[test_idx, :]
+
+    adata_RNA = adata_RNA[train_idx, :]
+    adata_Protein = adata_Protein[train_idx, :]
+
+    adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_Protein_raw_train.h5ad')
+
+    adata_RNA_test.write_h5ad(save_path + f'adata_RNA_test.h5ad')
+    adata_Protein_test.write_h5ad(save_path + f'adata_Protein_raw_test.h5ad')
+
+    print("Saved adata and tf.")
+
 
 def prepare_data_PBMC_full(adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
     print("Read PBMC data.")
@@ -236,6 +262,7 @@ def read_data(save_path: str = ""):
     test_idx = (train_idx != 1)
 
     prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
+    prepare_data_PBMC_together_raw(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
     prepare_data_PBMC_full(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path)
     prepare_data_PBMC_full_raw(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path)
     

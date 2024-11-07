@@ -90,17 +90,21 @@ for file_read in only_files:
     adata = sc.read_h5ad(file_read) 
     print("Read adata")
 
-    df = evaluate_model(adata=adata)
-    df = df.assign(**{"combine_omics": combine_omics, "model_type": model_type, "batch_size": batch_size, "epoch": epoch, "lr": lr, "drop_rate": drop_rate, "heads": heads})
-    # df = df.assign(**{"model_type": model_type})
-    # df = df.assign(**{"batch_size": batch_size})
-    # df = df.assign(**{"epoch": epoch})
-    # df = df.assign(**{"lr": lr})
-    # df = df.assign(**{"drop_rate": drop_rate})
-    # df = df.assign(**{"heads": heads})
-    print(df.columns)
+    try:
+        df = evaluate_model(adata=adata)
+        df = df.assign(**{"combine_omics": combine_omics, "model_type": model_type, "batch_size": batch_size, "epoch": epoch, "lr": lr, "drop_rate": drop_rate, "heads": heads})
+        # df = df.assign(**{"model_type": model_type})
+        # df = df.assign(**{"batch_size": batch_size})
+        # df = df.assign(**{"epoch": epoch})
+        # df = df.assign(**{"lr": lr})
+        # df = df.assign(**{"drop_rate": drop_rate})
+        # df = df.assign(**{"heads": heads})
+        print(df.columns)
 
-    final_df = pd.concat([df, final_df], ignore_index=True)
+        final_df = pd.concat([df, final_df], ignore_index=True)
+    except:
+        print(f"Exception with: {file_read}")
+        continue
 
 final_df.to_csv(f'./Multimodal_pretraining/results/{data}/{data}_new_metrics_unscaled.csv')
 

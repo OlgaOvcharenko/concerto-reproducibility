@@ -13,6 +13,6 @@ mkdir -p logs
 
 conda activate myenv
 
-python3 metrics_new.py --data simulated
+# python3 metrics_new.py --data simulated
 # python3 metrics_new.py --data human_cite
-# python3 metrics_new.py --data human_multiome
+python3 metrics_new.py --data human_multiome
