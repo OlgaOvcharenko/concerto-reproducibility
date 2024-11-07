@@ -102,8 +102,8 @@ def preprocess_protein(
     adata = adata[:, [gene for gene in adata.var_names
                       if not str(gene).startswith(tuple(['ERCC', 'MT-', 'mt-']))]]
     
-    sc.pp.normalize_total(adata, target_sum=target_sum)
-    sc.pp.log1p(adata)
+    # sc.pp.normalize_total(adata, target_sum=target_sum)
+    # sc.pp.log1p(adata)
 
     print('Processed dataset shape: {}'.format(adata.shape))
     return adata
@@ -126,13 +126,13 @@ def prepare_data_PBMC_together(train_idx, test_idx, adata_RNA, adata_Protein, sa
     adata_RNA = adata_RNA[train_idx, :]
     adata_Protein = adata_Protein[train_idx, :]
 
-    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
-    adata_RNA = adata_RNA[ix, :]
-    adata_Protein = adata_Protein[ix, :]
+    # ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    # adata_RNA = adata_RNA[ix, :]
+    # adata_Protein = adata_Protein[ix, :]
 
-    ix = (adata_RNA_test.obs['cell_type_l1'] != 'other') & (adata_RNA_test.obs['cell_type_l1'] != 'other T')
-    adata_RNA_test = adata_RNA_test[ix, :]
-    adata_Protein_test = adata_Protein_test[ix, :]
+    # ix = (adata_RNA_test.obs['cell_type_l1'] != 'other') & (adata_RNA_test.obs['cell_type_l1'] != 'other T')
+    # adata_RNA_test = adata_RNA_test[ix, :]
+    # adata_Protein_test = adata_Protein_test[ix, :]
 
     adata_RNA.write_h5ad(save_path + f'adata_RNA_train.h5ad')
     adata_Protein.write_h5ad(save_path + f'adata_Protein_train.h5ad')
@@ -171,9 +171,9 @@ def prepare_data_PBMC_full(adata_RNA, adata_Protein, save_path: str = '', is_hvg
     adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
     # print(adata_RNA.obs['cell_type_l1'].value_counts())
     
-    ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
-    adata_RNA = adata_RNA[ix, :]
-    adata_Protein = adata_Protein[ix, :]
+    # ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    # adata_RNA = adata_RNA[ix, :]
+    # adata_Protein = adata_Protein[ix, :]
 
     # print(adata_RNA)
 
@@ -190,6 +190,41 @@ def prepare_data_PBMC_full(adata_RNA, adata_Protein, save_path: str = '', is_hvg
 
     print("Saved adata and tf.")
 
+def prepare_data_PBMC_full_raw(adata_RNA, adata_Protein, save_path: str = '', is_hvg_RNA: bool = True, is_hvg_protein: bool = False):
+    print("Read PBMC data.")
+    print(f"RNA data shape {adata_RNA.shape}")
+    print(f"Protein data shape {adata_Protein.shape}")
+    
+    # Create PCA for benchmarking
+    adata_merged_tmp = ad.concat([adata_RNA, adata_Protein], axis=1)
+    sc.tl.pca(adata_merged_tmp)
+
+    adata_RNA, cells_subset = preprocess_rna(adata_RNA, min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+    adata_Protein = preprocess_protein(adata_Protein[cells_subset, :], min_features = 0, is_hvg=is_hvg_RNA, batch_key='batch')
+
+    adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
+    adata_Protein.obs['cell_type_l1'] = adata_Protein.obs['cell_type'].map(l2tol1)
+    # print(adata_RNA.obs['cell_type_l1'].value_counts())
+    
+    # ix = (adata_RNA.obs['cell_type_l1'] != 'other') & (adata_RNA.obs['cell_type_l1'] != 'other T')
+    # adata_RNA = adata_RNA[ix, :]
+    # adata_Protein = adata_Protein[ix, :]
+
+    # print(adata_RNA)
+
+    # Add PCA after preprocessing for benchmarking
+    adata_RNA.write_h5ad(save_path + f'adata_RNA_raw_full.h5ad')
+    adata_Protein.write_h5ad(save_path + f'adata_Protein_raw_full.h5ad')
+
+
+    # path_file = 'tfrecord_full/'
+    # RNA_tf_path = save_path + path_file + 'RNA_tf/'
+    # Protein_tf_path = save_path + path_file + 'Protein_tf/'
+    # RNA_tf_path = concerto_make_tfrecord(adata_RNA,tf_path = RNA_tf_path, batch_col_name = 'batch')
+    # Protein_tf_path = concerto_make_tfrecord(adata_Protein,tf_path = Protein_tf_path, batch_col_name = 'batch')
+
+    print("Saved adata and tf.")
+
 def read_data(save_path: str = ""):
     path = './Multimodal_pretraining/data/multi_gene_l2.loom'
     adata_RNA = sc.read(path)
@@ -202,6 +237,7 @@ def read_data(save_path: str = ""):
 
     prepare_data_PBMC_together(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path, train_idx=train_idx, test_idx=test_idx)
     prepare_data_PBMC_full(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path)
+    prepare_data_PBMC_full_raw(adata_RNA=adata_RNA, adata_Protein=adata_Protein, save_path=save_path)
     
 def main():
     # Read data

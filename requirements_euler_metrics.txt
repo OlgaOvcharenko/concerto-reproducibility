@@ -1,4 +1,0 @@
-scib-metrics
-anndata
-scanpy
-faiss-gpu

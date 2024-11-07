@@ -1653,11 +1653,11 @@ def concerto_train_multimodal(mult_feature_names:list, RNA_tf_path: str, Protein
                 tf_step += 1
 
         encode_network.save_weights(
-            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}_{super_parameters["task"]}.h5')
         decode_network.save_weights(
-            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}_{super_parameters["task"]}.h5')
 
-    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}_{super_parameters["task"]}.h5')
     return print('finished')
 
 def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str, staining_tf_path: str, weight_path: str, super_parameters=None):
@@ -1684,6 +1684,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
     f = np.load(os.path.join(staining_tf_path, 'vocab_size.npz'))
     vocab_size_staining = int(f['rows'])
     
+
+    print(vocab_size_RNA, vocab_size_staining)
     encode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
                                                   mult_feature_names=mult_feature_names,
                                                   embedding_dims=128,
@@ -1736,7 +1738,8 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                                                                batch_size=super_parameters['batch_size'],
                                                                is_training=True,
                                                                shuffle_size=10000,
-                                                               seed=epoch
+                                                               seed=epoch,
+                                                               is_image=False if super_parameters["model_type_image"] == 2 else True
                                                                )
             
             step = 0
@@ -1745,10 +1748,21 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     in (zip(train_db_RNA, train_db_staining)):
                 step += 1
 
+                if super_parameters['model_type_image'] == 2:
+                    source_image_raw_staining = tf.squeeze(source_image_raw_staining)
 
-                # TODO Add preprocessing of mask
+                # print("RNA")
+                # print(source_values_RNA)
+                # print(source_values_RNA.shape)
+                
+                # print("Stain")
+                # print(source_image_raw_staining)
+                # print(source_image_raw_staining.shape)
+                # exit()
+
+                # Add preprocessing of mask
                 batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
-                if super_parameters['mask'] == 1:
+                if super_parameters['mask'] == 1 and super_parameters['model_type_image'] != 2:
                     radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
                     for im, r in enumerate(radius):
                         arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
@@ -1759,9 +1773,6 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
 
                     batch_masks = tf.convert_to_tensor(batch_masks, dtype=tf.uint8)
                     source_image_raw_staining = tf.math.multiply(source_image_raw_staining, batch_masks)
-
-                    # print(batch_masks)
-                    # print(source_image_raw_staining)
 
                 with tf.GradientTape() as tape:
                     if super_parameters["combine_omics"]:
@@ -1800,8 +1811,9 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                     train_loss(loss)
 
                 if super_parameters["combine_omics"]:
-                    variables = [encode_network.trainable_variables, decode_network.trainable_variables]
-                elif super_parameters["model_type"] in [1, 4]:
+                    raise Exception("Wrong path.")
+                    # variables = [encode_network.trainable_variables, decode_network.trainable_variables]
+                elif super_parameters["model_type"] == 1:
                     variables = [encode_network.trainable_variables, [temperature]]
                 else:
                     variables = [encode_network.trainable_variables, decode_network.trainable_variables, [temperature]]
@@ -1822,11 +1834,11 @@ def concerto_train_spatial_multimodal(mult_feature_names:list, RNA_tf_path: str,
                 tf_step += 1
 
         encode_network.save_weights(
-            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["mask"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["model_type_image"]}_{super_parameters["mask"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
         decode_network.save_weights(
-            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_{super_parameters["mask"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+            weight_path + f'multi_weight_decoder_{super_parameters["data"]}_{super_parameters["model_type_image"]}_{super_parameters["mask"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{epoch+1}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
 
-    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["mask"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
+    print(weight_path + f'multi_weight_encoder_{super_parameters["data"]}_{super_parameters["model_type_image"]}_{super_parameters["mask"]}_{super_parameters["batch_size"]}_model_{super_parameters["combine_omics"]}_{super_parameters["model_type"]}_epoch_{super_parameters["epoch_pretrain"]}_{super_parameters["lr"]}_{super_parameters["drop_rate"]}_{super_parameters["attention_t"]}_{super_parameters["attention_s"]}_{super_parameters["heads"]}.h5')
     return print('finished')
 
 def concerto_test_spatial_multimodal(mult_feature_names, model_path: str, 
@@ -1844,10 +1856,11 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
     batch_size = super_parameters['batch_size']
     
+    print(vocab_size_RNA, vocab_size_staining)
     encode_network = make_spatial_RNA_image_model(multi_max_features=[vocab_size_RNA, vocab_size_staining],
                                                   mult_feature_names=mult_feature_names,
                                                   embedding_dims=128,
-                                                  include_attention=super_parameters['attention_t'],
+                                                  include_attention=True,
                                                   drop_rate=super_parameters['drop_rate'],
                                                   head_1=super_parameters["heads"],
                                                   head_2=super_parameters["heads"],
@@ -1889,7 +1902,8 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         train_db_staining = create_classifier_dataset_spatial_multi([staining_file],
                                                             batch_size=super_parameters['batch_size'],
                                                             is_training=False,
-                                                            shuffle_size=10000
+                                                            shuffle_size=10000,
+                                                            is_image=False if super_parameters["model_type_image"] == 2 else True
                                                             )
 
 
@@ -1898,19 +1912,21 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
         for (source_features_RNA, source_values_RNA, _, _, _), \
                 (_, source_image_raw_staining, source_radius_staining) \
                     in (zip(train_db_RNA, train_db_staining)):
+
+            if super_parameters['model_type_image'] == 2:
+                source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+                print(source_image_raw_staining.shape)
+                print(encode_network.summary())
+            
             if step == 0:
                 if super_parameters["combine_omics"]:
                     # TODO
                     raise Exception("Not implemented")
-                    # encode_output, attention_output = encode_network([[source_features_RNA,],
-                    #                         [source_values_RNA, source_image_raw_staining]], training=False)
-                    
-                    # break
 
                 else:
                     encode_output1, encode_output2 = encode_network([[source_features_RNA,],
-                                            [source_values_RNA, source_image_raw_staining]], training=False)
-
+                                    [source_values_RNA, source_image_raw_staining]], training=False)
+                    exit()
                     if only_image:
                         encode_output = encode_output1
                     else:
@@ -1938,9 +1954,13 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
             if all_samples  >= feature_len:
                 print("Entered if break")
                 break
+            
+            if super_parameters['model_type_image'] == 2:
+                source_image_raw_staining = tf.squeeze(source_image_raw_staining)
+            print(source_image_raw_staining.shape)
 
             batch_masks = np.zeros(source_image_raw_staining.shape, dtype=int)
-            if super_parameters['mask'] == 1:
+            if super_parameters['mask'] == 1 and super_parameters['model_type_image'] != 2:
                 radius = source_radius_staining.numpy().reshape((super_parameters['batch_size'],))
                 for im, r in enumerate(radius):
                     arr = np.arange(-int(source_image_raw_staining.shape[1]/2), int(source_image_raw_staining.shape[2]/2)) ** 2
@@ -1955,14 +1975,6 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
             if super_parameters["combine_omics"]:
                 raise Exception("Not implemented")
-                # if only_image:
-                #     encode_output, attention_output = encode_network([[source_features_RNA],
-                #                                                 [source_values_RNA]],
-                #                                                 training=False)
-                # else:
-                #     encode_output, attention_output = encode_network([[source_features_RNA, source_features_protein],
-                #                                                     [source_values_RNA, source_values_protein]],
-                #                                                     training=False)
 
             else:
                 encode_output1, encode_output2 = encode_network([[source_features_RNA,],

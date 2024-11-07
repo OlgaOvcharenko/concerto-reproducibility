@@ -9,6 +9,40 @@ import matplotlib.pyplot as plt
 # Inital setting for plot size
 from matplotlib import rcParams
 
+l2tol1 = {
+ 'CD8 Naive': 'CD8 T',
+ 'CD8 Proliferating': 'CD8 T',
+ 'CD8 TCM': 'CD8 T',
+ 'CD8 TEM': 'CD8 T',
+ 'CD4 CTL': 'CD4 T',
+ 'CD4 Naive': 'CD4 T',
+ 'CD4 Proliferating': 'CD4 T',
+ 'CD4 TCM': 'CD4 T',
+ 'CD4 TEM': 'CD4 T',
+ 'Treg': 'CD4 T',
+ 'NK': 'NK',
+ 'NK Proliferating': 'NK',
+ 'NK_CD56bright': 'NK',
+ 'dnT': 'other T',
+ 'gdT': 'other T',
+ 'ILC': 'other T',
+ 'MAIT': 'other T',
+ 'CD14 Mono': 'Monocytes',
+ 'CD16 Mono': 'Monocytes',
+ 'cDC1': 'DC',
+ 'cDC2': 'DC',
+ 'pDC': 'DC',
+ 'ASDC':'DC',
+ 'B intermediate': 'B',
+ 'B memory': 'B',
+ 'B naive': 'B',
+ 'Plasmablast': 'B',
+ 'Eryth': 'other',
+ 'HSPC': 'other',
+ 'Platelet': 'other',
+ 'Doublet': 'other'
+}
+
 # X_train = np.random.rand(1000, 128)
 # X_test = np.random.rand(250, 128)
 # y_train = np.random.randint(low=1, high=2, size=1000)
@@ -25,13 +59,21 @@ from matplotlib import rcParams
 # # from scib_metrics.benchmark import Benchmarker
 
 adata_gex = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad")
-print(adata_gex)
+# adata_gex = adata_gex[:, 0:13953]
+adata_adt = adata_gex[:, 13953:]
+print(adata_adt.X)
+# adata_gex.obsm["dataset"] = np.zeros(shape=(adata_gex.shape[0]))
+# print(adata_gex.var["gene_id"])
 
-print(adata_gex.X)
-print(adata_gex.var["feature_types"])
-print(adata_gex.var["feature_types"].value_counts())
-print(adata_gex.layers["counts"])
-print(adata_gex.obs["batch"])
+# print(adata_gex.X)
+# print(adata_gex.var["feature_types"])
+# print(adata_gex.var["feature_types"].value_counts())
+# print(adata_gex.layers["counts"])
+# print(adata_gex.obs["batch"])
+
+# path = "../../../../../Downloads/fetal.h5mu"
+# adata_fetal = sc.read(path)
+# print(adata_fetal)
 
 # adata_adt = sc.read_h5ad("./Multimodal_pretraining/data/data/GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad")
 # print(adata_adt.var["feature_types"])
@@ -39,9 +81,42 @@ print(adata_gex.obs["batch"])
 # adata_adt.X = adata_adt.layers["counts"]
 # adata_adt_atac = adata_adt[:, 13431:]
 # adata_adt_gex = adata_adt[:, 0:13431]
+# adata_adt_gex.obsm["dataset"] = np.ones(shape=(adata_adt_gex.shape[0]))
+# print(adata_adt)
+# print(np.unique(adata_adt.obs["batch"].to_list()))
+# print(np.unique(adata_adt.obs["cell_type"].to_list()))
 
 # print(adata_adt_atac)
-# print(adata_adt_gex)
+# print(adata_adt_gex.var["gene_id"])
+
+# print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
+# print(len(set(adata_gex.obs_names).intersection(set(adata_adt_gex.obs_names))))
+# print(len(set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))))
+# print(len(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names))))
+
+# tmp = ad.concat([adata_gex, adata_adt_gex], axis=0)
+# print(tmp)
+# print(tmp.var)
+# print(sum(tmp.var=='ENSG00000153006'))
+# tmp.var == set(adata_gex.var["gene_id"]).symmetric_difference(set(adata_adt_gex.var["gene_id"]))
+# sym_d = list(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names)))
+# adata_gex = adata_gex[:, [gene for gene in adata_gex.var_names
+#                       if str(gene) not in sym_d]]
+# adata_adt_gex = adata_adt_gex[:, [gene for gene in adata_adt_gex.var_names
+#                       if str(gene) not in sym_d]]
+# print(adata_gex.shape)
+# print(adata_adt_gex.shape)
+# tmp = ad.concat([adata_gex, adata_adt_gex], axis=0)
+# print(tmp.shape)
+# print(np.concatenate([np.zeros(shape=(adata_gex.shape[0])), np.ones(shape=(adata_adt_gex.shape[0]))], axis=0).shape)
+# pd.Categorical(["cite"] * adata_gex.shape[0] + ["multiome"] * adata_adt_gex.shape[0])
+# tmp.obs["dataset"] = pd.DataFrame(np.concatenate([np.zeros(shape=(adata_gex.shape[0])), np.ones(shape=(adata_adt_gex.shape[0]))], axis=0), columns=['y'])['y']
+# # tmp.obs["dataset"]=tmp.obs["dataset"].astype('category')
+# print(tmp.obs["dataset"])
+# print(adata_gex.var_names)
+# print(adata_adt_gex.var_names)
+# print(set(adata_gex.var_names).symmetric_difference(set(adata_adt_gex.var_names)))
+
 
 # # print(adata_adt.X)
 # # print(adata_adt.X)
@@ -87,6 +162,7 @@ print(adata_gex.obs["batch"])
 
 # path = './Multimodal_pretraining/data/data/multi_gene_l2.loom'
 # adata_RNA = sc.read(path)
+# adata_RNA.obs['cell_type_l1'] = adata_RNA.obs['cell_type'].map(l2tol1)
 
 # print(adata_RNA)
 
@@ -108,8 +184,11 @@ print(adata_gex.obs["batch"])
 
 # # print(adata_RNA)
 
-# # print(np.unique(adata_RNA.obs["batch"].to_list()))
-# # print(np.unique(adata_RNA.obs["cell_type"].to_list()))
+# b_list = np.unique(adata_RNA.obs["batch"].to_list())
+# for b in b_list:
+#     print(f"\n{b}")
+#     print(adata_RNA[adata_RNA.obs["batch"] == b, :].obs["cell_type_l1"].value_counts())
+
 # # print(np.unique(adata_RNA.obs["batch"].to_list()))
 # # print(np.unique(adata_RNA.obs["cell_type"].to_list()))
 

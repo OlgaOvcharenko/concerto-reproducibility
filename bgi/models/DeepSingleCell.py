@@ -2,15 +2,12 @@ import tensorflow as tf
 from tensorflow.keras.models import Model  # layers, Sequential, optimizers, losses, metrics, datasets
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Embedding, Input
-from tensorflow.keras.layers import GlobalAveragePooling1D,Dropout
-from tensorflow.keras.layers import concatenate
+from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Add
 import tensorflow.keras.backend as K
 from tensorflow.keras import models, layers
-from tensorflow.keras import regularizers
-from tensorflow.keras import optimizers, losses, metrics, datasets
-from tensorflow.keras.applications import EfficientNetB4, EfficientNetB7
+from tensorflow.keras.applications import EfficientNetB2, EfficientNetB0
 # from keras.applications.efficientnet import EfficientNetB4, EfficientNetB7
 from bgi.layers.attention import AttentionWithContext
 
@@ -68,7 +65,10 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
         x = BatchNormalization(name='{}-BN-3'.format(name))(x)
         features.append(x)
 
-        image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        if model_type != 2:
+            image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        else:
+            image_value_input = Input(shape=(multi_max_features[1],), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
         x_value_inputs.append(image_value_input)
 
         inputs.append(x_feature_inputs)
@@ -84,7 +84,10 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
 
         features.append(x)
 
-        image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        if model_type != 2:
+            image_value_input = Input(shape=(multi_max_features[1], multi_max_features[1], 3), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
+        else:
+            image_value_input = Input(shape=(multi_max_features[1],), name='Image-Input-{}-Value'.format(mult_feature_names[1]), dtype='float')
         x_value_inputs.append(image_value_input)
 
         inputs.append(x_value_inputs)
@@ -138,13 +141,16 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 Dense(head_1, activation='relu')
             ])
             output1 = image_network(image_value_input)
-        else:
+        elif model_type == 1:
             # EfficientNet B7
-            base_model2 = EfficientNetB7(
+            base_model2 = EfficientNetB2(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=False,
-                weights='model_weights/efficientnetb7_notop.h5',
+                weights='model_weights/efficientnetb2_notop.h5',
             )
+            # Freeze the pretrained weights
+            base_model2.trainable = False
+
             base_model2.build(input_shape=(multi_max_features[1], multi_max_features[1], 3))
             base_model2.layers.pop()
             base_model = Model(base_model2.input, base_model2.layers[-1].output)
@@ -156,6 +162,19 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
             ])
             print(image_network.summary())
+            output1 = image_network(image_value_input)
+
+        elif model_type == 2:
+            # 
+            image_network = models.Sequential([
+                Dense(512, name='{}-projection-1'.format(name), activation='relu'),
+                BatchNormalization(),
+                Dense(256, name='{}-projection-2'.format(name), activation='relu'),
+                BatchNormalization(),
+                Dense(128, name='{}-projection-3'.format(name), activation='relu'),
+                Dropout(rate=drop_rate),
+                Dense(head_1, name='{}-projection-4'.format(name), activation='relu')
+            ])
             output1 = image_network(image_value_input)
 
     else:
@@ -174,14 +193,18 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
             ])
             output1 = image_network(image_value_input)
-        else:
+        elif model_type == 1:
             # EfficientNet B4
-            base_model2 = EfficientNetB4(
+            base_model2 = EfficientNetB0(
                 input_shape=(multi_max_features[1], multi_max_features[1], 3),
                 include_top=False,
-                weights='model_weights/efficientnetb4_notop.h5',
+                weights='model_weights/efficientnetb0_notop.h5',
             )
             base_model2.build(input_shape=(multi_max_features[1], multi_max_features[1], 3))
+
+            # Freeze the pretrained weights
+            base_model2.trainable = False
+            
             base_model2.layers.pop()
             base_model = Model(base_model2.input, base_model2.layers[-1].output)
             
@@ -192,6 +215,15 @@ def make_spatial_RNA_image_model(multi_max_features: list = [40000],
                 Dense(head_1, name='{}-projection-0'.format(name), activation='relu')
             ])
             print(image_network.summary())
+            output1 = image_network(image_value_input)
+
+        elif model_type == 2:
+            # 
+            image_network = models.Sequential([
+                BatchNormalization(name='BN-0-transpath', input_shape=(multi_max_features[1],)),
+                Dense(head_1, name='{}-projection-0'.format(name), activation='relu'),
+                BatchNormalization(),
+            ])
             output1 = image_network(image_value_input)
 
     return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
@@ -415,6 +447,63 @@ def multi_embedding_attention_transfer(supvised_train: bool = False,
         output1 = Dense(head_1, name='projection-1', activation='relu')(dropout1)
 
         return tf.keras.Model(inputs=inputs, outputs=[output0, output1])
+    
+
+def single_embedding_attention_transfer(max_length: int = 40000,
+                                        name: str = 'Gene',
+                                        embedding_dims=128,
+                                        head_1=128,
+                                        head_2=128,
+                                        head_3=128,
+                                        drop_rate=0.05,
+                                        include_attention: bool = False,
+                                        combine_omics: bool = True,
+                                        model_type: int = 0
+                                        ):
+    x_feature_inputs = []
+    x_value_inputs = []
+    features = []
+    if include_attention == True:
+        feature_input = Input(shape=(None,), name='Input-{}-Feature'.format(name))
+        value_input = Input(shape=(None,), name='Input-{}-Value'.format(name), dtype='float')
+        x_feature_inputs.append(feature_input)
+        x_value_inputs.append(value_input)
+
+        embedding = Embedding(max_length, embedding_dims, input_length=None, name='{}-Embedding'.format(name))(
+            feature_input)
+
+        sparse_value = tf.expand_dims(value_input, 2, name='{}-Expend-Dims'.format(name))
+        sparse_value = BatchNormalization(name='{}-BN-1'.format(name))(sparse_value)
+        x = tf.multiply(embedding, sparse_value, name='{}-Multiply'.format(name))
+
+        weight_output,a = AttentionWithContext()(x)
+        x = K.tanh(K.sum(weight_output, axis=1))
+
+        x = BatchNormalization(name='{}-BN-3'.format(name))(x)
+
+        features.append(x)
+        inputs = [x_feature_inputs, x_value_inputs]
+
+    else:
+        value_input = Input(shape=(max_length,), name='Input-{}-Value'.format(name), dtype='float')
+
+        x_value_inputs.append(value_input)
+        
+        sparse_value = BatchNormalization(name='{}-BN-1'.format(name))(value_input)
+
+        x = Dense(head_1, name='{}-projection-0'.format(name), activation='relu')(sparse_value)
+
+        x = BatchNormalization(name='{}-BN-3'.format(name))(x)
+
+        features.append(x)
+        inputs = [x_value_inputs]
+        
+
+    feature = features[0]
+    dropout = Dropout(rate=drop_rate)(feature)
+    output = Dense(head_1, name='projection-1', activation='relu')(dropout)
+    
+    return tf.keras.Model(inputs=inputs, outputs=output)
     
 
 def multi_embedding_attention_transfer_1(supvised_train: bool = False,
