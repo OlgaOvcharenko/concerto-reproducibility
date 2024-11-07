@@ -58,7 +58,7 @@ def prepare_data_PBMC_together(train: bool = True, save_path: str = ''):
 def prepare_data_PBMC_full(train: bool = True, save_path: str = ''):
     print("Read PBMC data.")
     adata_RNA = sc.read_h5ad(save_path + f'adata_RNA_full.h5ad')
-    adata_Protein = sc.read_h5ad(save_path + f'adata_Protein_full.h5ad')
+    adata_Protein = sc.read(save_path + f'adata_Protein_raw_full.h5ad')
 
     print(f"RNA data shape train {adata_RNA.shape}")
     print(f"Protein data shape {adata_Protein.shape}")
@@ -145,13 +145,15 @@ def train_scvi(adata_RNA, adata_Protein):
     sc.set_figure_params(figsize=(6, 6), frameon=False)
     sns.set_theme()
     torch.set_float32_matmul_precision("high")
-
+    
+    print(adata_RNA)
+    print(adata_Protein)
     mdata = md.MuData({"rna": adata_RNA, "protein": adata_Protein})
     scvi.model.TOTALVI.setup_mudata(
         mdata,
-        rna_layer="counts",
-        protein_layer=None,
-        batch_key="batch",
+        #rna_layer="counts",
+        #protein_layer=None,
+        #batch_key="batch",
         modalities={
             "rna_layer": "rna",
             "protein_layer": "protein",
@@ -162,7 +164,7 @@ def train_scvi(adata_RNA, adata_Protein):
     model.train()
 
     # arbitrarily store latent in rna modality
-    rna = mdata.mod["rna_subset"]
+    rna = mdata.mod["rna"]
     protein = mdata.mod["protein"]
     TOTALVI_LATENT_KEY = "X_totalVI"
     embedding = model.get_latent_representation()
@@ -193,7 +195,8 @@ def main():
         adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test = read_data(data=data, save_path=save_path, task=task)
         adata_RNA_test.obs_names_make_unique()
         adata_Protein_test.obs_names_make_unique()
-
+    adata_RNA.X = adata_RNA.X.toarray()
+    adata_Protein.X = adata_Protein.X.toarray()
     adata_RNA.obs_names_make_unique()
     adata_Protein.obs_names_make_unique()
 
