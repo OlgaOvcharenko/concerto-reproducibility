@@ -132,10 +132,10 @@ def train_scvi(adata_merged, adata_RNA, adata_atac):
     embedding = mvi.get_latent_representation()
     adata_RNA.obsm["MultiVI_latent"] = embedding
 
-    return adata_rna, embedding
+    return adata_RNA, embedding
 
 def evaluate_model(adata, batch_key="batch", cell_type_label="cell_type_l1"):
-    names_obs = ['X_totalVI']
+    names_obs = ['MultiVI_latent']
     print(names_obs)
     bm = Benchmarker(
                 adata,
@@ -151,83 +151,56 @@ def evaluate_model(adata, batch_key="batch", cell_type_label="cell_type_l1"):
     results = a.round(decimals=4)
     return results
 
-def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
+def train_qr_scvi(adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test):
     # Settings
     scvi.settings.seed = 0
-    print("Last run with scvi-tools version:", scvi.__version__)
 
-    sc.set_figure_params(figsize=(6, 6), frameon=False)
-    sns.set_theme()
-    torch.set_float32_matmul_precision("high")
+    adata_mvi = scvi.data.organize_multiome_anndatas(adata_merged)
+    scvi.model.MULTIVI.setup_anndata(adata_mvi)
 
-    sc.set_figure_params(figsize=(6, 6), frameon=False)
-    sns.set_theme()
-    torch.set_float32_matmul_precision("high")
+    adata_mvi_test = scvi.data.organize_multiome_anndatas(adata_merged_test)
+    scvi.model.MULTIVI.setup_anndata(adata_mvi_test)
 
-    mdata = md.MuData({"rna": adata_RNA, "protein": adata_Protein})
-    scvi.model.TOTALVI.setup_mudata(
-        mdata,
-        # rna_layer="counts",
-        # protein_layer=None,
-        # batch_key="batch",
-        modalities={
-            "rna_layer": "rna",
-            "protein_layer": "protein",
-        },
+    mvi = scvi.model.MULTIVI(
+        adata_mvi,
+        n_genes=(adata_mvi.var["feature_types"] == "GEX").sum(),
+        n_regions=(adata_mvi.var["feature_types"] == "ATAC").sum(),
     )
-
-    mdata_test = md.MuData({"rna": adata_RNA_test, "protein": adata_Protein_test})
-    scvi.model.TOTALVI.setup_mudata(
-        mdata_test,
-        # rna_layer="counts",
-        # protein_layer=None,
-        # batch_key="batch",
-        modalities={
-            "rna_layer": "rna",
-            "protein_layer": "protein",
-        },
-    )
-
-    model = scvi.model.TOTALVI(mdata)
-    model.train()
-
-    # arbitrarily store latent in rna modality
-    rna = mdata.mod["rna_subset"]
-    protein = mdata.mod["protein"]
-    TOTALVI_LATENT_KEY = "X_totalVI"
-    embedding = model.get_latent_representation()
-    rna.obsm[TOTALVI_LATENT_KEY] = embedding
-
+    mvi.view_anndata_setup()
+    mvi.train()
+    embedding = mvi.get_latent_representation()
+    adata_RNA.obsm["MultiVI_latent"] = embedding
 
     # Query
-    scvi.model.TOTALVI.prepare_query_anndata(mdata_test, model)
-    model_query = scvi.model.TOTALVI.load_query_data(mdata_test, model)
+    scvi.model.MULTIVI.prepare_query_anndata(adata_mvi_test, mvi)
+    model_query = scvi.model.MULTIVI.load_query_data(adata_mvi_test, mvi)
     model_query.train(
         max_epochs=100,
         plan_kwargs=dict(weight_decay=0.0, scale_adversarial_loss=0.0),
     )
-    rna_test = mdata_test.mod["rna_subset"]
-    embedding_test = model_query.get_latent_representation(mdata_query)
-    rna_test.obsm["X_totalVI_test"] = embedding_test
+    
+    embedding_test = model_query.get_latent_representation(adata_mvi_test)
+    adata_RNA_test.obsm["X_totalVI_test"] = embedding_test
 
     # predict cell types of query
-    predictions = model_query.latent_space_classifer_.predict(rna_test.obsm["X_totalvi_scarches"])
+    print(adata_RNA_test)
+    predictions = model_query.latent_space_classifer_.predict(adata_RNA_test.obsm["X_multivi_scarches"])
     categories = adata_RNA.obs["cell_type_l1"].astype("category").cat.categories
     cat_preds = [categories[i] for i in predictions]
-    rna_test.obs["predicted_l2"] = cat_preds
+    adata_RNA_test.obs["predicted_l2"] = cat_preds
 
-    cell_types_list = pd.unique(rna_test.obs['cell_type_l1']).tolist()
-    acc = accuracy_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds)
-    f1 = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average=None)
-    f1_weighted = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='weighted')
-    f1_macro = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='macro')
+    cell_types_list = pd.unique(adata_RNA_test.obs['cell_type_l1']).tolist()
+    acc = accuracy_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds)
+    f1 = f1_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average=None)
+    f1_weighted = f1_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='weighted')
+    f1_macro = f1_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='macro')
     f1_median = np.median(f1)
     
     print(f"Per class {cell_types_list} F1 {f1}")
     print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
 
 
-    return rna, embedding, rna_test, embedding_test
+    return adata_RNA, embedding, adata_RNA_test, embedding_test
 
 def main():
     # Parse args
