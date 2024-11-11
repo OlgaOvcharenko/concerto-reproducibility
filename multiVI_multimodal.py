@@ -237,7 +237,7 @@ def main():
         if task == 0:
             rna, embedding = train_scvi(adata_merged=adata_merged, adata_RNA=adata_RNA, adata_atac=adata_Protein)
         else:
-            rna, embedding, rna_test, embedding_test = train_qr_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein, adata_RNA_test=adata_RNA_test, adata_Protein_test=adata_Protein_test)
+            rna, embedding, rna_test, embedding_test = train_qr_scvi(adata_merged=adata_merged, adata_RNA=adata_RNA, adata_Protein=adata_Protein, adata_RNA_test=adata_RNA_test, adata_Protein_test=adata_Protein_test, adata_merged_test=adata_merged_test)
     print("Trained.")
 
     if test:

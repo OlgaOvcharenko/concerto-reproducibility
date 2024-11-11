@@ -299,7 +299,7 @@ def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
 
 
     # Query
-    scvi.model.TOTALVI.prepare_query_anndata(mdata_test, model)
+    scvi.model.TOTALVI.prepare_query_anndata(mdata_test, model, return_reference_var_names=True)
     model_query = scvi.model.TOTALVI.load_query_data(mdata_test, model)
     model_query.train(
         max_epochs=100,
@@ -352,6 +352,12 @@ def main():
         adata_merged, adata_RNA, adata_Protein, adata_merged_test, adata_RNA_test, adata_Protein_test = read_data(data=data, save_path=save_path, task=task)
         adata_RNA_test.obs_names_make_unique()
         adata_Protein_test.obs_names_make_unique()
+
+        adata_RNA_test.X = adata_RNA_test.X.toarray()
+        adata_Protein_test.X = adata_Protein_test.X.toarray()
+        adata_RNA_test.obs_names_make_unique()
+        adata_Protein_test.obs_names_make_unique()
+
     adata_RNA.X = adata_RNA.X.toarray()
     adata_Protein.X = adata_Protein.X.toarray()
     adata_RNA.obs_names_make_unique()
