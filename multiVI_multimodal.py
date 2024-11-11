@@ -16,6 +16,7 @@ import pandas as pd
 sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
 
 from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
 
@@ -180,14 +181,12 @@ def train_qr_scvi(adata_merged, adata_RNA, adata_Protein, adata_merged_test, ada
     )
     
     embedding_test = model_query.get_latent_representation(adata_mvi_test)
-    adata_RNA_test.obsm["X_totalVI_test"] = embedding_test
+    adata_RNA_test.obsm["MultiVI_latent"] = embedding_test
 
     # predict cell types of query
-    print(adata_RNA_test)
-    predictions = model_query.latent_space_classifer_.predict(adata_RNA_test.obsm["X_multivi_scarches"])
-    categories = adata_RNA.obs["cell_type_l1"].astype("category").cat.categories
-    cat_preds = [categories[i] for i in predictions]
-    adata_RNA_test.obs["predicted_l2"] = cat_preds
+    knn = KNeighborsClassifier(n_neighbors=5)
+    knn.fit(embedding_train, adata_RNA.obs["cell_type_l1"].tolist())
+    cat_preds = knn.predict(embedding_test)
 
     cell_types_list = pd.unique(adata_RNA_test.obs['cell_type_l1']).tolist()
     acc = accuracy_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds)
@@ -196,7 +195,7 @@ def train_qr_scvi(adata_merged, adata_RNA, adata_Protein, adata_merged_test, ada
     f1_macro = f1_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='macro')
     f1_median = np.median(f1)
     
-    print(f"Per class {cell_types_list} F1 {f1}")
+    print(f"MultiVI Per class {cell_types_list} F1 {f1}")
     print('Accuracy {:.3f}, F1 median {:.3f}, F1 macro {:.3f}, F1 weighted {:.3f} '.format(acc, f1_median, f1_macro, f1_weighted),)
 
 

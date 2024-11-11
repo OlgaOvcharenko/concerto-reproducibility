@@ -3266,7 +3266,7 @@ def concerto_test_multimodal_project(model_path: str, RNA_tf_path: str, Protein_
 
 
 
-def knn_classifier(ref_embedding, query_embedding, ref_anndata, column_name,k, num_chunks=100):
+def knn_classifier(ref_embedding, query_embedding, ref_anndata, column_name, k, num_chunks=100):
     '''
     return :
         target_neighbor: predicted label
