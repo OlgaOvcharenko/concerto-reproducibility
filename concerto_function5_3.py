@@ -1853,6 +1853,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
 
     f = np.load(os.path.join(staining_tf_path, 'vocab_size.npz'))
     vocab_size_staining = int(f['rows'])
+    vocab_size_staining = 384
 
     batch_size = super_parameters['batch_size']
     
@@ -1926,7 +1927,7 @@ def concerto_test_spatial_multimodal(mult_feature_names, model_path: str,
                 else:
                     encode_output1, encode_output2 = encode_network([[source_features_RNA,],
                                     [source_values_RNA, source_image_raw_staining]], training=False)
-                    exit()
+                    
                     if only_image:
                         encode_output = encode_output1
                     else:

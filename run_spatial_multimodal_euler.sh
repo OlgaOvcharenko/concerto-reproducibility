@@ -20,6 +20,7 @@ mkdir -p logs
 # module load python_cuda/3.9.18
 # source "python_venv/bin/activate"
 
+conda init
 conda activate concerto
 
 nvidia-smi

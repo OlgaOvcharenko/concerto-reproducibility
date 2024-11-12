@@ -20,5 +20,5 @@ conda activate myenv
 # python3 multiVI_multimodal.py --data human_multiome --epoch 100 --task 0 --train 1 --test 1
 
 # python3 scVI_multimodal.py --data simulated --epoch 100 --task 1 --train 1 --test 1
-# python3 scVI_multimodal.py --data human_cite --epoch 100 --task 1 --train 1 --test 1
-python3 multiVI_multimodal.py --data human_multiome --epoch 100 --task 1 --train 1 --test 1
+python3 scVI_multimodal.py --data human_cite --epoch 100 --task 1 --train 1 --test 1
+# python3 multiVI_multimodal.py --data human_multiome --epoch 100 --task 1 --train 1 --test 1

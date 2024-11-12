@@ -15,6 +15,10 @@ import pandas as pd
 sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, f1_score
+
+
 
 from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
 
@@ -306,20 +310,26 @@ def train_qr_scvi(adata_RNA, adata_Protein, adata_RNA_test, adata_Protein_test):
         plan_kwargs=dict(weight_decay=0.0, scale_adversarial_loss=0.0),
     )
     rna_test = mdata_test.mod["rna"]
-    embedding_test = model_query.get_latent_representation(mdata_query)
+    embedding_test = model_query.get_latent_representation(mdata_test)
     rna_test.obsm["X_totalVI_test"] = embedding_test
 
     # predict cell types of query
-    predictions = model_query.latent_space_classifer_.predict(rna_test.obsm["X_totalvi_scarches"])
-    categories = adata_RNA.obs["cell_type_l1"].astype("category").cat.categories
-    cat_preds = [categories[i] for i in predictions]
-    rna_test.obs["predicted_l2"] = cat_preds
+    # FIXME
 
-    cell_types_list = pd.unique(rna_test.obs['cell_type_l1']).tolist()
-    acc = accuracy_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds)
-    f1 = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average=None)
-    f1_weighted = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='weighted')
-    f1_macro = f1_score(rna_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='macro')
+    knn = KNeighborsClassifier(n_neighbors=5)
+    knn.fit(embedding, adata_RNA.obs["cell_type_l1"].tolist())
+    cat_preds = knn.predict(embedding_test)
+
+    # predictions = model_query.latent_space_classifer_.predict(rna_test.obsm["X_totalvi_scarches"])
+    # categories = adata_RNA.obs["cell_type_l1"].astype("category").cat.categories
+    # cat_preds = [categories[i] for i in predictions]
+    # rna_test.obs["predicted_l2"] = cat_preds
+
+    cell_types_list = pd.unique(adata_RNA_test.obs['cell_type_l1']).tolist()
+    acc = accuracy_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds)
+    f1 = f1_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average=None)
+    f1_weighted = f1_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='weighted')
+    f1_macro = f1_score(adata_RNA_test.obs['cell_type_l1'].to_list(), cat_preds, labels=cell_types_list, average='macro')
     f1_median = np.median(f1)
     
     print(f"Per class {cell_types_list} F1 {f1}")
@@ -370,7 +380,7 @@ def main():
             rna, embedding = train_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein)
         else:
             rna, embedding, rna_test, embedding_test = train_qr_scvi(adata_RNA=adata_RNA, adata_Protein=adata_Protein, adata_RNA_test=adata_RNA_test, adata_Protein_test=adata_Protein_test)
-    print("Trained.")
+    
 
     if test:
         if task == 0:

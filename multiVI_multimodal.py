@@ -17,6 +17,7 @@ sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, f1_score
 
 from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
 
@@ -185,7 +186,7 @@ def train_qr_scvi(adata_merged, adata_RNA, adata_Protein, adata_merged_test, ada
 
     # predict cell types of query
     knn = KNeighborsClassifier(n_neighbors=5)
-    knn.fit(embedding_train, adata_RNA.obs["cell_type_l1"].tolist())
+    knn.fit(embedding, adata_RNA.obs["cell_type_l1"].tolist())
     cat_preds = knn.predict(embedding_test)
 
     cell_types_list = pd.unique(adata_RNA_test.obs['cell_type_l1']).tolist()
