@@ -24,7 +24,7 @@ batch_sizes=("256")
 batch_sizes2=("256")
 attention_t=("1")
 attention_s=("0")
-train=0
+train=1
 test=1
 
 lrs=("1e-5")
@@ -33,11 +33,9 @@ model_type=("2")
 combine_omics=1
 tasks=("1")
 
-
-
-drop_rates=("0.1")
+drop_rates=("0.2")
 heads=("64")
-epochs=("66")
+epochs=("64")
 
 for e in $epochs; do
     for lr in $lrs; do

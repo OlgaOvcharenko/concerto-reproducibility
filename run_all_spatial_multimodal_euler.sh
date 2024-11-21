@@ -31,12 +31,12 @@ attention_t=("1")
 attention_s=("0")
 heads=("128")
 data=("spatial_split")
-train=0
+train=1
 test=1
 mask=("0")
 
 model_type_image=("2")
-model_type=("1 2")
+model_type=("2")
 combine_omics=0
 
 for e in $epochs; do
