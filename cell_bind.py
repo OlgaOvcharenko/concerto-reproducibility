@@ -14,7 +14,7 @@ import tensorflow as tf
 from statistics import mode
 
 def get_args():
-    parser = argparse.ArgumentParser(description='CONCERTO Batch Correction.')
+    parser = argparse.ArgumentParser(description='Cell Bind.')
 
     parser.add_argument('--data', type=str, required=True,
                         help='Dataset (Simulated/Not)')
