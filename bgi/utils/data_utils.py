@@ -105,34 +105,6 @@ def single_file_dataset_multi(input_file: list, name_to_features, sparse_to_dens
 
     return d
 
-def single_file_spatial_RNA_dataset_multi(input_file: list, name_to_features, sparse_to_denses):
-    d = tf.data.TFRecordDataset(input_file)
-
-    def single_example_parser(serialized_example):
-        name_to_features = {
-            'feature': tf.io.VarLenFeature(tf.int64),
-            'value': tf.io.VarLenFeature(tf.float32),
-            'batch': tf.io.FixedLenFeature([], tf.int64),
-            'id': tf.io.FixedLenFeature([], tf.string),
-            'cell_id': tf.io.FixedLenFeature([], tf.string)
-        }
-        example = tf.io.parse_single_example(serialized_example, name_to_features)
-
-        feature = example['feature']
-        value = example['value']
-        domain = example['batch']
-        id = example['id']
-        sc_id = example['cell_id']
-
-        feature = tf.sparse.to_dense(feature, default_value=0)
-        value = tf.sparse.to_dense(value, default_value=0)
-
-        return feature, value, domain, id, sc_id
-
-    d = d.map(single_example_parser)
-
-    return d
-
 
 def single_file_dataset_multi_supervised(input_file: list, name_to_features, sparse_to_denses):
     d = tf.data.TFRecordDataset(input_file)
@@ -162,67 +134,13 @@ def single_file_dataset_multi_supervised(input_file: list, name_to_features, spa
 
     return d
 
-def single_file_dataset_spatial_multi(input_file: list, name_to_features, sparse_to_denses, is_image: bool = True):
-    d = tf.data.TFRecordDataset(input_file)
 
-    def single_example_spatial_parser(serialized_example):
-        name_to_features = {
-            'image_raw': tf.io.FixedLenFeature([], tf.string),
-            'id': tf.io.FixedLenFeature([], tf.string),
-            'radius': tf.io.VarLenFeature(tf.float32)
-        }
-        example = tf.io.parse_single_example(serialized_example, name_to_features)
-        id = example['id']
-
-        image_raw = example['image_raw']
-        
-
-        radius = example['radius']
-        radius = tf.sparse.to_dense(radius, default_value=0)
-
-        if is_image:
-            image_raw = tf.io.parse_tensor(image_raw, tf.uint8)
-        else:
-            image_raw = tf.io.parse_tensor(image_raw, tf.float32)
-
-        return id, image_raw, radius
-
-    d = d.map(single_example_spatial_parser)
-
-    return d
-
-def create_classifier_dataset_spatial_multi(record_files: list,
-                              batch_size: int,
-                              is_training=True,
-                              shuffle_size=100,
-                              seed=42,
-                              is_image: bool = True):
-    """Creates input dataset from (tf)records files for train/eval."""
-    name_to_features = {
-        'image_raw': tf.io.FixedLenFeature([], tf.string),
-        'id': tf.io.FixedLenFeature([], tf.string),
-        'radius': tf.io.VarLenFeature(tf.float32)
-    }
-    sparse_to_denses = ['image_raw', 'id', 'radius']
-
-    # 读取记录
-    dataset = single_file_dataset_spatial_multi(record_files, name_to_features, sparse_to_denses, is_image=is_image)
-
-    dataset = dataset.padded_batch(batch_size=batch_size,
-                                       padded_shapes=([], [None, None, 3],[None]) if is_image else ([], [None, None],[None]),
-                                       drop_remainder=True)
-    if is_training:
-        dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
-
-    dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
-    return dataset
 
 def create_classifier_dataset_multi(record_files: list,
                               batch_size: int,
                               is_training=True,
                               data_augment=False,
-                              shuffle_size=100,
-                              seed=42):
+                              shuffle_size=100):
     """Creates input dataset from (tf)records files for train/eval."""
     name_to_features = {
         'feature': tf.io.VarLenFeature(tf.int64),
@@ -246,34 +164,7 @@ def create_classifier_dataset_multi(record_files: list,
                                        drop_remainder=True)
     if is_training:
         # dataset = dataset.shuffle(shuffle_size)
-        dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
-
-    dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
-    return dataset
-
-def create_classifier_spatial_RNA_dataset_multi(record_files: list,
-                              batch_size: int,
-                              is_training=True,
-                              data_augment=False,
-                              shuffle_size=100,
-                              seed=42):
-    """Creates input dataset from (tf)records files for train/eval."""
-    name_to_features = {
-        'feature': tf.io.VarLenFeature(tf.int64),
-        'value': tf.io.VarLenFeature(tf.float32),
-        'batch': tf.io.FixedLenFeature([], tf.int64),
-        'id': tf.io.FixedLenFeature([], tf.string),
-        'cell_id': tf.io.FixedLenFeature([], tf.string)
-    }
-    sparse_to_denses = ['feature', 'value', 'batch', 'is', 'cell_id']
-
-    dataset = single_file_spatial_RNA_dataset_multi(record_files, name_to_features, sparse_to_denses)
-    
-    dataset = dataset.padded_batch(batch_size=batch_size, 
-                                   padded_shapes=([None], [None],[],[], []),
-                                   drop_remainder=True)
-    if is_training: 
-        dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True, seed=seed)
+        dataset = dataset.shuffle(shuffle_size, reshuffle_each_iteration=True)
 
     dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
     return dataset
